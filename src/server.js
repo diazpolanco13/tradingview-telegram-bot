@@ -17,7 +17,7 @@ const telegramService = require('./services/telegramService');
 
 // Routes
 const webhookRoutes = require('./routes/webhook');
-const { router: adminRoutes } = require('./routes/admin');
+const { router: adminRoutes, cookieManager } = require('./routes/admin');
 
 // Initialize Express app
 const app = express();

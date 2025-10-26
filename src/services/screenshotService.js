@@ -1,6 +1,9 @@
 const puppeteer = require('puppeteer');
 const { logger } = require('../utils/logger');
-const cookieManager = require('../utils/cookieManager');
+const CookieManager = require('../utils/cookieManager');
+
+// Instancia de cookieManager
+const cookieManager = new CookieManager();
 
 class ScreenshotService {
   constructor() {
