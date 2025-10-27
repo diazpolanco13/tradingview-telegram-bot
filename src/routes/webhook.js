@@ -23,20 +23,12 @@ router.post('/webhook', async (req, res) => {
     // Extraer parámetros
     const {
       chart,
-      ticker,
+      ticker: queryTicker,
       delivery = 'together',
       jsonRequest = 'false'
     } = req.query;
 
-    logger.info({
-      chart,
-      ticker,
-      delivery,
-      jsonRequest,
-      hasBody: !!req.body
-    }, '📨 Webhook recibido');
-
-    // Procesar mensaje
+    // Procesar mensaje primero para poder extraer ticker si es necesario
     let message = '';
     
     if (typeof req.body === 'string') {
@@ -52,6 +44,28 @@ router.post('/webhook', async (req, res) => {
     } else {
       message = String(req.body || 'Alerta de TradingView');
     }
+
+    // Extraer ticker del mensaje si no viene en query
+    let ticker = queryTicker;
+    if (!ticker || ticker.includes('{{')) {
+      // Intentar extraer ticker del mensaje
+      // Buscar patrón: "Ticker: EXCHANGE:SYMBOL" o "🪙 Ticker: EXCHANGE:SYMBOL"
+      const tickerMatch = message.match(/Ticker:\s*([A-Z]+:[A-Z0-9.]+)/i);
+      if (tickerMatch) {
+        ticker = tickerMatch[1];
+        logger.info({ extractedTicker: ticker }, '✅ Ticker extraído del mensaje');
+      } else {
+        ticker = null; // No usar ticker si tiene placeholders
+      }
+    }
+
+    logger.info({
+      chart,
+      ticker,
+      delivery,
+      jsonRequest,
+      hasBody: !!req.body
+    }, '📨 Webhook procesado');
 
     // Envío ASAP: mensaje primero, screenshot después
     if (delivery === 'asap' && message) {
