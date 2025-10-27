@@ -33,7 +33,7 @@ function initAdminAuth() {
     console.log(`   ${currentAdminToken}`);
     console.log(`   📄 Token guardado en: ${tokenFilePath}`);
     console.log('   Usa este token para acceder al panel de administración');
-    console.log('   💡 También puedes obtenerlo desde: http://localhost:5001/admin-token');
+    console.log('   💡 También puedes obtenerlo desde: http://localhost:${process.env.PORT || 5002}/admin-token');
   } catch (error) {
     console.error('⚠️ Error al guardar token en archivo:', error.message);
     console.log('🔐 Admin token generado para esta sesión:');
