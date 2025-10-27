@@ -327,69 +327,93 @@ class ScreenshotService {
       logger.info({ waitTime }, '⏳ Esperando carga completa del chart...');
       await page.waitForTimeout(waitTime);
 
+      // Cerrar cualquier modal que pueda interferir
+      logger.info('🔄 Cerrando modales previos...');
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(500);
+
       // ✨ PRESIONAR ALT + S (TradingView Share)
       logger.info('✨ Presionando Alt + S para generar share link...');
       await page.keyboard.down('Alt');
       await page.keyboard.press('KeyS');
       await page.keyboard.up('Alt');
 
-      // Esperar que TradingView genere el snapshot y muestre el modal
-      logger.info('⏳ Esperando que TradingView genere el snapshot...');
-      await page.waitForTimeout(5000);
+      // Esperar a que aparezca el modal de compartir
+      logger.info('⏳ Esperando modal de compartir...');
+      await page.waitForTimeout(3000);
 
-      // Intentar capturar la URL del modal de compartir
-      logger.info('🔍 Extrayendo share URL del modal...');
-      
-      const shareUrl = await page.evaluate(() => {
-        // Intentar diferentes selectores que TradingView usa para el share link
+      // 🔍 ESTRATEGIA 1: Buscar input con la URL
+      logger.info('🔍 ESTRATEGIA 1: Buscando input con URL en el modal...');
+      let shareUrl = await page.evaluate(() => {
+        // Buscar TODOS los inputs visibles
+        const allInputs = Array.from(document.querySelectorAll('input'));
         
-        // Opción 1: Input con el link compartido
-        const input1 = document.querySelector('input[readonly][value*="/x/"]');
-        if (input1?.value) return input1.value;
-        
-        // Opción 2: Input con data-clipboard-text
-        const input2 = document.querySelector('[data-clipboard-text*="/x/"]');
-        if (input2?.dataset?.clipboardText) return input2.dataset.clipboardText;
-        
-        // Opción 3: Cualquier input dentro del modal que contenga "/x/"
-        const inputs = document.querySelectorAll('.tv-dialog__modal-body input, .tv-snapshot-dialog input');
-        for (const input of inputs) {
-          if (input.value && input.value.includes('/x/')) {
-            return input.value;
-          }
-        }
-        
-        // Opción 4: Buscar en todo el DOM
-        const allInputs = document.querySelectorAll('input[readonly]');
         for (const input of allInputs) {
-          if (input.value && input.value.includes('tradingview.com/x/')) {
-            return input.value;
+          const value = input.value || '';
+          // Buscar URL con patrón /x/ de TradingView
+          if (value.includes('tradingview.com/x/') || value.includes('/x/')) {
+            return value.startsWith('http') ? value : `https://www.tradingview.com${value}`;
           }
         }
         
         return null;
       });
 
-      if (!shareUrl) {
-        // Si no se pudo extraer del DOM, intentar con clipboard
-        logger.warn('⚠️ No se encontró URL en el modal, intentando con clipboard...');
-        
-        try {
-          const clipboardUrl = await page.evaluate(() => navigator.clipboard.readText());
-          if (clipboardUrl && clipboardUrl.includes('/x/')) {
-            logger.info('✅ URL obtenida del clipboard');
-            return clipboardUrl;
-          }
-        } catch (clipError) {
-          logger.warn('⚠️ No se pudo acceder al clipboard');
-        }
-        
-        throw new Error('No se pudo capturar la share URL de TradingView. El modal puede no haber aparecido.');
+      if (shareUrl) {
+        logger.info({ shareUrl }, '✅ URL encontrada en modal');
+        return shareUrl;
       }
 
-      logger.info({ shareUrl }, '✅ Share URL capturada exitosamente');
+      // 🔍 ESTRATEGIA 2: Copiar al clipboard con Ctrl+A + Ctrl+C
+      logger.info('🔍 ESTRATEGIA 2: Intentando copiar desde clipboard...');
+      
+      // Seleccionar todo el contenido del input activo
+      await page.keyboard.down('Control');
+      await page.keyboard.press('KeyA');
+      await page.keyboard.up('Control');
+      await page.waitForTimeout(200);
+      
+      // Copiar
+      await page.keyboard.down('Control');
+      await page.keyboard.press('KeyC');
+      await page.keyboard.up('Control');
+      await page.waitForTimeout(500);
 
-      return shareUrl;
+      // Intentar leer del clipboard
+      try {
+        const clipboardData = await page.evaluate(() => {
+          return navigator.clipboard.readText().catch(() => null);
+        });
+        
+        if (clipboardData && (clipboardData.includes('/x/') || clipboardData.includes('tradingview.com'))) {
+          shareUrl = clipboardData.startsWith('http') ? clipboardData : `https://www.tradingview.com${clipboardData}`;
+          logger.info({ shareUrl }, '✅ URL obtenida del clipboard');
+          return shareUrl;
+        }
+      } catch (clipError) {
+        logger.warn('⚠️ No se pudo acceder al clipboard:', clipError.message);
+      }
+
+      // 🔍 ESTRATEGIA 3: Tomar screenshot para debugging
+      logger.warn('⚠️ No se pudo obtener URL, tomando screenshot para debugging...');
+      const debugScreenshot = await page.screenshot({ type: 'png' });
+      const debugPath = `/tmp/tradingview-debug-${Date.now()}.png`;
+      const fs = require('fs').promises;
+      await fs.writeFile(debugPath, debugScreenshot);
+      logger.warn({ debugPath }, '📸 Screenshot de debugging guardado');
+
+      // 🔍 ESTRATEGIA 4: Buscar en el HTML completo
+      logger.info('🔍 ESTRATEGIA 4: Buscando en HTML completo...');
+      const htmlContent = await page.content();
+      const urlMatch = htmlContent.match(/https:\/\/(?:www\.)?tradingview\.com\/x\/[a-zA-Z0-9]+\//);
+      
+      if (urlMatch) {
+        shareUrl = urlMatch[0];
+        logger.info({ shareUrl }, '✅ URL encontrada en HTML');
+        return shareUrl;
+      }
+
+      throw new Error('No se pudo capturar la share URL después de 4 intentos. Revisa el screenshot de debugging.');
 
     } catch (error) {
       logger.error({ 
