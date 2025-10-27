@@ -119,11 +119,26 @@ router.post('/webhook/:token', async (req, res) => {
     
     if (addScreenshotJob && signalData.chart_id && userConfig.cookies_valid && userConfig.tv_sessionid) {
       try {
-        // Desencriptar cookies del usuario
-        const cookies = decryptTradingViewCookies(
-          userConfig.tv_sessionid,
-          userConfig.tv_sessionid_sign
-        );
+        // Desencriptar cookies del usuario (o usar directamente si están en texto plano)
+        let cookies;
+        
+        // Detectar si las cookies están encriptadas o en texto plano
+        // Las cookies encriptadas tienen longitud > 100 y formato hex
+        const isEncrypted = userConfig.tv_sessionid.length > 100;
+        
+        if (isEncrypted) {
+          cookies = decryptTradingViewCookies(
+            userConfig.tv_sessionid,
+            userConfig.tv_sessionid_sign
+          );
+        } else {
+          // Cookies en texto plano (para testing)
+          cookies = {
+            sessionid: userConfig.tv_sessionid,
+            sessionid_sign: userConfig.tv_sessionid_sign
+          };
+          logger.info('⚠️ Usando cookies en texto plano (no encriptadas)');
+        }
 
         // Agregar job a la cola
         await addScreenshotJob({
