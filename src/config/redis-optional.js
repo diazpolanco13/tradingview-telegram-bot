@@ -37,13 +37,15 @@ if (isRedisAvailable) {
     addScreenshotJob = queueConfig.addScreenshotJob;
     getQueueStats = queueConfig.getQueueStats;
     
-    // Iniciar Worker después de que Redis esté conectado
-    setImmediate(() => {
+    // Iniciar Worker SOLO cuando Redis esté ready
+    redisConnection.once('ready', () => {
       try {
+        logger.info('🔄 Redis ready - Iniciando Screenshot Worker...');
         const { startWorker } = require('../workers/screenshotWorker');
         screenshotWorker = startWorker(redisConnection);
       } catch (workerError) {
         logger.error('❌ Error inicializando worker:', workerError.message);
+        logger.error(workerError.stack);
       }
     });
     
