@@ -15,10 +15,10 @@ const cookieManager = new CookieManager();
 
 /**
  * GET /admin
- * Panel de administración web
+ * Panel de administración web (versión simplificada sin login)
  */
 router.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../public/admin.html'));
+  res.sendFile(path.join(__dirname, '../../public/admin-simple.html'));
 });
 
 /**

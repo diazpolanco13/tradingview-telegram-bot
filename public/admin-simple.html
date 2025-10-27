@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Bot - Admin Panel (Dev Mode)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl font-bold mb-2 text-cyan-400">📱 TradingView Telegram Bot</h1>
+        <p class="text-gray-400 mb-8">Panel de Administración - Modo Desarrollo</p>
+
+        <!-- Cookie Status -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4 text-green-400">🍪 Estado de Cookies</h2>
+            <button onclick="checkCookies()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded mb-4">
+                🔄 Verificar Cookies
+            </button>
+            <pre id="cookie-status" class="bg-gray-900 p-4 rounded text-sm overflow-auto">
+Haz click en "Verificar Cookies"
+            </pre>
+        </div>
+
+        <!-- Update Cookies -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4 text-yellow-400">🔧 Actualizar Cookies</h2>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">sessionid:</label>
+                <input type="text" id="sessionid" 
+                    class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white"
+                    placeholder="Pega aquí la cookie sessionid">
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">sessionid_sign:</label>
+                <input type="text" id="sessionid_sign" 
+                    class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white"
+                    placeholder="Pega aquí la cookie sessionid_sign">
+            </div>
+
+            <button onclick="updateCookies()" class="bg-green-600 hover:bg-green-700 px-6 py-2 rounded font-semibold">
+                ✅ Actualizar Cookies
+            </button>
+
+            <pre id="update-result" class="bg-gray-900 p-4 rounded text-sm overflow-auto mt-4 hidden"></pre>
+        </div>
+
+        <!-- Test Webhook -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4 text-purple-400">📨 Test Webhook</h2>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">Mensaje:</label>
+                <textarea id="test-message" 
+                    class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white h-24"
+                    placeholder="Escribe un mensaje de prueba...">🧪 Mensaje de prueba desde el panel admin</textarea>
+            </div>
+
+            <button onclick="testWebhook()" class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded font-semibold">
+                📤 Enviar a Telegram
+            </button>
+
+            <pre id="webhook-result" class="bg-gray-900 p-4 rounded text-sm overflow-auto mt-4 hidden"></pre>
+        </div>
+
+        <!-- Health Check -->
+        <div class="bg-gray-800 rounded-lg p-6">
+            <h2 class="text-2xl font-bold mb-4 text-red-400">❤️ System Health</h2>
+            <button onclick="checkHealth()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded mb-4">
+                🔍 Check Health
+            </button>
+            <pre id="health-status" class="bg-gray-900 p-4 rounded text-sm overflow-auto">
+Haz click en "Check Health"
+            </pre>
+        </div>
+    </div>
+
+    <script>
+        // Check cookies status
+        async function checkCookies() {
+            const statusEl = document.getElementById('cookie-status');
+            statusEl.textContent = 'Verificando...';
+
+            try {
+                const response = await fetch('/cookies/status');
+                const data = await response.json();
+                statusEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                statusEl.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // Update cookies
+        async function updateCookies() {
+            const sessionid = document.getElementById('sessionid').value;
+            const sessionid_sign = document.getElementById('sessionid_sign').value;
+            const resultEl = document.getElementById('update-result');
+
+            if (!sessionid || !sessionid_sign) {
+                alert('Por favor completa ambas cookies');
+                return;
+            }
+
+            resultEl.classList.remove('hidden');
+            resultEl.textContent = 'Actualizando...';
+
+            try {
+                const response = await fetch('/cookies/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionid, sessionid_sign })
+                });
+
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+
+                if (data.success) {
+                    setTimeout(checkCookies, 1000);
+                }
+            } catch (error) {
+                resultEl.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // Test webhook
+        async function testWebhook() {
+            const message = document.getElementById('test-message').value;
+            const resultEl = document.getElementById('webhook-result');
+
+            resultEl.classList.remove('hidden');
+            resultEl.textContent = 'Enviando...';
+
+            try {
+                const response = await fetch('/webhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: message
+                });
+
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultEl.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // Check health
+        async function checkHealth() {
+            const statusEl = document.getElementById('health-status');
+            statusEl.textContent = 'Verificando...';
+
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                statusEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                statusEl.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // Auto-check on load
+        window.onload = () => {
+            checkCookies();
+            checkHealth();
+        };
+    </script>
+</body>
+</html>
+
