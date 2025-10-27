@@ -37,8 +37,9 @@ if (isRedisAvailable) {
     addScreenshotJob = queueConfig.addScreenshotJob;
     getQueueStats = queueConfig.getQueueStats;
     
-    // Importar Worker
-    screenshotWorker = require('../workers/screenshotWorker');
+    // Importar y crear Worker con la conexión Redis
+    const { createScreenshotWorker } = require('../workers/screenshotWorker');
+    screenshotWorker = createScreenshotWorker(redisConnection);
     
     logger.info('✅ BullMQ cargado correctamente');
   } catch (error) {

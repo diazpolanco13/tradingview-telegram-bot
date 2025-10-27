@@ -7,7 +7,6 @@
  */
 
 const { Worker } = require('bullmq');
-const { redisConnection } = require('../config/redis');
 const { updateScreenshotStatus, supabase } = require('../config/supabase');
 const { logger } = require('../utils/logger');
 
@@ -15,11 +14,18 @@ const { logger } = require('../utils/logger');
 const screenshotService = require('../services/screenshotService');
 
 /**
- * Worker que procesa screenshots
+ * Crear Worker solo si se proporciona conexión Redis
+ * Este módulo es llamado desde redis-optional.js que ya tiene la conexión
  */
-const screenshotWorker = new Worker(
-  'screenshot-processing',
-  async (job) => {
+function createScreenshotWorker(redisConnection) {
+  if (!redisConnection) {
+    logger.warn('⚠️ No se puede crear worker sin conexión Redis');
+    return null;
+  }
+
+  const screenshotWorker = new Worker(
+    'screenshot-processing',
+    async (job) => {
     const { signalId, userId, ticker, chartId, cookies, resolution } = job.data;
 
     logger.info(`🔄 Procesando screenshot para señal ${signalId} - ${ticker}`);
@@ -85,42 +91,46 @@ const screenshotWorker = new Worker(
   }
 );
 
+  /**
+   * Eventos del worker
+   */
+  screenshotWorker.on('completed', (job) => {
+    logger.info(`✅ Worker completó job: ${job.id}`);
+  });
+
+  screenshotWorker.on('failed', (job, error) => {
+    logger.error(`❌ Worker falló job: ${job?.id} - ${error.message}`);
+  });
+
+  screenshotWorker.on('error', (error) => {
+    logger.error('❌ Error en el worker:', error.message);
+  });
+
+  screenshotWorker.on('stalled', (jobId) => {
+    logger.warn(`⚠️ Job estancado detectado: ${jobId}`);
+  });
+
+  logger.info('✅ Screenshot Worker inicializado correctamente');
+  
+  return screenshotWorker;
+}
+
 /**
- * Eventos del worker
+ * Graceful shutdown del worker
  */
-screenshotWorker.on('completed', (job) => {
-  logger.info(`✅ Worker completó job: ${job.id}`);
-});
-
-screenshotWorker.on('failed', (job, error) => {
-  logger.error(`❌ Worker falló job: ${job?.id} - ${error.message}`);
-});
-
-screenshotWorker.on('error', (error) => {
-  logger.error('❌ Error en el worker:', error.message);
-});
-
-screenshotWorker.on('stalled', (jobId) => {
-  logger.warn(`⚠️ Job estancado detectado: ${jobId}`);
-});
-
-/**
- * Graceful shutdown
- */
-async function shutdownWorker() {
+async function shutdownWorker(worker) {
+  if (!worker) return;
+  
   try {
-    await screenshotWorker.close();
+    await worker.close();
     logger.info('🛑 Screenshot worker cerrado correctamente');
   } catch (error) {
     logger.error('❌ Error cerrando worker:', error.message);
   }
 }
 
-process.on('SIGTERM', shutdownWorker);
-process.on('SIGINT', shutdownWorker);
-
 module.exports = {
-  screenshotWorker,
+  createScreenshotWorker,
   shutdownWorker
 };
 
