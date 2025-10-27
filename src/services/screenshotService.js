@@ -65,11 +65,18 @@ class ScreenshotService {
         throw new Error('No hay cookies de TradingView configuradas. Configura en el panel admin.');
       }
 
-      // Inyectar cookies
+      // Inyectar cookies (compatibilidad con ambos formatos)
+      const sessionid = cookies.sessionid || cookies.tv_sessionid;
+      const sessionid_sign = cookies.sessionid_sign || cookies.tv_sessionid_sign;
+
+      if (!sessionid || !sessionid_sign) {
+        throw new Error('Cookies inválidas. Verifica que estén configuradas correctamente.');
+      }
+
       await page.setCookie(
         {
           name: 'sessionid',
-          value: cookies.tv_sessionid,
+          value: sessionid,
           domain: '.tradingview.com',
           path: '/',
           httpOnly: true,
@@ -77,7 +84,7 @@ class ScreenshotService {
         },
         {
           name: 'sessionid_sign',
-          value: cookies.tv_sessionid_sign,
+          value: sessionid_sign,
           domain: '.tradingview.com',
           path: '/',
           httpOnly: true,
