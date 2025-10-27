@@ -1,48 +1,30 @@
-# Dockerfile optimizado para TradingView Telegram Bot
-FROM node:18-alpine
+FROM node:18-slim
 
-# Instalar Chromium y dependencias para Puppeteer
-RUN apk add --no-cache \
+# Install Chromium for Puppeteer
+RUN apt-get update && apt-get install -y \
     chromium \
-    nss \
-    freetype \
-    freetype-dev \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
-    curl
+    chromium-sandbox \
+    fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 
-# Variables de entorno para Puppeteer
+# Set Puppeteer to use installed Chromium
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Crear directorio de trabajo
 WORKDIR /app
 
-# Copiar archivos de dependencias
+# Copy package files
 COPY package*.json ./
 
-# Instalar dependencias
-RUN npm install --production && npm cache clean --force
+# Install dependencies
+RUN npm ci --only=production
 
-# Copiar código fuente
-COPY src/ ./src/
-COPY scripts/ ./scripts/
-COPY config/ ./config/
-COPY public/ ./public/
+# Copy application code
+COPY . .
 
-# Crear directorios necesarios
-RUN mkdir -p logs data screenshots
-
-# Configurar permisos
-RUN chmod +x scripts/*.js || true
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:5002/health || exit 1
-
-# Exponer puerto
+# Expose port
 EXPOSE 5002
 
-# Comando de inicio
+# Start application
 CMD ["npm", "start"]
