@@ -1,14 +1,17 @@
 /**
  * Screenshot Worker
  * Procesa jobs de screenshots de forma asíncrona usando BullMQ
+ * 
+ * NUEVO: Usa TradingView Share (Alt+S) para obtener URLs oficiales
+ * En lugar de subir PNGs a Supabase Storage
  */
 
 const { Worker } = require('bullmq');
 const { redisConnection } = require('../config/redis');
-const { updateScreenshotStatus, uploadScreenshot } = require('../config/supabase');
+const { updateScreenshotStatus, supabase } = require('../config/supabase');
 const { logger } = require('../utils/logger');
 
-// Importar el servicio de screenshots (lo adaptaremos después)
+// Importar el servicio de screenshots
 const screenshotService = require('../services/screenshotService');
 
 /**
@@ -25,35 +28,43 @@ const screenshotWorker = new Worker(
       // 1. Actualizar estado a "processing"
       await updateScreenshotStatus(signalId, 'processing');
 
-      // 2. Capturar screenshot con cookies del usuario
-      const screenshotBuffer = await screenshotService.captureWithUserCookies(
+      // 2. ✨ NUEVO: Capturar usando TradingView Share (Alt + S)
+      logger.info('✨ Usando TradingView Share para capturar screenshot...');
+      
+      const shareUrl = await screenshotService.captureWithTradingViewShare(
         ticker,
         chartId,
-        cookies,
-        resolution
+        cookies
       );
 
-      if (!screenshotBuffer) {
-        throw new Error('No se pudo capturar el screenshot');
+      if (!shareUrl) {
+        throw new Error('No se pudo capturar la share URL de TradingView');
       }
 
-      // 3. Subir a Supabase Storage
-      const filename = `${ticker}_${Date.now()}.png`;
-      const screenshotUrl = await uploadScreenshot(screenshotBuffer, userId, filename);
+      logger.info({ shareUrl }, '✅ TradingView Share URL obtenida');
 
-      if (!screenshotUrl) {
-        throw new Error('No se pudo subir el screenshot');
+      // 3. Guardar URL directamente en Supabase (sin upload de imagen)
+      const { data, error } = await supabase
+        .from('trading_signals')
+        .update({ 
+          screenshot_url: shareUrl,
+          screenshot_status: 'completed'
+        })
+        .eq('id', signalId)
+        .select()
+        .single();
+
+      if (error) {
+        throw new Error(`Error actualizando señal: ${error.message}`);
       }
 
-      // 4. Actualizar estado a "completed" con URL
-      await updateScreenshotStatus(signalId, 'completed', screenshotUrl);
-
-      logger.info(`✅ Screenshot completado: ${signalId} - ${screenshotUrl}`);
+      logger.info(`✅ Screenshot completado: ${signalId} - ${shareUrl}`);
 
       return {
         success: true,
         signalId,
-        screenshotUrl
+        screenshotUrl: shareUrl,
+        method: 'tradingview_share'
       };
     } catch (error) {
       logger.error(`❌ Error procesando screenshot ${signalId}:`, error.message);
