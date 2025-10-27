@@ -1,4 +1,4 @@
-# 🚀 Inicio Rápido - Microservicio Trading V2
+# 🚀 Inicio Rápido - Microservicio Trading
 
 ## ⚡ En 5 Minutos
 
@@ -27,19 +27,19 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 ### **3. Iniciar Servidor**
 ```bash
-npm run dev:v2
+npm run dev
 ```
 
 ### **4. Abrir Panel**
 ```
-http://localhost:5002/admin-v2
+http://localhost:5002/admin
 ```
 
 ---
 
 ## 🎯 Lo Que Verás
 
-### **Panel Admin V2:**
+### **Panel Admin:**
 - ✅ Health Check de servicios
 - ✅ Test de Supabase
 - ✅ Probar webhooks
@@ -64,7 +64,7 @@ curl http://localhost:5002/health
 # API Root
 curl http://localhost:5002/
 
-# Webhook V2 (requiere token)
+# Webhook (requiere token)
 curl -X POST http://localhost:5002/webhook/:token \
   -H "Content-Type: application/json" \
   -d '{"ticker":"BTCUSDT","price":45000}'
@@ -98,7 +98,7 @@ curl -X POST http://localhost:5002/webhook/TU_TOKEN_AQUI \
 ### **3. Ver la señal creada:**
 ```bash
 # Desde el panel admin
-http://localhost:5002/admin-v2
+http://localhost:5002/admin
 # Click en "Get Recent Signals"
 ```
 
@@ -156,7 +156,7 @@ https://supabase.com/dashboard/project/tu-proyecto/settings/api
 lsof -i :5002
 
 # Ver logs
-npm run dev:v2
+npm run dev
 ```
 
 ---

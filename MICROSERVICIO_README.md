@@ -1,4 +1,4 @@
-# 🚀 Microservicio de Captura de Señales de TradingView V2
+# 🚀 Microservicio de Captura de Señales de TradingView
 
 ## ✅ IMPLEMENTACIÓN COMPLETADA
 
@@ -55,13 +55,13 @@ src/
 │   └── screenshotWorker.js   ✅ Procesador asíncrono de screenshots
 │
 ├── routes/
-│   ├── webhookV2.js          ✅ Webhook multi-tenant /webhook/:token
+│   ├── webhook.js          ✅ Webhook multi-tenant /webhook/:token
 │   └── dashboard.js          ✅ API REST para Next.js
 │
 ├── services/
 │   └── screenshotService.js  ✅ Adaptado con captureWithUserCookies()
 │
-└── serverV2.js               ✅ Servidor integrado completo
+└── server.js               ✅ Servidor integrado completo
 ```
 
 ---
@@ -152,12 +152,12 @@ sudo systemctl start redis
 
 **Desarrollo:**
 ```bash
-npm run dev:v2
+npm run dev
 ```
 
 **Producción:**
 ```bash
-npm run start:v2
+npm start
 ```
 
 El servidor se iniciará en `http://localhost:3000`
@@ -514,7 +514,7 @@ El microservicio está 100% implementado y listo para integrarse con tu platafor
 
 1. ✅ Configurar `.env` con tus credenciales de Supabase
 2. ✅ Iniciar Redis
-3. ✅ Ejecutar `npm run dev:v2`
+3. ✅ Ejecutar `npm run dev`
 4. ✅ Integrar los endpoints en Next.js
 
 **¿Dudas? Revisa los archivos creados o prueba el endpoint /health**

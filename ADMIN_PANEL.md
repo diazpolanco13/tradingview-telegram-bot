@@ -1,16 +1,16 @@
-# 🎛️ Panel de Testing Admin V2
+# 🎛️ Panel de Testing Admin
 
 ## ✅ PANEL COMPLETO IMPLEMENTADO
 
-Hemos creado un **panel de testing profesional** para el microservicio V2 que mantiene **backward compatibility** con tu panel V1 existente.
+Hemos creado un **panel de testing profesional** para el microservicio que mantiene **backward compatibility** con tu panel V1 existente.
 
 ---
 
 ## 🚀 Acceso Rápido
 
-### Panel V2 (Nuevo - Microservicio)
+### Panel (Nuevo - Microservicio)
 ```
-http://localhost:3000/admin-v2
+http://localhost:3000/admin
 ```
 
 ### Panel V1 (Legacy - Bot Telegram)
@@ -20,7 +20,7 @@ http://localhost:3000/admin
 
 ---
 
-## 📋 Características del Panel V2
+## 📋 Características del Panel
 
 ### 🎯 **Columna Izquierda:**
 
@@ -35,7 +35,7 @@ http://localhost:3000/admin
    - Jobs completados (completed)
    - Jobs fallidos (failed)
 
-3. **📡 Test Webhook V2 (Multi-tenant)**
+3. **📡 Test Webhook (Multi-tenant)**
    - Prueba el endpoint `/webhook/:token`
    - Envía JSON personalizado
    - Valida tokens de usuario
@@ -80,7 +80,7 @@ http://localhost:3000/admin
 
 10. **API Endpoints Documentation**
     - Tabla completa de endpoints
-    - Webhook V2, Dashboard API, System, Legacy V1
+    - Webhook, Dashboard API, System, Legacy V1
     - Códigos de ejemplo
 
 ---
@@ -242,7 +242,7 @@ Elimina todas las señales de prueba del sistema.
 ### **Colores:**
 - 🔴 Rojo: System Health
 - 🟠 Naranja: Queue Stats
-- 🟣 Púrpura: Webhook V2
+- 🟣 Púrpura: Webhook
 - 🔵 Azul: Webhook V1 Legacy
 - 🟢 Verde: Supabase
 - 🔵 Cyan: User Config
@@ -255,7 +255,7 @@ Elimina todas las señales de prueba del sistema.
 ## 🧪 Flujo de Prueba Completo
 
 ### **Paso 1: Verificar Salud del Sistema**
-1. Abre `http://localhost:3000/admin-v2`
+1. Abre `http://localhost:3000/admin`
 2. Click en "Check Health"
 3. Verifica que todos los servicios estén ✅
 
@@ -271,10 +271,10 @@ Elimina todas las señales de prueba del sistema.
 4. Click "Get Config"
 5. Copia el `webhook_token`
 
-### **Paso 4: Probar Webhook V2**
-1. Pega el `webhook_token` en la sección Webhook V2
+### **Paso 4: Probar Webhook**
+1. Pega el `webhook_token` en la sección Webhook
 2. Modifica el JSON si quieres
-3. Click "Enviar al Webhook V2"
+3. Click "Enviar al Webhook"
 4. Verifica respuesta exitosa con `signal_id`
 
 ### **Paso 5: Ver Señales Recientes**
@@ -293,14 +293,14 @@ Elimina todas las señales de prueba del sistema.
 
 ---
 
-## 🔄 Comparación V1 vs V2
+## 🔄 Comparación V1 vs
 
-| **Feature**                  | **V1 (Legacy)**       | **V2 (Nuevo)**           |
+| **Feature**                  | **V1 (Legacy)**       | **(Nuevo)**           |
 |------------------------------|-----------------------|--------------------------|
-| URL                          | `/admin`              | `/admin-v2`              |
+| URL                          | `/admin`              | `/admin`              |
 | Cookie Management            | ✅ Sí                 | ✅ Sí (Legacy section)   |
 | Test Telegram Webhook        | ✅ Sí                 | ✅ Sí (V1 section)       |
-| Test Webhook V2 Multi-tenant | ❌ No                 | ✅ Sí                    |
+| Test Webhook Multi-tenant | ❌ No                 | ✅ Sí                    |
 | Supabase Testing             | ❌ No                 | ✅ Sí                    |
 | Queue Stats (BullMQ)         | ❌ No                 | ✅ Sí                    |
 | User Config Lookup           | ❌ No                 | ✅ Sí                    |
@@ -326,15 +326,15 @@ El panel tiene un diseño profesional con:
 
 ## 🚀 Cómo Usar
 
-### **Iniciar el Servidor V2:**
+### **Iniciar el Servidor:**
 ```bash
-npm run dev:v2
+npm run dev
 ```
 
 ### **Acceder al Panel:**
 ```bash
-# Panel V2 (Nuevo)
-http://localhost:3000/admin-v2
+# Panel (Nuevo)
+http://localhost:3000/admin
 
 # Panel V1 (Legacy)
 http://localhost:3000/admin
@@ -375,14 +375,14 @@ curl http://localhost:3000/health
 
 ### **Agregar Más Tests:**
 
-Edita `src/routes/adminV2.js`:
+Edita `src/routes/admin.js`:
 ```javascript
 router.get('/test/mi-nuevo-test', async (req, res) => {
   // Tu código aquí
 });
 ```
 
-Edita `public/admin-v2.html`:
+Edita `public/admin.html`:
 ```html
 <button onclick="miNuevoTest()">Test</button>
 
@@ -399,9 +399,9 @@ async function miNuevoTest() {
 
 ## 📚 Documentación de Referencia
 
-- **Archivo HTML**: `public/admin-v2.html`
-- **Rutas Backend**: `src/routes/adminV2.js`
-- **Servidor**: `src/serverV2.js`
+- **Archivo HTML**: `public/admin.html`
+- **Rutas Backend**: `src/routes/admin.js`
+- **Servidor**: `src/server.js`
 
 ---
 

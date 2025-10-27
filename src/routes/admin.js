@@ -1,197 +1,344 @@
 /**
- * Admin Routes - Gestión de Cookies TradingView
- * Simplificado para bot de Telegram
+ * Admin V2 Routes - Testing Panel para Microservicio
+ * Endpoints de testing y desarrollo para el panel admin V2
  */
 
 const express = require('express');
 const router = express.Router();
 const path = require('path');
-const { requireAdminToken, getCurrentAdminToken } = require('../utils/adminAuth');
-const { logger: apiLogger } = require('../utils/logger');
-const CookieManager = require('../utils/cookieManager');
-
-// Instancia global de cookieManager
-const cookieManager = new CookieManager();
+const { apiLogger: logger } = require('../utils/logger');
+const { supabase, getUserConfig } = require('../config/supabase');
+const { encrypt, decrypt } = require('../utils/encryption');
 
 /**
  * GET /admin
- * Panel de administración web (versión simplificada SIN login)
+ * Panel de testing del microservicio
  */
 router.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../public/admin-simple.html'));
+  res.sendFile(path.join(__dirname, '../../public/admin.html'));
 });
 
 /**
- * POST /admin/login
- * Login simplificado para desarrollo/testing (SIN validación de token)
+ * GET /test/supabase
+ * Probar conexión a Supabase
  */
-router.post('/admin/login', (req, res) => {
+router.get('/test/supabase', async (req, res) => {
   try {
-    // ✅ Modo desarrollo: Aceptar cualquier token
-    // TODO: Habilitar validación en producción
-    
-    apiLogger.info('Admin login (development mode - no validation)');
-    
-    return res.json({
+    // Test 1: Contar configuraciones
+    const { count: configCount, error: configError } = await supabase
+      .from('trading_signals_config')
+      .select('*', { count: 'exact', head: true });
+
+    if (configError) throw configError;
+
+    // Test 2: Contar señales
+    const { count: signalsCount, error: signalsError } = await supabase
+      .from('trading_signals')
+      .select('*', { count: 'exact', head: true });
+
+    if (signalsError) throw signalsError;
+
+    // Test 3: Verificar bucket
+    const { data: buckets, error: bucketError } = await supabase.storage
+      .listBuckets();
+
+    if (bucketError) throw bucketError;
+
+    const screenshotBucket = buckets?.find(b => b.name === 'trading-screenshots');
+
+    res.json({
       success: true,
-      message: 'Acceso concedido (modo desarrollo)',
-      token: req.body.token || 'dev-mode'
+      message: 'Conexión a Supabase exitosa ✅',
+      stats: {
+        total_configs: configCount || 0,
+        total_signals: signalsCount || 0,
+        screenshot_bucket_exists: !!screenshotBucket,
+        buckets: buckets?.length || 0
+      },
+      timestamp: new Date().toISOString()
     });
 
   } catch (error) {
-    apiLogger.error({ error: error.message }, 'Login error');
+    logger.error({ error: error.message }, 'Error testing Supabase');
     res.status(500).json({
-      error: 'Error en login',
-      message: error.message
+      success: false,
+      error: error.message
     });
   }
 });
 
 /**
- * GET /admin-token
- * Obtener token admin (SOLO LOCALHOST)
+ * GET /test/user-config/:userId
+ * Obtener configuración de un usuario específico
  */
-router.get('/admin-token', (req, res) => {
-  // Solo permitir desde localhost
-  const isLocalhost = req.ip === '127.0.0.1' || 
-                      req.ip === '::1' || 
-                      req.ip === '::ffff:127.0.0.1';
-
-  if (!isLocalhost) {
-    return res.status(403).json({
-      error: 'Acceso denegado',
-      message: 'Este endpoint solo está disponible desde localhost'
-    });
-  }
-
-  const token = getCurrentAdminToken();
-  
-  res.json({
-    token,
-    message: 'Token de administrador',
-    expires: 'Al reiniciar el servidor'
-  });
-});
-
-/**
- * GET /admin/cookies/status
- * Verificar estado actual de las cookies de TradingView
- */
-router.get('/cookies/status', async (req, res) => {
+router.get('/test/user-config/:userId', async (req, res) => {
   try {
-    apiLogger.info('Checking cookie status');
+    const { userId } = req.params;
 
-    const cookieData = await cookieManager.loadCookies();
+    const config = await getUserConfig(userId);
 
-    if (!cookieData) {
-      return res.json({
-        valid: false,
-        message: 'No hay cookies configuradas',
-        last_updated: null
+    if (!config) {
+      return res.status(404).json({
+        success: false,
+        message: 'Usuario no encontrado o sin configuración'
       });
     }
 
-    // Validar cookies
-    const isValid = await cookieManager.validateCookies(
-      cookieData.sessionid, 
-      cookieData.sessionid_sign
-    );
-
-    // Obtener datos del perfil si las cookies son válidas
-    let profileData = null;
-    if (isValid) {
-      profileData = await cookieManager.getProfileData(
-        cookieData.sessionid,
-        cookieData.sessionid_sign
-      );
+    // Ocultar cookies encriptadas en respuesta
+    const safeConfig = { ...config };
+    if (safeConfig.tv_sessionid) {
+      safeConfig.tv_sessionid = '[ENCRYPTED - Hidden for security]';
+    }
+    if (safeConfig.tv_sessionid_sign) {
+      safeConfig.tv_sessionid_sign = '[ENCRYPTED - Hidden for security]';
     }
 
     res.json({
-      valid: isValid,
-      profile_data: profileData,
-      last_updated: cookieData.timestamp
+      success: true,
+      data: safeConfig
     });
 
   } catch (error) {
-    apiLogger.error({ error: error.message }, 'Cookie status check error');
+    logger.error({ error: error.message }, 'Error getting user config');
     res.status(500).json({
-      error: 'Error verificando cookies',
-      message: error.message
+      success: false,
+      error: error.message
     });
   }
 });
 
 /**
- * POST /admin/cookies/update
- * Actualizar cookies manualmente
+ * GET /test/signals
+ * Obtener señales recientes (todas, para testing)
  */
-router.post('/cookies/update', async (req, res) => {
+router.get('/test/signals', async (req, res) => {
   try {
-    const { sessionid, sessionid_sign } = req.body;
+    const limit = parseInt(req.query.limit) || 10;
 
-    if (!sessionid || !sessionid_sign) {
+    const { data, error, count } = await supabase
+      .from('trading_signals')
+      .select('*', { count: 'exact' })
+      .order('timestamp', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      total: count,
+      limit,
+      data: data || []
+    });
+
+  } catch (error) {
+    logger.error({ error: error.message }, 'Error getting signals');
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /test/encryption
+ * Probar encriptación y desencriptación
+ */
+router.post('/test/encryption', async (req, res) => {
+  try {
+    const { text } = req.body;
+
+    if (!text) {
       return res.status(400).json({
-        error: 'Cookies requeridas',
-        message: 'Proporciona sessionid y sessionid_sign'
+        success: false,
+        error: 'Proporciona un texto a encriptar'
       });
     }
 
-    // Validar cookies antes de guardar
-    const isValid = await cookieManager.validateCookies(sessionid, sessionid_sign);
+    // Encriptar
+    const encrypted = encrypt(text);
 
-    if (!isValid) {
-      return res.status(400).json({
-        error: 'Cookies inválidas',
-        message: 'Verifica que hayas copiado correctamente las cookies del navegador. Asegúrate de estar logueado en TradingView.'
-      });
-    }
+    // Desencriptar
+    const decrypted = decrypt(encrypted);
 
-    // Guardar cookies
-    await cookieManager.saveCookies(sessionid, sessionid_sign);
-
-    apiLogger.info('Cookies updated successfully via admin panel');
+    // Verificar
+    const isValid = text === decrypted;
 
     res.json({
       success: true,
-      message: 'Cookies actualizadas exitosamente'
+      original: text,
+      encrypted: encrypted.substring(0, 50) + '...',
+      encrypted_length: encrypted.length,
+      decrypted: decrypted,
+      validation: isValid ? '✅ OK' : '❌ FAILED'
     });
 
   } catch (error) {
-    apiLogger.error({ error: error.message }, 'Cookie update error');
-
+    logger.error({ error: error.message }, 'Error testing encryption');
     res.status(500).json({
-      error: 'Error actualizando cookies',
-      message: error.message
+      success: false,
+      error: error.message
     });
   }
 });
 
 /**
- * POST /admin/cookies/clear
- * Limpiar cookies (para testing o renovación forzada)
+ * GET /test/database-stats
+ * Estadísticas generales de la base de datos
  */
-router.post('/cookies/clear', async (req, res) => {
+router.get('/test/database-stats', async (req, res) => {
   try {
-    await cookieManager.clearCookies();
+    // Contar por tabla
+    const [
+      { count: totalConfigs },
+      { count: totalSignals },
+      { count: totalStats },
+      { count: signalsPending },
+      { count: signalsCompleted },
+      { count: signalsFailed }
+    ] = await Promise.all([
+      supabase.from('trading_signals_config').select('*', { count: 'exact', head: true }),
+      supabase.from('trading_signals').select('*', { count: 'exact', head: true }),
+      supabase.from('trading_signals_stats').select('*', { count: 'exact', head: true }),
+      supabase.from('trading_signals').select('*', { count: 'exact', head: true }).eq('screenshot_status', 'pending'),
+      supabase.from('trading_signals').select('*', { count: 'exact', head: true }).eq('screenshot_status', 'completed'),
+      supabase.from('trading_signals').select('*', { count: 'exact', head: true }).eq('screenshot_status', 'failed')
+    ]);
 
-    apiLogger.info('Cookies cleared via admin panel');
+    // Top 5 usuarios con más señales
+    const { data: topUsers } = await supabase
+      .from('trading_signals')
+      .select('user_id')
+      .limit(1000);
+
+    const userCounts = {};
+    topUsers?.forEach(signal => {
+      userCounts[signal.user_id] = (userCounts[signal.user_id] || 0) + 1;
+    });
+
+    const topUsersList = Object.entries(userCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([userId, count]) => ({ user_id: userId, signal_count: count }));
 
     res.json({
       success: true,
-      message: 'Cookies eliminadas exitosamente'
+      stats: {
+        total_users_with_config: totalConfigs || 0,
+        total_signals: totalSignals || 0,
+        total_stats_records: totalStats || 0,
+        screenshots: {
+          pending: signalsPending || 0,
+          completed: signalsCompleted || 0,
+          failed: signalsFailed || 0
+        },
+        top_users: topUsersList
+      },
+      timestamp: new Date().toISOString()
     });
 
   } catch (error) {
-    apiLogger.error({ error: error.message }, 'Cookie clear error');
-
+    logger.error({ error: error.message }, 'Error getting database stats');
     res.status(500).json({
-      error: 'Error eliminando cookies',
-      message: error.message
+      success: false,
+      error: error.message
     });
   }
 });
 
-module.exports = { 
-  router,
-  cookieManager // Exportar para uso en services
-};
+/**
+ * POST /test/create-test-signal
+ * Crear una señal de prueba para un usuario
+ */
+router.post('/test/create-test-signal', async (req, res) => {
+  try {
+    const { user_id } = req.body;
+
+    if (!user_id) {
+      return res.status(400).json({
+        success: false,
+        error: 'Proporciona un user_id'
+      });
+    }
+
+    // Verificar que el usuario tenga config
+    const { data: config } = await supabase
+      .from('trading_signals_config')
+      .select('id')
+      .eq('user_id', user_id)
+      .single();
+
+    if (!config) {
+      return res.status(404).json({
+        success: false,
+        error: 'Usuario no tiene configuración. Crea un usuario primero.'
+      });
+    }
+
+    // Crear señal de prueba
+    const testSignal = {
+      user_id,
+      indicator_name: 'Test Indicator',
+      ticker: 'BINANCE:BTCUSDT',
+      exchange: 'BINANCE',
+      symbol: 'BTCUSDT',
+      price: 45000 + Math.random() * 1000,
+      signal_type: 'TEST_SIGNAL',
+      direction: Math.random() > 0.5 ? 'LONG' : 'SHORT',
+      screenshot_status: 'pending',
+      raw_message: 'Test signal created from admin panel',
+      parsed_data: { test: true },
+      timestamp: new Date().toISOString()
+    };
+
+    const { data, error } = await supabase
+      .from('trading_signals')
+      .insert([testSignal])
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      message: 'Señal de prueba creada ✅',
+      data
+    });
+
+  } catch (error) {
+    logger.error({ error: error.message }, 'Error creating test signal');
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * DELETE /test/clear-test-signals
+ * Eliminar todas las señales de prueba
+ */
+router.delete('/test/clear-test-signals', async (req, res) => {
+  try {
+    const { error } = await supabase
+      .from('trading_signals')
+      .delete()
+      .eq('signal_type', 'TEST_SIGNAL');
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      message: 'Señales de prueba eliminadas ✅'
+    });
+
+  } catch (error) {
+    logger.error({ error: error.message }, 'Error clearing test signals');
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+module.exports = router;
+

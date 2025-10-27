@@ -1,4 +1,4 @@
-# 🚀 Guía de Despliegue - Microservicio Trading V2
+# 🚀 Guía de Despliegue - Microservicio Trading
 
 ## 📋 Resumen
 
@@ -85,10 +85,10 @@ El proyecto incluye un `Dockerfile` optimizado que:
 
 ```bash
 # 1. Desarrolla localmente
-npm run dev:v2
+npm run dev
 
 # 2. Prueba tus cambios
-# Visita: http://localhost:5002/admin-v2
+# Visita: http://localhost:5002/admin
 
 # 3. Commit y push
 git add .
@@ -166,7 +166,7 @@ RUN apk add --no-cache chromium
 
 ### **Panel Admin:**
 ```
-https://tu-dominio.com/admin-v2
+https://tu-dominio.com/admin
 ```
 
 Desde el panel puedes:

@@ -5,9 +5,7 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "start:v2": "node src/serverV2.js",
     "dev": "nodemon src/server.js",
-    "dev:v2": "nodemon src/serverV2.js",
     "test": "echo \"Tests coming soon\" && exit 0",
     "get-token": "node scripts/get-admin-token.js"
   },

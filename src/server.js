@@ -1,6 +1,6 @@
 /**
- * TradingView Telegram Bot Server
- * Send TradingView alerts with chart screenshots to Telegram
+ * TradingView Microservice Server
+ * Multi-tenant system with Supabase + BullMQ
  */
 
 require('dotenv').config();
@@ -11,13 +11,20 @@ const compression = require('compression');
 const path = require('path');
 
 const { logger } = require('./utils/logger');
-const { initAdminAuth } = require('./utils/adminAuth');
+const { testConnection: testSupabaseConnection } = require('./config/supabase');
 const screenshotService = require('./services/screenshotService');
-const telegramService = require('./services/telegramService');
+
+// Redis y BullMQ son opcionales en desarrollo
+const {
+  testRedisConnection,
+  getQueueStats,
+  isRedisAvailable: redisAvailable
+} = require('./config/redis-optional');
 
 // Routes
 const webhookRoutes = require('./routes/webhook');
-const { router: adminRoutes, cookieManager } = require('./routes/admin');
+const dashboardRoutes = require('./routes/dashboard');
+const adminRoutes = require('./routes/admin');
 
 // Initialize Express app
 const app = express();
@@ -42,7 +49,7 @@ app.use(compression());
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.text({ limit: '10mb' })); // Para alertas de TradingView en texto plano
+app.use(express.text({ limit: '10mb' }));
 
 // Static files (admin panel)
 app.use(express.static(path.join(__dirname, '../public')));
@@ -50,39 +57,59 @@ app.use(express.static(path.join(__dirname, '../public')));
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({
-    message: 'TradingView Telegram Bot - Node.js',
-    version: '1.0.0',
+    message: 'TradingView Microservice - Multi-tenant V2',
+    version: '2.0.0',
     status: 'running',
     timestamp: new Date().toISOString(),
     endpoints: {
       health: 'GET /health',
-      webhook: 'POST /webhook (MAIN ENDPOINT)',
-      admin: 'GET /admin (REQUIRES TOKEN)',
-      adminToken: 'GET /admin-token (LOCALHOST ONLY)'
+      webhookV2: 'POST /webhook/:token (MAIN - Multi-tenant)',
+      webhookV1: 'POST /webhook (Legacy - Single user)',
+      dashboardApi: 'GET /api/* (Dashboard endpoints)',
+      admin: 'GET /admin (Admin panel)'
     },
-    quickLinks: {
-      adminPanel: `http://localhost:${process.env.PORT || 5002}/admin`,
-      documentation: 'https://github.com/diazpolanco13/tradingview-telegram-bot'
-    }
+    features: [
+      'Multi-tenant (usuarios independientes)',
+      'Webhook único por usuario',
+      'Almacenamiento en Supabase',
+      'Colas asíncronas con BullMQ',
+      'Screenshots personalizados por usuario',
+      'API REST para dashboard Next.js'
+    ]
   });
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'healthy',
-    uptime: process.uptime(),
-    timestamp: new Date().toISOString(),
-    services: {
-      telegram: telegramService.initialized,
-      puppeteer: screenshotService.initialized
+app.get('/health', async (req, res) => {
+  try {
+    let queueStats = null;
+    if (redisAvailable && getQueueStats) {
+      queueStats = await getQueueStats();
     }
-  });
+
+    res.status(200).json({
+      status: 'healthy',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+      services: {
+        supabase: true,
+        redis: redisAvailable,
+        puppeteer: screenshotService.initialized,
+        queue: queueStats || { message: 'Redis no disponible' }
+      }
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: 'degraded',
+      error: error.message
+    });
+  }
 });
 
-// Routes
-app.use(webhookRoutes);
-app.use(adminRoutes);
+// API Routes
+app.use(webhookRoutes);          // POST /webhook/:token
+app.use('/api', dashboardRoutes); // Dashboard API endpoints
+app.use(adminRoutes);             // Admin panel
 
 // 404 handler
 app.use((req, res) => {
@@ -92,9 +119,11 @@ app.use((req, res) => {
     availableEndpoints: [
       'GET /',
       'GET /health',
-      'POST /webhook',
-      'GET /admin',
-      'GET /admin-token'
+      'POST /webhook/:token (V2 Multi-tenant)',
+      'POST /v1/webhook (V1 Legacy)',
+      'GET /api/signals (Dashboard)',
+      'GET /api/config (Dashboard)',
+      'GET /admin'
     ]
   });
 });
@@ -115,48 +144,59 @@ app.use((err, req, res, next) => {
 });
 
 // Server startup
-const PORT = process.env.PORT || 5002;
+const PORT = process.env.PORT || 3000;
 
 async function startServer() {
   try {
-    logger.info('🚀 Starting TradingView Telegram Bot...');
+    logger.info('🚀 Starting TradingView Microservice V2...');
 
-    // Initialize admin authentication
-    await initAdminAuth();
-
-    // Initialize services
-    logger.info('Initializing Telegram service...');
-    try {
-      telegramService.init();
-    } catch (error) {
-      logger.warn({ error: error.message }, '⚠️ Telegram service not configured (this is OK for testing)');
+    // Test Supabase connection
+    logger.info('🔌 Conectando a Supabase...');
+    const supabaseOk = await testSupabaseConnection();
+    if (!supabaseOk) {
+      throw new Error('No se pudo conectar a Supabase');
     }
-    
-    logger.info('Initializing Screenshot service...');
+
+    // Test Redis connection (opcional)
+    if (redisAvailable && testRedisConnection) {
+      logger.info('🔌 Conectando a Redis...');
+      const redisOk = await testRedisConnection();
+      if (!redisOk) {
+        logger.warn('⚠️ Redis no disponible - Screenshots deshabilitados');
+      }
+    } else {
+      logger.warn('⚠️ Redis no configurado - Modo desarrollo sin screenshots');
+    }
+
+    // Initialize Screenshot service
+    logger.info('📸 Inicializando Puppeteer...');
     try {
       await screenshotService.init();
     } catch (error) {
-      logger.warn({ error: error.message }, '⚠️ Screenshot service not available (requires Chromium in Docker)');
+      logger.warn({ error: error.message }, '⚠️ Screenshot service not available');
     }
 
     // Start server
     app.listen(PORT, () => {
       logger.info(`
-╔════════════════════════════════════════════════════════════╗
-║  📱 TradingView Telegram Bot - Running                     ║
-║                                                            ║
-║  🌐 Server:     http://localhost:${PORT}                   ║
-║  🎛️  Admin:      http://localhost:${PORT}/admin            ║
-║  📡 Webhook:     http://localhost:${PORT}/webhook          ║
-║  ❤️  Health:     http://localhost:${PORT}/health           ║
-║                                                            ║
-║  Environment: ${process.env.NODE_ENV || 'development'}                                 ║
-║  Telegram Bot: ${telegramService.initialized ? '✅ Ready' : '❌ Not configured'}                       ║
-║  Puppeteer: ${screenshotService.initialized ? '✅ Ready' : '❌ Not initialized'}                        ║
-╚════════════════════════════════════════════════════════════╝
+╔════════════════════════════════════════════════════════════════╗
+║  🎯 TradingView Microservice - RUNNING                         ║
+║                                                                ║
+║  🌐 Server:       http://localhost:${PORT}                     ║
+║  📡 Webhook:      http://localhost:${PORT}/webhook/:token      ║
+║  🔌 API:          http://localhost:${PORT}/api/*               ║
+║  ❤️  Health:       http://localhost:${PORT}/health             ║
+║  🎛️  Admin Panel:  http://localhost:${PORT}/admin              ║
+║                                                                ║
+║  Environment:     ${process.env.NODE_ENV || 'development'}                                    ║
+║  Supabase:        ✅ Connected                                  ║
+║  Redis/BullMQ:    ${redisAvailable ? '✅ Connected' : '⚠️  Not available (dev mode)'}                    ║
+║  Puppeteer:       ${screenshotService.initialized ? '✅ Ready' : '❌ Not initialized'}                                   ║
+║  Worker:          ${redisAvailable ? '✅ Running (concurrency: 2)' : '⚠️  Disabled (no Redis)'}                    ║
+║                                                                ║
+║  🚀 Microservicio listo para recibir señales multi-tenant     ║
+╚════════════════════════════════════════════════════════════════╝
       `);
-
-      logger.info('Bot está listo para recibir alertas de TradingView');
     });
 
   } catch (error) {
@@ -166,19 +206,27 @@ async function startServer() {
 }
 
 // Graceful shutdown
-process.on('SIGTERM', async () => {
-  logger.info('SIGTERM received, shutting down gracefully...');
-  await screenshotService.close();
-  process.exit(0);
-});
+async function shutdown() {
+  logger.info('🛑 Shutting down gracefully...');
+  
+  try {
+    await screenshotService.close();
+    const { shutdownWorker } = require('./workers/screenshotWorker');
+    await shutdownWorker();
+    
+    logger.info('✅ Shutdown complete');
+    process.exit(0);
+  } catch (error) {
+    logger.error({ error: error.message }, '❌ Error during shutdown');
+    process.exit(1);
+  }
+}
 
-process.on('SIGINT', async () => {
-  logger.info('SIGINT received, shutting down gracefully...');
-  await screenshotService.close();
-  process.exit(0);
-});
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
 
 // Start server
 startServer();
 
 module.exports = app;
+

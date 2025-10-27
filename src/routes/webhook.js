@@ -1,107 +1,164 @@
+/**
+ * Webhook V2 - Multi-tenant con Supabase + BullMQ
+ * Endpoint optimizado para recibir alertas de TradingView por usuario
+ */
+
 const express = require('express');
 const router = express.Router();
-const screenshotService = require('../services/screenshotService');
-const telegramService = require('../services/telegramService');
 const { logger } = require('../utils/logger');
+const {
+  validateWebhookToken,
+  insertSignal,
+  incrementWebhookUsage
+} = require('../config/supabase');
+const { decryptTradingViewCookies } = require('../utils/encryption');
+
+// BullMQ es opcional (puede no estar en desarrollo local)
+const { addScreenshotJob } = require('../config/redis-optional');
 
 /**
- * POST /webhook
+ * POST /webhook/:token
  * Endpoint principal para recibir alertas de TradingView
  * 
- * Query Parameters:
- * - chart: ID del chart de TradingView (opcional)
- * - ticker: Símbolo del ticker (opcional, ej: BTCUSDT)
- * - delivery: 'asap' (mensaje primero) o 'together' (mensaje con screenshot)
- * - jsonRequest: 'true' para formatear JSON como tabla
+ * Path Parameters:
+ * - token: Token único del webhook del usuario
  * 
  * Body: Mensaje de la alerta (string o JSON)
+ * Estructura JSON esperada (personalizable):
+ * {
+ *   "indicator": "Nombre del indicador",
+ *   "ticker": "BINANCE:BTCUSDT",
+ *   "exchange": "BINANCE",
+ *   "symbol": "BTCUSDT",
+ *   "price": 45000.50,
+ *   "signal_type": "BUY_SIGNAL",
+ *   "direction": "LONG",
+ *   "timestamp": "2025-10-27T10:30:00Z",
+ *   "chart_id": "xyz123abc",
+ *   "message": "Señal de compra detectada"
+ * }
  */
-router.post('/webhook', async (req, res) => {
+router.post('/webhook/:token', async (req, res) => {
   const startTime = Date.now();
+  const { token } = req.params;
 
   try {
-    // Extraer parámetros
-    const {
-      chart,
-      ticker: queryTicker,
-      delivery = 'together',
-      jsonRequest = 'false'
-    } = req.query;
+    // 1. VALIDAR WEBHOOK TOKEN Y OBTENER CONFIGURACIÓN DEL USUARIO
+    logger.info({ token: token.substring(0, 8) + '...' }, '📨 Webhook recibido');
 
-    // Procesar mensaje primero para poder extraer ticker si es necesario
-    let message = '';
-    
+    const userConfig = await validateWebhookToken(token);
+
+    if (!userConfig) {
+      logger.warn({ token: token.substring(0, 8) + '...' }, '⚠️ Token inválido o deshabilitado');
+      return res.status(401).json({
+        success: false,
+        error: 'Webhook token inválido, deshabilitado o cuota excedida'
+      });
+    }
+
+    logger.info({ userId: userConfig.user_id }, '✅ Token validado correctamente');
+
+    // 2. PARSEAR MENSAJE DE TRADINGVIEW
+    let parsedData = {};
+    let rawMessage = '';
+
     if (typeof req.body === 'string') {
-      message = req.body;
+      rawMessage = req.body;
+      
+      // Intentar parsear como JSON
+      try {
+        parsedData = JSON.parse(rawMessage);
+      } catch {
+        // Si no es JSON, extraer datos del texto
+        parsedData = extractDataFromText(rawMessage);
+      }
     } else if (typeof req.body === 'object') {
-      if (jsonRequest === 'true') {
-        // Formatear JSON como texto legible
-        message = '```\n' + JSON.stringify(req.body, null, 2) + '\n```';
-      } else {
-        // Convertir a string simple
-        message = JSON.stringify(req.body, null, 2);
+      parsedData = req.body;
+      rawMessage = JSON.stringify(req.body, null, 2);
+    } else {
+      rawMessage = String(req.body || '');
+    }
+
+    // 3. CONSTRUIR DATOS DE LA SEÑAL
+    const signalData = {
+      user_id: userConfig.user_id,
+      indicator_name: parsedData.indicator || parsedData.indicator_name || null,
+      ticker: parsedData.ticker || parsedData.symbol || extractTicker(rawMessage),
+      exchange: parsedData.exchange || null,
+      symbol: parsedData.symbol || null,
+      price: parsedData.price ? parseFloat(parsedData.price) : null,
+      signal_type: parsedData.signal_type || parsedData.type || null,
+      direction: parsedData.direction || null,
+      chart_id: parsedData.chart_id || parsedData.chartId || userConfig.default_chart_id || null,
+      screenshot_url: null,
+      screenshot_status: 'pending',
+      raw_message: rawMessage,
+      parsed_data: parsedData,
+      timestamp: parsedData.timestamp ? new Date(parsedData.timestamp) : new Date()
+    };
+
+    logger.info({ 
+      ticker: signalData.ticker, 
+      signal_type: signalData.signal_type 
+    }, '📊 Señal parseada');
+
+    // 4. INSERTAR SEÑAL EN SUPABASE
+    const insertedSignal = await insertSignal(signalData);
+
+    if (!insertedSignal) {
+      throw new Error('No se pudo insertar la señal en la base de datos');
+    }
+
+    logger.info({ signalId: insertedSignal.id }, '✅ Señal insertada en Supabase');
+
+    // 5. INCREMENTAR CONTADOR DE USO DEL WEBHOOK
+    await incrementWebhookUsage(token);
+
+    // 6. ENCOLAR SCREENSHOT SI HAY CHART_ID Y COOKIES VÁLIDAS
+    let screenshotQueued = false;
+    
+    if (addScreenshotJob && signalData.chart_id && userConfig.cookies_valid && userConfig.tv_sessionid) {
+      try {
+        // Desencriptar cookies del usuario
+        const cookies = decryptTradingViewCookies(
+          userConfig.tv_sessionid,
+          userConfig.tv_sessionid_sign
+        );
+
+        // Agregar job a la cola
+        await addScreenshotJob({
+          signalId: insertedSignal.id,
+          userId: userConfig.user_id,
+          ticker: signalData.ticker,
+          chartId: signalData.chart_id,
+          cookies: cookies,
+          resolution: userConfig.screenshot_resolution || '1080p'
+        });
+
+        screenshotQueued = true;
+        logger.info({ signalId: insertedSignal.id }, '📸 Screenshot encolado correctamente');
+      } catch (error) {
+        logger.error({ error: error.message }, '❌ Error encolando screenshot');
+        // No fallar el webhook por error en screenshot
       }
     } else {
-      message = String(req.body || 'Alerta de TradingView');
-    }
-
-    // Extraer ticker del mensaje si no viene en query
-    let ticker = queryTicker;
-    if (!ticker || ticker.includes('{{')) {
-      // Intentar extraer ticker del mensaje
-      // Buscar patrón: "Ticker: EXCHANGE:SYMBOL" o "🪙 Ticker: EXCHANGE:SYMBOL"
-      const tickerMatch = message.match(/Ticker:\s*([A-Z]+:[A-Z0-9.]+)/i);
-      if (tickerMatch) {
-        ticker = tickerMatch[1];
-        logger.info({ extractedTicker: ticker }, '✅ Ticker extraído del mensaje');
+      if (!addScreenshotJob) {
+        logger.info('⏭️ Screenshot omitido (BullMQ no disponible - modo desarrollo)');
       } else {
-        ticker = null; // No usar ticker si tiene placeholders
+        logger.info('⏭️ Screenshot omitido (sin chart_id o cookies no configuradas)');
       }
     }
 
-    logger.info({
-      chart,
-      ticker,
-      delivery,
-      jsonRequest,
-      hasBody: !!req.body
-    }, '📨 Webhook procesado');
-
-    // Envío ASAP: mensaje primero, screenshot después
-    if (delivery === 'asap' && message) {
-      await telegramService.sendMessage(message);
-      logger.info('✅ Mensaje enviado (modo ASAP)');
-    }
-
-    // Capturar y enviar screenshot si hay chart
-    if (chart) {
-      logger.info({ chart, ticker }, '📸 Iniciando captura de screenshot...');
-      
-      const screenshot = await screenshotService.captureChart(chart, ticker);
-      
-      if (delivery === 'together') {
-        // Enviar foto con mensaje como caption
-        await telegramService.sendPhoto(screenshot, message);
-        logger.info('✅ Screenshot + mensaje enviados (modo together)');
-      } else {
-        // Solo screenshot (mensaje ya enviado en ASAP)
-        await telegramService.sendPhoto(screenshot);
-        logger.info('✅ Screenshot enviado (modo ASAP)');
-      }
-    } else if (delivery !== 'asap') {
-      // Solo mensaje, no hay chart
-      await telegramService.sendMessage(message);
-      logger.info('✅ Mensaje enviado (sin screenshot)');
-    }
-
+    // 7. RESPUESTA EXITOSA
     const duration = Date.now() - startTime;
-    
+
     res.json({
       success: true,
-      message: 'Alerta enviada exitosamente',
+      message: 'Señal recibida y procesada correctamente',
+      signal_id: insertedSignal.id,
+      screenshot_queued: screenshotQueued,
       duration_ms: duration,
-      delivery_mode: delivery,
-      had_screenshot: !!chart
+      timestamp: new Date().toISOString()
     });
 
   } catch (error) {
@@ -113,32 +170,116 @@ router.post('/webhook', async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message,
-      message: 'Error enviando alerta a Telegram'
+      message: 'Error procesando la señal'
     });
   }
 });
 
 /**
- * GET /webhook
- * Health check del webhook
+ * GET /webhook/:token
+ * Health check del webhook del usuario
  */
-router.get('/webhook', (req, res) => {
-  res.json({
-    status: 'online',
-    message: 'Webhook endpoint está funcionando. Usa POST para enviar alertas.',
-    usage: {
-      method: 'POST',
-      url: '/webhook',
-      query_params: {
-        chart: 'ID del chart (opcional)',
-        ticker: 'Símbolo del ticker (opcional)',
-        delivery: 'asap o together (default: together)',
-        jsonRequest: 'true o false (default: false)'
-      },
-      body: 'Mensaje de la alerta (string o JSON)'
+router.get('/webhook/:token', async (req, res) => {
+  const { token } = req.params;
+
+  try {
+    const userConfig = await validateWebhookToken(token);
+
+    if (!userConfig) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Token inválido o deshabilitado'
+      });
     }
-  });
+
+    res.json({
+      status: 'active',
+      message: 'Tu webhook está funcionando correctamente ✅',
+      user_id: userConfig.user_id,
+      webhook_enabled: userConfig.webhook_enabled,
+      cookies_configured: !!userConfig.tv_sessionid,
+      cookies_valid: userConfig.cookies_valid,
+      signals_quota: userConfig.signals_quota,
+      signals_used: userConfig.signals_used_this_month,
+      screenshot_resolution: userConfig.screenshot_resolution,
+      usage: {
+        method: 'POST',
+        url: `/webhook/${token}`,
+        body_example: {
+          indicator: 'Mi Indicador',
+          ticker: 'BINANCE:BTCUSDT',
+          price: 45000.50,
+          signal_type: 'BUY',
+          direction: 'LONG',
+          chart_id: 'xyz123',
+          message: 'Señal de compra'
+        }
+      }
+    });
+  } catch (error) {
+    logger.error({ error: error.message }, '❌ Error en health check');
+    res.status(500).json({
+      status: 'error',
+      message: 'Error verificando webhook'
+    });
+  }
 });
+
+/**
+ * Extraer ticker del texto (formato EXCHANGE:SYMBOL o SYMBOL)
+ */
+function extractTicker(text) {
+  if (!text) return null;
+
+  // Buscar patrón: EXCHANGE:SYMBOL
+  const exchangeTickerMatch = text.match(/([A-Z]+):([A-Z0-9.]+)/);
+  if (exchangeTickerMatch) {
+    return exchangeTickerMatch[0];
+  }
+
+  // Buscar patrón: Ticker: SYMBOL
+  const tickerMatch = text.match(/Ticker:\s*([A-Z0-9.]+)/i);
+  if (tickerMatch) {
+    return tickerMatch[1];
+  }
+
+  return null;
+}
+
+/**
+ * Extraer datos básicos del mensaje de texto
+ */
+function extractDataFromText(text) {
+  const data = {};
+
+  // Extraer ticker
+  const ticker = extractTicker(text);
+  if (ticker) {
+    data.ticker = ticker;
+    
+    // Separar exchange y symbol
+    if (ticker.includes(':')) {
+      const [exchange, symbol] = ticker.split(':');
+      data.exchange = exchange;
+      data.symbol = symbol;
+    }
+  }
+
+  // Extraer precio
+  const priceMatch = text.match(/(?:Price|Precio|@)\s*[:\$]?\s*([0-9,]+\.?[0-9]*)/i);
+  if (priceMatch) {
+    data.price = parseFloat(priceMatch[1].replace(/,/g, ''));
+  }
+
+  // Detectar dirección
+  if (/\b(LONG|BUY|COMPRA)\b/i.test(text)) {
+    data.direction = 'LONG';
+  } else if (/\b(SHORT|SELL|VENTA)\b/i.test(text)) {
+    data.direction = 'SHORT';
+  }
+
+  return data;
+}
 
 module.exports = router;
 
