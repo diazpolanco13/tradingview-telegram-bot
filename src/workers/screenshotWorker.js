@@ -13,116 +13,128 @@ const { logger } = require('../utils/logger');
 // Importar el servicio de screenshots
 const screenshotService = require('../services/screenshotService');
 
+// Worker instance (se inicializa externamente)
+let workerInstance = null;
+
 /**
- * Crear Worker solo si se proporciona conexión Redis
- * Este módulo es llamado desde redis-optional.js que ya tiene la conexión
+ * Iniciar el Worker de screenshots
+ * @param {Object} redisConnection - Conexión activa de Redis
+ * @returns {Worker} - Worker instance
  */
-function createScreenshotWorker(redisConnection) {
+function startWorker(redisConnection) {
+  if (workerInstance) {
+    logger.warn('⚠️ Worker ya está corriendo');
+    return workerInstance;
+  }
+
   if (!redisConnection) {
-    logger.warn('⚠️ No se puede crear worker sin conexión Redis');
+    logger.error('❌ No se puede iniciar worker sin conexión Redis');
     return null;
   }
 
-  const screenshotWorker = new Worker(
+  logger.info('🔄 Inicializando Screenshot Worker...');
+
+  workerInstance = new Worker(
     'screenshot-processing',
     async (job) => {
-    const { signalId, userId, ticker, chartId, cookies, resolution } = job.data;
+      const { signalId, userId, ticker, chartId, cookies, resolution } = job.data;
 
-    logger.info(`🔄 Procesando screenshot para señal ${signalId} - ${ticker}`);
+      logger.info(`🔄 Procesando screenshot para señal ${signalId} - ${ticker}`);
 
-    try {
-      // 1. Actualizar estado a "processing"
-      await updateScreenshotStatus(signalId, 'processing');
+      try {
+        // 1. Actualizar estado a "processing"
+        await updateScreenshotStatus(signalId, 'processing');
 
-      // 2. ✨ NUEVO: Capturar usando TradingView Share (Alt + S)
-      logger.info('✨ Usando TradingView Share para capturar screenshot...');
-      
-      const shareUrl = await screenshotService.captureWithTradingViewShare(
-        ticker,
-        chartId,
-        cookies
-      );
+        // 2. ✨ NUEVO: Capturar usando TradingView Share (Alt + S)
+        logger.info('✨ Usando TradingView Share para capturar screenshot...');
+        
+        const shareUrl = await screenshotService.captureWithTradingViewShare(
+          ticker,
+          chartId,
+          cookies
+        );
 
-      if (!shareUrl) {
-        throw new Error('No se pudo capturar la share URL de TradingView');
+        if (!shareUrl) {
+          throw new Error('No se pudo capturar la share URL de TradingView');
+        }
+
+        logger.info({ shareUrl }, '✅ TradingView Share URL obtenida');
+
+        // 3. Guardar URL directamente en Supabase (sin upload de imagen)
+        const { data, error } = await supabase
+          .from('trading_signals')
+          .update({ 
+            screenshot_url: shareUrl,
+            screenshot_status: 'completed'
+          })
+          .eq('id', signalId)
+          .select()
+          .single();
+
+        if (error) {
+          throw new Error(`Error actualizando señal: ${error.message}`);
+        }
+
+        logger.info(`✅ Screenshot completado: ${signalId} - ${shareUrl}`);
+
+        return {
+          success: true,
+          signalId,
+          screenshotUrl: shareUrl,
+          method: 'tradingview_share'
+        };
+      } catch (error) {
+        logger.error(`❌ Error procesando screenshot ${signalId}:`, error.message);
+
+        // Actualizar estado a "failed"
+        await updateScreenshotStatus(signalId, 'failed');
+
+        throw error; // BullMQ reintentará según configuración
       }
-
-      logger.info({ shareUrl }, '✅ TradingView Share URL obtenida');
-
-      // 3. Guardar URL directamente en Supabase (sin upload de imagen)
-      const { data, error } = await supabase
-        .from('trading_signals')
-        .update({ 
-          screenshot_url: shareUrl,
-          screenshot_status: 'completed'
-        })
-        .eq('id', signalId)
-        .select()
-        .single();
-
-      if (error) {
-        throw new Error(`Error actualizando señal: ${error.message}`);
+    },
+    {
+      connection: redisConnection,
+      concurrency: 2, // Procesar 2 screenshots simultáneamente
+      limiter: {
+        max: 10, // Máximo 10 jobs
+        duration: 60000 // Por minuto
       }
-
-      logger.info(`✅ Screenshot completado: ${signalId} - ${shareUrl}`);
-
-      return {
-        success: true,
-        signalId,
-        screenshotUrl: shareUrl,
-        method: 'tradingview_share'
-      };
-    } catch (error) {
-      logger.error(`❌ Error procesando screenshot ${signalId}:`, error.message);
-
-      // Actualizar estado a "failed"
-      await updateScreenshotStatus(signalId, 'failed');
-
-      throw error; // BullMQ reintentará según configuración
     }
-  },
-  {
-    connection: redisConnection,
-    concurrency: 2, // Procesar 2 screenshots simultáneamente
-    limiter: {
-      max: 10, // Máximo 10 jobs
-      duration: 60000 // Por minuto
-    }
-  }
-);
+  );
 
   /**
    * Eventos del worker
    */
-  screenshotWorker.on('completed', (job) => {
+  workerInstance.on('completed', (job) => {
     logger.info(`✅ Worker completó job: ${job.id}`);
   });
 
-  screenshotWorker.on('failed', (job, error) => {
+  workerInstance.on('failed', (job, error) => {
     logger.error(`❌ Worker falló job: ${job?.id} - ${error.message}`);
   });
 
-  screenshotWorker.on('error', (error) => {
+  workerInstance.on('error', (error) => {
     logger.error('❌ Error en el worker:', error.message);
   });
 
-  screenshotWorker.on('stalled', (jobId) => {
+  workerInstance.on('stalled', (jobId) => {
     logger.warn(`⚠️ Job estancado detectado: ${jobId}`);
   });
 
   logger.info('✅ Screenshot Worker inicializado correctamente');
   
-  return screenshotWorker;
+  return workerInstance;
 }
 
 /**
  * Graceful shutdown del worker
  */
-async function shutdownWorker(worker) {
-  if (!worker) return;
+async function stopWorker() {
+  if (!workerInstance) return;
   
   try {
-    await worker.close();
+    await workerInstance.close();
+    workerInstance = null;
     logger.info('🛑 Screenshot worker cerrado correctamente');
   } catch (error) {
     logger.error('❌ Error cerrando worker:', error.message);
@@ -130,7 +142,7 @@ async function shutdownWorker(worker) {
 }
 
 module.exports = {
-  createScreenshotWorker,
-  shutdownWorker
+  startWorker,
+  stopWorker,
+  getWorkerInstance: () => workerInstance
 };
-

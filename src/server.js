@@ -220,11 +220,8 @@ async function shutdown() {
     await screenshotService.close();
     
     // Cerrar worker si está disponible
-    const { screenshotWorker } = require('./config/redis-optional');
-    if (screenshotWorker) {
-      const { shutdownWorker } = require('./workers/screenshotWorker');
-      await shutdownWorker(screenshotWorker);
-    }
+    const { stopWorker } = require('./workers/screenshotWorker');
+    await stopWorker();
     
     logger.info('✅ Shutdown complete');
     process.exit(0);
