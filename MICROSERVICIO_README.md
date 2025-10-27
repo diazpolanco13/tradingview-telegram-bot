@@ -1,6 +1,9 @@
 # 🚀 Microservicio de Captura de Señales de TradingView
 
-## ✅ IMPLEMENTACIÓN COMPLETADA
+> **🌐 PRODUCCIÓN:** https://alerts.apidevs-api.com/  
+> **📊 Estado:** [ESTADO_ACTUAL.md](./ESTADO_ACTUAL.md) | **📖 Inicio Rápido:** [INICIO_RAPIDO.md](./INICIO_RAPIDO.md)
+
+## ✅ IMPLEMENTACIÓN COMPLETADA Y DESPLEGADA
 
 ### 📋 Resumen
 
