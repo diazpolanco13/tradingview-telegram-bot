@@ -11,6 +11,28 @@
 
 ---
 
+## 🚀 **Evolución del Proyecto**
+
+Este bot es la **base** para dos arquitecturas más avanzadas:
+
+### 📋 **[Microservicio para APIDevs](ARQUITECTURA_MICROSERVICIO.md)**
+Integración con plataforma Next.js + Supabase para clientes de indicadores
+- Multi-tenant con Supabase
+- Dashboard de señales en Next.js
+- Sistema de colas (BullMQ)
+- Storage en Supabase
+
+### 💡 **[Producto SaaS Independiente](ARQUITECTURA_PRODUCTO_SAAS.md)**
+Plataforma SaaS completa "SignalHub" para traders
+- Planes de suscripción (Free/Pro/Premium)
+- Analytics avanzados
+- White-label B2B
+- Go-to-market strategy completa
+
+👉 **[Ver Comparación Completa en Docs](docs/README.md)**
+
+---
+
 ## 🎯 **¿Qué hace este bot?**
 
 1. **Recibe alertas** de TradingView vía webhook

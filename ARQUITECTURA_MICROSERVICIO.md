@@ -1,44 +1,63 @@
-# 🏗️ Arquitectura: Microservicio de Alertas Trading
+# 🏗️ Arquitectura: Microservicio de Captura de Señales Trading
 
-> **Documento de Arquitectura** - API para Plataforma de Indicadores APIDevs
+> **Documento de Arquitectura** - Microservicio para Plataforma APIDevs
 
 ---
 
 ## 🎯 **Objetivo**
 
-Convertir el bot de Telegram en un **microservicio de API** que:
-- Recibe alertas de TradingView de múltiples usuarios
-- Captura screenshots personalizados por usuario
-- Almacena señales en base de datos estructurada
-- Expone API REST para la plataforma web principal
-- Escala a 1000+ usuarios concurrentes
+Convertir el bot de Telegram en un **microservicio especializado** que:
+- Actúa como puente entre TradingView y la plataforma APIDevs
+- Recibe webhooks de alertas de múltiples usuarios
+- Captura screenshots personalizados con indicadores del usuario
+- Almacena señales en Supabase (base de datos principal)
+- Procesa screenshots de forma asíncrona con colas
+- Se integra nativamente con la plataforma Next.js existente
 
 ---
 
-## 📊 **Modelo de Negocio**
+## 📊 **Modelo de Negocio APIDevs**
 
-### **Estructura:**
+### **Estructura del Ecosistema:**
 ```
-PLATAFORMA PRINCIPAL (APIDevs Web)
-├── Venta de indicadores personalizados
-├── Dashboard de señales (frontend React/Next.js)
-├── Gestión de usuarios y suscripciones
-└── Analytics y estadísticas
+PLATAFORMA APIDEVS (Next.js + Supabase)
+https://apidevs-react.vercel.app
+├── 🛒 Venta de indicadores personalizados (Stripe)
+├── 👤 Autenticación y usuarios (Supabase Auth)
+├── 💳 Gestión de suscripciones (Stripe + Supabase)
+├── 📊 Dashboard de señales (React/Next.js)
+├── 📈 Analytics y estadísticas de trading
+├── 🗄️ Base de datos PostgreSQL (Supabase)
+└── 🖼️ Storage de screenshots (Supabase Storage)
 
-MICROSERVICIO DE ALERTAS (Este proyecto)
-├── API REST para webhooks de TradingView
-├── Captura de screenshots en background
-├── Almacenamiento de señales en DB
-└── Sistema de colas para procesamiento asíncrono
+MICROSERVICIO DE CAPTURA (Node.js + Express)
+Este proyecto - Bot actual convertido
+├── 📡 Webhook endpoint por usuario (/webhook/u/:token)
+├── 📸 Captura de screenshots (Puppeteer)
+├── ⚡ Sistema de colas (BullMQ + Redis)
+├── 💾 Inserción en Supabase DB
+├── 📤 Upload a Supabase Storage
+└── 📱 Notificaciones Telegram (opcional)
 ```
 
-### **Flujo del Usuario:**
-1. Usuario compra indicador en la plataforma
-2. Usuario configura alerta en TradingView con su webhook personalizado
-3. Alertas llegan al microservicio
-4. Microservicio guarda en DB y captura screenshot
-5. Plataforma web consume la API para mostrar señales en dashboard
-6. Usuario ve todo organizado en su cuenta
+### **Flujo Completo del Usuario:**
+1. **Usuario compra indicador** en plataforma APIDevs
+2. **Sistema genera webhook token único** y lo guarda en Supabase
+3. **Usuario copia su webhook URL** del dashboard
+4. **Usuario configura alerta en TradingView** con su webhook personalizado
+5. **Alerta se dispara** → llega al microservicio
+6. **Microservicio procesa:**
+   - Valida token en Supabase
+   - Extrae datos de la señal (ticker, precio, etc)
+   - Inserta en tabla `signals` en Supabase
+   - Encola screenshot en BullMQ
+   - Responde 200 OK a TradingView (< 100ms)
+7. **Worker captura screenshot** (20-25 seg en background):
+   - Puppeteer con cookies del usuario
+   - Upload a Supabase Storage
+   - Actualiza registro en DB con URL
+8. **Dashboard se actualiza automáticamente** (Supabase Realtime)
+9. **Usuario ve señal + screenshot** en su dashboard personalizado
 
 ---
 
@@ -48,160 +67,401 @@ MICROSERVICIO DE ALERTAS (Este proyecto)
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  PLATAFORMA PRINCIPAL (Vercel/Next.js)                  │
-│  - Frontend: Dashboard de señales                        │
-│  - Backend: Autenticación, usuarios, suscripciones     │
-│  - Base de datos: Supabase/PostgreSQL                    │
-└─────────────────────────────────────────────────────────┘
-                    ↓ API Calls
-┌─────────────────────────────────────────────────────────┐
-│  MICROSERVICIO DE ALERTAS (Docker/Kubernetes)           │
+│  PLATAFORMA APIDEVS (Vercel/Next.js)                    │
+│  https://apidevs-react.vercel.app                       │
 │                                                          │
-│  ┌──────────────────────────────────────────┐           │
-│  │  API Gateway (Express)                  │           │
-│  │  - Webhook endpoint: /webhook/u/:token  │           │
-│  │  - Health check: /health                 │           │
-│  │  - Rate limiting por usuario             │           │
-│  │  - Validación rápida                     │           │
-│  │  - Response < 100ms                      │           │
-│  └──────────────────────────────────────────┘           │
-│                    ↓                                     │
-│  ┌──────────────────────────────────────────┐           │
-│  │  Message Processor                       │           │
-│  │  - Parsea mensaje estandarizado          │           │
-│  │  - Extrae ticker automáticamente         │           │
-│  │  - Valida formato requerido              │           │
-│  │  - Guarda en DB inmediatamente            │           │
-│  └──────────────────────────────────────────┘           │
-│                    ↓                                     │
-│  ┌──────────────────────────────────────────┐           │
-│  │  Screenshot Queue (BullMQ + Redis)       │           │
-│  │  - Cola de trabajos de captura           │           │
-│  │  - Prioridad por plan (premium > pro)   │           │
-│  │  - Retry automático en caso de error     │           │
-│  │  - Rate limiting inteligente             │           │
-│  └──────────────────────────────────────────┘           │
-│                    ↓                                     │
-│  ┌──────────────────────────────────────────┐           │
-│  │  Screenshot Workers Pool                 │           │
-│  │  - Workers con Puppeteer                 │           │
-│  │  - Concurrency: 3 por worker              │           │
-│  │  - 10 workers iniciales (30 simultáneos) │           │
-│  │  - Auto-scaling hasta 20 workers         │           │
-│  │  - Usa cookies del usuario específico    │           │
-│  └──────────────────────────────────────────┘           │
-│                    ↓                                     │
-│  ┌──────────────────────────────────────────┐           │
-│  │  Storage Layer                           │           │
-│  │  - Cloudflare R2 o S3                    │           │
-│  │  - CDN para delivery rápido              │           │
-│  │  - URLs públicas con expiración          │           │
-│  └──────────────────────────────────────────┘           │
-└─────────────────────────────────────────────────────────┘
-                    ↓
-┌─────────────────────────────────────────────────────────┐
-│  BASE DE DATOS (PostgreSQL)                              │
+│  Frontend:                                               │
+│  - Dashboard de señales (React)                         │
+│  - Configuración de webhooks                            │
+│  - Analytics y estadísticas                             │
+│  - Gestión de suscripciones                             │
 │                                                          │
-│  Tablas:                                                 │
-│  - users (usuarios con webhook tokens)                  │
-│  - signals (señales recibidas, formato estandarizado)   │
-│  - screenshots (metadatos de imágenes)                   │
-│  - user_config (configuración por usuario)             │
-│  - audit_logs (traza de webhooks recibidos)             │
+│  Backend:                                                │
+│  - Next.js API Routes                                   │
+│  - Supabase Client (directo desde frontend)             │
+│  - Stripe integration                                   │
+│  - Real-time subscriptions (Supabase Realtime)          │
 └─────────────────────────────────────────────────────────┘
+       ↑ Queries directas                ↑ Realtime updates
+       │ Supabase Client               │ (nuevas señales)
+       │                                 │
+┌──────┴─────────────────────────────────┴─────────────────┐
+│  SUPABASE (Fuente Única de Verdad)                       │
+│                                                           │
+│  PostgreSQL Database:                                     │
+│  - auth.users (Supabase Auth integrado)                  │
+│  - signals (señales con screenshots)                     │
+│  - user_config (webhook tokens, cookies TV, config)      │
+│  - subscriptions (planes activos Stripe)                 │
+│                                                           │
+│  Storage (Supabase Storage):                              │
+│  - Bucket: screenshots (imágenes PNG)                    │
+│  - CDN integrado                                         │
+│  - URLs públicas automáticas                             │
+│                                                           │
+│  Realtime:                                                │
+│  - Notificaciones automáticas a dashboard                │
+│  - Sin polling, push-based                               │
+│                                                           │
+│  Row Level Security (RLS):                                │
+│  - Usuario solo ve SUS señales                           │
+│  - Políticas automáticas por auth.uid()                  │
+└───────────────────────────────────────────────────────────┘
+       ↑ INSERT signals              ↑ Validación tokens
+       │ UPDATE screenshots          │ Consultas user_config
+       │                              │
+┌──────┴──────────────────────────────┴──────────────────────┐
+│  MICROSERVICIO DE CAPTURA (Docker/VPS)                     │
+│  Este proyecto convertido a multi-tenant                   │
+│                                                             │
+│  ┌──────────────────────────────────────────┐              │
+│  │  API Gateway (Express)                   │              │
+│  │  - Webhook: POST /webhook/u/:token       │              │
+│  │  - Health check: GET /health             │              │
+│  │  - Rate limiting por usuario             │              │
+│  │  - Supabase Client (para DB/Storage)     │              │
+│  │  - Response < 100ms garantizado          │              │
+│  └──────────────────────────────────────────┘              │
+│                    ↓                                        │
+│  ┌──────────────────────────────────────────┐              │
+│  │  Message Processor                       │              │
+│  │  - Consulta Supabase: validar token     │              │
+│  │  - Parsea mensaje TradingView            │              │
+│  │  - Extrae ticker automáticamente         │              │
+│  │  - INSERT en Supabase.signals            │              │
+│  │  - Status: 'pending'                     │              │
+│  └──────────────────────────────────────────┘              │
+│                    ↓                                        │
+│  ┌──────────────────────────────────────────┐              │
+│  │  Screenshot Queue (BullMQ + Redis)       │              │
+│  │  - Cola de jobs de captura               │              │
+│  │  - Prioridad por plan Stripe             │              │
+│  │  - Retry automático (3 intentos)         │              │
+│  │  - Redis local o Redis Cloud             │              │
+│  └──────────────────────────────────────────┘              │
+│                    ↓                                        │
+│  ┌──────────────────────────────────────────┐              │
+│  │  Screenshot Workers Pool                 │              │
+│  │  - Puppeteer con cookies del usuario     │              │
+│  │  - Concurrency: 2-3 por worker           │              │
+│  │  - 5-10 workers iniciales                │              │
+│  │  - Auto-scale hasta 20 workers           │              │
+│  │  - Upload directo a Supabase Storage     │              │
+│  │  - UPDATE Supabase.signals (status+url)  │              │
+│  └──────────────────────────────────────────┘              │
+└─────────────────────────────────────────────────────────────┘
+                    ↑ Webhooks
+┌─────────────────────────────────────────────────────────────┐
+│  TRADINGVIEW                                                │
+│  Usuario configura alerta con su webhook personalizado:    │
+│  https://bot.apidevs.com/webhook/u/abc123?chart=Q7w5R5x8   │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🔑 **Sistema Multi-Tenant**
+## 🔑 **Sistema Multi-Tenant con Supabase**
 
 ### **Individualización por Usuario:**
 
-Cada usuario tiene:
-- **Webhook token único:** `https://api.apidevs.com/webhook/u/abc123`
-- **Cookies propias de TradingView:** Para capturar SUS charts
-- **Chart ID personalizado:** Donde guarda sus indicadores
-- **Configuración independiente:** Preferencias y límites
+Cada usuario de APIDevs tiene:
+- **Cuenta en Supabase Auth:** Autenticación segura integrada
+- **Webhook token único:** `https://bot.apidevs.com/webhook/u/abc123def456...`
+- **Cookies propias de TradingView:** Almacenadas encriptadas en `user_config`
+- **Chart ID personalizado:** Donde tiene configurados SUS indicadores
+- **Plan de suscripción:** Free/Pro/Premium (validado vía Stripe en Supabase)
+- **Aislamiento de datos:** RLS garantiza que solo ve SUS señales
 
-### **Flujo de una Alert:**
+### **Flujo Detallado de una Alerta:**
 
-1. **Usuario configura en TradingView:**
-   ```
-   Webhook: https://api.apidevs.com/webhook/u/USER_TOKEN?chart=CHART_ID
-   ```
+#### **1. Usuario configura en TradingView:**
+```
+Webhook URL: https://bot.apidevs.com/webhook/u/abc123def456?chart=Q7w5R5x8
+Message: 
+🪙 Ticker: BINANCE:BTCUSDT
+💰 Precio: $67,890.50
+📈 Cambio: +2.5%
+⏰ {{timenow}}
+```
 
-2. **Alert dispara → API recibe:**
-   ```json
-   {
-     "user_token": "abc123",
-     "chart_id": "Q7w5R5x8",
-     "message": "🪙 Ticker: BINANCE:BTCUSDT\n💰 $67,890..."
-   }
-   ```
+#### **2. Alerta se dispara → Microservicio recibe:**
+```http
+POST /webhook/u/abc123def456?chart=Q7w5R5x8
+Content-Type: text/plain
 
-3. **API identifica usuario por token:**
-   - Busca usuario en DB
-   - Valida plan y límites
-   - Verifica cookies válidas
+🪙 Ticker: BINANCE:BTCUSDT
+💰 Precio: $67,890.50
+📈 Cambio: +2.5%
+⏰ 2025-10-27 14:30:00
+```
 
-4. **Procesamiento inmediato (< 100ms):**
-   - Parsea mensaje estandarizado
-   - Guarda en tabla `signals`
-   - Encola screenshot
-   - Responde 200 OK
+#### **3. Microservicio valida token en Supabase (< 50ms):**
+```javascript
+const { data: config, error } = await supabase
+  .from('user_config')
+  .select(`
+    user_id,
+    default_chart_id,
+    tv_sessionid,
+    tv_sessionid_sign,
+    cookies_valid,
+    users!inner(subscription_plan)
+  `)
+  .eq('webhook_token', token)
+  .eq('cookies_valid', true)
+  .single();
 
-5. **Screenshot en background (20-25 seg):**
-   - Worker toma cola
-   - Abre chart con cookies del usuario
-   - Captura screenshot
-   - Sube a S3/R2
-   - Actualiza DB con URL
+// Valida límites según plan
+if (config.users.subscription_plan === 'free' && 
+    monthlySignals >= 50) {
+  return res.status(429).json({ 
+    error: 'Límite alcanzado. Actualiza tu plan.' 
+  });
+}
+```
+
+#### **4. Parseo y extracción de datos (< 20ms):**
+```javascript
+const ticker = extractTicker(message); // "BINANCE:BTCUSDT"
+const price = extractPrice(message);   // 67890.50
+const timestamp = new Date();
+```
+
+#### **5. Inserción en Supabase (< 30ms):**
+```javascript
+const { data: signal } = await supabase
+  .from('signals')
+  .insert({
+    user_id: config.user_id,
+    ticker: ticker,
+    exchange: 'BINANCE',
+    symbol: 'BTCUSDT',
+    price: price,
+    chart_id: chartId,
+    raw_message: message,
+    screenshot_status: 'pending',
+    timestamp: timestamp,
+    result: 'pending'
+  })
+  .select()
+  .single();
+```
+
+#### **6. Encolar screenshot + Responder (< 100ms total):**
+```javascript
+await screenshotQueue.add('capture', {
+  signal_id: signal.id,
+  user_id: config.user_id,
+  chart_id: chartId,
+  ticker: ticker,
+  cookies: {
+    sessionid: config.tv_sessionid,
+    sessionid_sign: config.tv_sessionid_sign
+  }
+});
+
+res.json({
+  success: true,
+  signal_id: signal.id,
+  status: 'processing'
+});
+```
+
+#### **7. Worker procesa screenshot en background (20-25 seg):**
+```javascript
+// Worker toma el job
+screenshotWorker.process(async (job) => {
+  const { signal_id, chart_id, ticker, cookies } = job.data;
+  
+  // Captura con Puppeteer
+  const screenshot = await captureChart(chart_id, ticker, cookies);
+  
+  // Upload a Supabase Storage
+  const { data: upload } = await supabase.storage
+    .from('screenshots')
+    .upload(`${signal_id}.png`, screenshot, {
+      contentType: 'image/png',
+      cacheControl: '3600'
+    });
+  
+  // Obtener URL pública
+  const { data: { publicUrl } } = supabase.storage
+    .from('screenshots')
+    .getPublicUrl(`${signal_id}.png`);
+  
+  // Actualizar señal en DB
+  await supabase
+    .from('signals')
+    .update({
+      screenshot_url: publicUrl,
+      screenshot_status: 'completed'
+    })
+    .eq('id', signal_id);
+});
+```
+
+#### **8. Dashboard se actualiza automáticamente:**
+```javascript
+// En el frontend Next.js
+const signalsSubscription = supabase
+  .channel('signals_changes')
+  .on('postgres_changes', {
+    event: 'INSERT',
+    schema: 'public',
+    table: 'signals',
+    filter: `user_id=eq.${userId}`
+  }, (payload) => {
+    // Nueva señal → Actualizar UI
+    setSignals(prev => [payload.new, ...prev]);
+    showNotification('Nueva señal capturada!');
+  })
+  .subscribe();
+```
 
 ---
 
-## 🗄️ **Modelo de Datos**
+## 🗄️ **Modelo de Datos en Supabase**
 
-### **Tabla: signals**
+### **Tabla: `signals`** (Señales capturadas)
 ```sql
-- id (UUID)
-- user_id (FK a users)
-- indicator (VARCHAR) - "ADX DEF [APIDEVS]"
-- ticker (VARCHAR) - "BINANCE:BTCUSDT"
-- exchange (VARCHAR) - "BINANCE"
-- symbol (VARCHAR) - "BTCUSDT"
-- price (DECIMAL)
-- signal_type (VARCHAR) - "Divergencia Alcista"
-- chart_id (VARCHAR)
-- screenshot_url (TEXT)
-- screenshot_status (ENUM) - pending/processing/completed/failed
-- timestamp (TIMESTAMP)
-- result (ENUM) - pending/win/loss/skip
-- profit_loss (DECIMAL)
-- notes (TEXT)
-- created_at, updated_at
+CREATE TABLE signals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  
+  -- Datos del indicador
+  indicator_name VARCHAR(100),              -- "ADX DEF [APIDEVS]"
+  ticker VARCHAR(50) NOT NULL,              -- "BINANCE:BTCUSDT"
+  exchange VARCHAR(20),                     -- "BINANCE"
+  symbol VARCHAR(20),                       -- "BTCUSDT"
+  
+  -- Datos de precio
+  price DECIMAL(18, 8),                     -- 67890.50
+  signal_type VARCHAR(50),                  -- "Divergencia Alcista"
+  
+  -- Screenshot
+  chart_id VARCHAR(20),                     -- "Q7w5R5x8"
+  screenshot_url TEXT,                      -- URL de Supabase Storage
+  screenshot_status VARCHAR(20) DEFAULT 'pending', -- pending/processing/completed/failed
+  
+  -- Metadata
+  raw_message TEXT,                         -- Mensaje completo de TradingView
+  timestamp TIMESTAMPTZ NOT NULL,           -- Cuándo se disparó la alerta
+  
+  -- Tracking de resultado (usuario edita)
+  result VARCHAR(20) DEFAULT 'pending',     -- pending/win/loss/skip
+  profit_loss DECIMAL(10, 2),               -- +150.00 o -50.00
+  notes TEXT,                               -- Notas del usuario
+  
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Índices para performance
+CREATE INDEX idx_signals_user_id ON signals(user_id);
+CREATE INDEX idx_signals_timestamp ON signals(timestamp DESC);
+CREATE INDEX idx_signals_ticker ON signals(ticker);
+CREATE INDEX idx_signals_result ON signals(result);
+CREATE INDEX idx_signals_status ON signals(screenshot_status);
+
+-- Row Level Security (RLS)
+ALTER TABLE signals ENABLE ROW LEVEL SECURITY;
+
+-- Policy: Usuario solo ve SUS señales
+CREATE POLICY "Users can view own signals"
+  ON signals FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- Policy: Usuario solo edita SUS señales
+CREATE POLICY "Users can update own signals"
+  ON signals FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- Policy: Microservicio puede insertar (service_role key)
+CREATE POLICY "Service can insert signals"
+  ON signals FOR INSERT
+  WITH CHECK (true);
 ```
 
-### **Tabla: users**
+### **Tabla: `user_config`** (Configuración por usuario)
 ```sql
-- id (UUID)
-- webhook_token (VARCHAR UNIQUE)
-- plan (VARCHAR) - free/pro/premium
-- signals_quota (INTEGER)
-- signals_used (INTEGER)
-- quota_reset_at (TIMESTAMP)
-- webhook_enabled (BOOLEAN)
-- webhook_last_used (TIMESTAMP)
+CREATE TABLE user_config (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
+  
+  -- Webhook
+  webhook_token VARCHAR(100) UNIQUE NOT NULL,  -- Token único para webhook
+  webhook_enabled BOOLEAN DEFAULT true,
+  webhook_last_used TIMESTAMPTZ,
+  
+  -- TradingView
+  default_chart_id VARCHAR(20),                -- Chart ID por defecto
+  tv_sessionid TEXT,                           -- Cookie 1 (encriptada)
+  tv_sessionid_sign TEXT,                      -- Cookie 2 (encriptada)
+  cookies_valid BOOLEAN DEFAULT false,
+  cookies_updated_at TIMESTAMPTZ,
+  
+  -- Notificaciones
+  telegram_enabled BOOLEAN DEFAULT false,
+  telegram_chat_id VARCHAR(50),
+  email_enabled BOOLEAN DEFAULT true,
+  
+  -- Configuración
+  preferences JSONB DEFAULT '{}',              -- Preferencias personalizadas
+  
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Índice para búsqueda rápida por token
+CREATE INDEX idx_user_config_webhook_token ON user_config(webhook_token);
+
+-- RLS
+ALTER TABLE user_config ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own config"
+  ON user_config FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own config"
+  ON user_config FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- Microservicio lee config (para validar webhooks)
+CREATE POLICY "Service can read config"
+  ON user_config FOR SELECT
+  USING (true);
 ```
 
-### **Tabla: user_config**
+### **Tabla: `subscriptions`** (Planes de suscripción)
 ```sql
-- user_id (FK)
-- tv_sessionid (ENCRYPTED)
-- tv_sessionid_sign (ENCRYPTED)
-- tv_cookies_valid (BOOLEAN)
-- tv_cookies_updated_at (TIMESTAMP)
-- default_chart_id (VARCHAR)
-- notification_preferences (JSON)
+-- Esta tabla ya existe en tu plataforma APIDevs
+-- Solo añadimos columnas relevantes para señales
+
+ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS 
+  signals_quota INTEGER DEFAULT 50;          -- Límite mensual de señales
+
+ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS 
+  signals_used INTEGER DEFAULT 0;            -- Señales usadas este mes
+
+ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS 
+  quota_reset_at TIMESTAMPTZ DEFAULT DATE_TRUNC('month', NOW()) + INTERVAL '1 month';
+```
+
+### **Storage Bucket: `screenshots`**
+```sql
+-- Crear bucket público en Supabase Storage
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('screenshots', 'screenshots', true);
+
+-- Policy: Solo microservicio puede subir (service_role)
+CREATE POLICY "Service can upload screenshots"
+ON storage.objects FOR INSERT
+WITH CHECK (bucket_id = 'screenshots');
+
+-- Policy: Usuarios autenticados pueden ver screenshots
+CREATE POLICY "Authenticated users can view screenshots"
+ON storage.objects FOR SELECT
+USING (bucket_id = 'screenshots' AND auth.role() = 'authenticated');
 ```
 
 ---
@@ -474,5 +734,141 @@ Actualizar UI automáticamente
 
 ---
 
-**Este microservicio será el corazón de la plataforma de gestión de alertas, convirtiendo el bot actual en una API profesional y escalable.**
+---
+
+## 🎯 **Ventajas de esta Arquitectura para APIDevs**
+
+### **1. Supabase como Fuente Única de Verdad:**
+- ✅ Una sola base de datos para TODO
+- ✅ Sin sincronización entre sistemas
+- ✅ RLS automático = seguridad robusta
+- ✅ Realtime = UX moderna sin esfuerzo
+- ✅ Storage integrado = menos infraestructura
+
+### **2. Microservicio Stateless:**
+- ✅ Solo procesa webhooks
+- ✅ No almacena nada localmente
+- ✅ Fácil de escalar horizontalmente
+- ✅ Reinicio sin pérdida de datos
+
+### **3. Integración Nativa con Next.js:**
+- ✅ Frontend consulta Supabase directamente
+- ✅ Sin necesidad de API intermedia
+- ✅ Queries optimizadas con filtros
+- ✅ TypeScript types generados automáticamente
+
+### **4. Bajo Costo Operacional:**
+```
+Supabase Free Tier:
+- 500MB DB (suficiente para 10,000+ señales)
+- 1GB Storage (2,000+ screenshots)
+- 2GB bandwidth/mes
+→ $0/mes
+
+Supabase Pro (cuando crezcas):
+- 8GB DB
+- 100GB Storage
+- 50GB bandwidth
+→ $25/mes
+
+VPS para Microservicio:
+- 2GB RAM, 1 vCPU
+- Hetzner/DigitalOcean
+→ $5-10/mes
+
+Redis Cloud Free:
+- 30MB (suficiente para colas)
+→ $0/mes
+
+TOTAL: $5-10/mes inicial, $35/mes cuando crezcas
+```
+
+### **5. Tiempo de Desarrollo Reducido:**
+- ✅ MCP Supabase = gestión DB desde Cursor
+- ✅ No necesitas crear APIs CRUD
+- ✅ Auth ya resuelto (Supabase Auth)
+- ✅ Storage ya resuelto (Supabase Storage)
+- ✅ Realtime ya resuelto (Supabase Realtime)
+
+**Estimado:** MVP funcional en 2-3 semanas vs 2-3 meses con arquitectura tradicional.
+
+---
+
+## 📋 **Roadmap de Implementación APIDevs**
+
+### **Fase 1: Fundamentos (Semana 1-2)**
+- [ ] Crear tablas en Supabase (`signals`, `user_config`)
+- [ ] Generar migración SQL
+- [ ] Implementar RLS policies
+- [ ] Crear bucket `screenshots` en Storage
+- [ ] Modificar bot: endpoint `/webhook/u/:token`
+- [ ] Integrar Supabase SDK en microservicio
+- [ ] Test básico: webhook → DB → Storage
+
+### **Fase 2: Dashboard Next.js (Semana 3)**
+- [ ] Página `/dashboard/signals` en Next.js
+- [ ] Query signals del usuario logueado
+- [ ] Mostrar tabla con filtros (fecha, ticker, resultado)
+- [ ] Modal para ver screenshot completo
+- [ ] Editar resultado (win/loss/profit)
+- [ ] Supabase Realtime para nuevas señales
+
+### **Fase 3: Colas y Escalado (Semana 4)**
+- [ ] Instalar BullMQ + Redis
+- [ ] Implementar cola `screenshot-processing`
+- [ ] Workers en background
+- [ ] Monitoreo de cola (dashboard admin)
+- [ ] Auto-retry en fallos
+
+### **Fase 4: Features Avanzadas (Mes 2)**
+- [ ] Analytics: win rate, profit/loss total
+- [ ] Gráficos con Chart.js/Recharts
+- [ ] Exportar a CSV/Excel
+- [ ] Notificaciones Telegram opcionales
+- [ ] Multi-chart support
+
+### **Fase 5: Optimización (Mes 3)**
+- [ ] Cache de queries frecuentes
+- [ ] Índices optimizados
+- [ ] CDN para screenshots
+- [ ] Cleanup automático (screenshots >90 días)
+- [ ] Monitoring con Sentry
+
+---
+
+## 🚀 **Próximos Pasos Inmediatos**
+
+### **1. Preparar Supabase:**
+```bash
+# Conectar con MCP Supabase desde Cursor
+# Ejecutar migraciones SQL (crear tablas)
+# Crear bucket screenshots
+# Configurar RLS policies
+```
+
+### **2. Modificar Bot Actual:**
+```javascript
+// Instalar Supabase SDK
+npm install @supabase/supabase-js
+
+// Cambiar endpoint a /webhook/u/:token
+// Integrar validación de token en Supabase
+// Insertar señales en DB
+// Upload screenshots a Storage
+```
+
+### **3. Crear Dashboard en Next.js:**
+```bash
+# Ya tienes la plataforma, solo agregar página
+# app/dashboard/signals/page.tsx
+# Componentes: SignalsTable, SignalFilters, SignalModal
+```
+
+---
+
+**Este microservicio será el corazón del sistema de captura de señales de APIDevs, integrándose perfectamente con tu plataforma Next.js existente y escalando a miles de usuarios con Supabase.**
+
+**Versión:** 2.0 - Arquitectura Supabase
+**Última actualización:** Octubre 2025  
+**Estado:** Listo para implementación
 
