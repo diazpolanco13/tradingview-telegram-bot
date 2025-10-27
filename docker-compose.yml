@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  telegram-bot:
+    build: .
+    container_name: tradingview-telegram-bot
+    restart: unless-stopped
+    
+    ports:
+      - "5002:5002"
+    
+    environment:
+      - PORT=5002
+      - NODE_ENV=production
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHANNEL_ID=${TELEGRAM_CHANNEL_ID}
+      - TV_SESSIONID=${TV_SESSIONID}
+      - TV_SESSIONID_SIGN=${TV_SESSIONID_SIGN}
+      - CHART_LOAD_WAIT=${CHART_LOAD_WAIT:-10000}
+      - SCREENSHOT_WIDTH=${SCREENSHOT_WIDTH:-1280}
+      - SCREENSHOT_HEIGHT=${SCREENSHOT_HEIGHT:-720}
+    
+    volumes:
+      # Persistir cookies y datos importantes
+      - telegram-bot-data:/app/data
+      # Persistir logs
+      - telegram-bot-logs:/app/logs
+      # Persistir screenshots (opcional)
+      - telegram-bot-screenshots:/app/screenshots
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  telegram-bot-data:
+    name: telegram-bot-data
+  telegram-bot-logs:
+    name: telegram-bot-logs
+  telegram-bot-screenshots:
+    name: telegram-bot-screenshots
+

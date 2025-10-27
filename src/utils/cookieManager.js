@@ -62,17 +62,32 @@ class CookieManager {
 
   /**
    * Carga cookies desde almacenamiento
+   * PRIORIDAD: 1) Variables de entorno, 2) Archivo cookies.json
    * @returns {Object|null} {sessionid, sessionid_sign, timestamp} o null si no existen
    */
   async loadCookies() {
+    // 1️⃣ PRIORIDAD 1: Intentar cargar desde variables de entorno (persistentes en Dokploy)
+    if (process.env.TV_SESSIONID && process.env.TV_SESSIONID_SIGN) {
+      console.log('✅ Cookies cargadas desde variables de entorno');
+      return {
+        sessionid: process.env.TV_SESSIONID,
+        sessionid_sign: process.env.TV_SESSIONID_SIGN,
+        timestamp: new Date().toISOString(),
+        source: 'env'
+      };
+    }
+
+    // 2️⃣ PRIORIDAD 2: Cargar desde archivo (puede perderse en Docker)
     try {
       const data = await fs.readFile(this.cookieFile, 'utf8');
       const cookieData = JSON.parse(data);
 
+      console.log('✅ Cookies cargadas desde archivo:', this.cookieFile);
       return {
         sessionid: cookieData.tv_sessionid,
         sessionid_sign: cookieData.tv_sessionid_sign,
-        timestamp: cookieData.cookies_updated_at
+        timestamp: cookieData.cookies_updated_at,
+        source: 'file'
       };
     } catch (error) {
       if (error.code !== 'ENOENT') {
