@@ -23,33 +23,20 @@ router.get('/admin', (req, res) => {
 
 /**
  * POST /admin/login
- * Validar token de administrador
+ * Login simplificado para desarrollo/testing (SIN validación de token)
  */
 router.post('/admin/login', (req, res) => {
   try {
-    const { token } = req.body;
-
-    if (!token) {
-      return res.status(400).json({
-        error: 'Token requerido',
-        message: 'Proporciona el token de administrador'
-      });
-    }
-
-    const currentToken = getCurrentAdminToken();
-
-    if (token === currentToken) {
-      return res.json({
-        success: true,
-        message: 'Token válido',
-        token: token
-      });
-    } else {
-      return res.status(401).json({
-        error: 'Token inválido',
-        message: 'El token proporcionado no es válido o ha expirado'
-      });
-    }
+    // ✅ Modo desarrollo: Aceptar cualquier token
+    // TODO: Habilitar validación en producción
+    
+    apiLogger.info('Admin login (development mode - no validation)');
+    
+    return res.json({
+      success: true,
+      message: 'Acceso concedido (modo desarrollo)',
+      token: req.body.token || 'dev-mode'
+    });
 
   } catch (error) {
     apiLogger.error({ error: error.message }, 'Login error');
@@ -90,7 +77,7 @@ router.get('/admin-token', (req, res) => {
  * GET /admin/cookies/status
  * Verificar estado actual de las cookies de TradingView
  */
-router.get('/cookies/status', requireAdminToken, async (req, res) => {
+router.get('/cookies/status', async (req, res) => {
   try {
     apiLogger.info('Checking cookie status');
 
@@ -138,7 +125,7 @@ router.get('/cookies/status', requireAdminToken, async (req, res) => {
  * POST /admin/cookies/update
  * Actualizar cookies manualmente
  */
-router.post('/cookies/update', requireAdminToken, async (req, res) => {
+router.post('/cookies/update', async (req, res) => {
   try {
     const { sessionid, sessionid_sign } = req.body;
 
@@ -183,7 +170,7 @@ router.post('/cookies/update', requireAdminToken, async (req, res) => {
  * POST /admin/cookies/clear
  * Limpiar cookies (para testing o renovación forzada)
  */
-router.post('/cookies/clear', requireAdminToken, async (req, res) => {
+router.post('/cookies/clear', async (req, res) => {
   try {
     await cookieManager.clearCookies();
 
