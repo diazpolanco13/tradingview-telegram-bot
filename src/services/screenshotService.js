@@ -367,31 +367,36 @@ class ScreenshotService {
       // 🔍 ESTRATEGIA 2: Copiar al clipboard con Ctrl+A + Ctrl+C
       logger.info('🔍 ESTRATEGIA 2: Intentando copiar desde clipboard...');
       
-      // Seleccionar todo el contenido del input activo
-      await page.keyboard.down('Control');
-      await page.keyboard.press('KeyA');
-      await page.keyboard.up('Control');
-      await page.waitForTimeout(200);
-      
-      // Copiar
-      await page.keyboard.down('Control');
-      await page.keyboard.press('KeyC');
-      await page.keyboard.up('Control');
-      await page.waitForTimeout(500);
-
-      // Intentar leer del clipboard
       try {
-        const clipboardData = await page.evaluate(() => {
-          return navigator.clipboard.readText().catch(() => null);
-        });
+        // Seleccionar todo el contenido del input activo
+        await page.keyboard.down('Control');
+        await page.keyboard.press('KeyA');
+        await page.keyboard.up('Control');
+        await page.waitForTimeout(200);
+        
+        // Copiar
+        await page.keyboard.down('Control');
+        await page.keyboard.press('KeyC');
+        await page.keyboard.up('Control');
+        await page.waitForTimeout(500);
+
+        // Intentar leer del clipboard con timeout
+        const clipboardData = await Promise.race([
+          page.evaluate(() => {
+            return navigator.clipboard.readText().catch(() => null);
+          }),
+          new Promise((resolve) => setTimeout(() => resolve(null), 2000)) // Timeout de 2s
+        ]);
         
         if (clipboardData && (clipboardData.includes('/x/') || clipboardData.includes('tradingview.com'))) {
           shareUrl = clipboardData.startsWith('http') ? clipboardData : `https://www.tradingview.com${clipboardData}`;
           logger.info({ shareUrl }, '✅ URL obtenida del clipboard');
           return shareUrl;
         }
+        
+        logger.warn('⚠️ Clipboard no contiene URL válida');
       } catch (clipError) {
-        logger.warn('⚠️ No se pudo acceder al clipboard:', clipError.message);
+        logger.warn('⚠️ Error accediendo al clipboard:', clipError.message);
       }
 
       // 🔍 ESTRATEGIA 3: Tomar screenshot para debugging
