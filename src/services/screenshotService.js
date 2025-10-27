@@ -94,9 +94,22 @@ class ScreenshotService {
 
       // Construir URL del chart
       const baseUrl = `https://www.tradingview.com/chart/${chartId}/`;
-      const chartUrl = ticker ? `${baseUrl}?symbol=${ticker}` : baseUrl;
+      
+      // Si hay ticker, agregarlo a la URL con formato correcto
+      let chartUrl = baseUrl;
+      if (ticker) {
+        // Si el ticker NO tiene exchange (ej: "BTCUSDT"), no agregar symbol
+        // TradingView usará el símbolo guardado en el chart
+        // Si tiene exchange (ej: "BINANCE:BTCUSDT"), agregarlo
+        if (ticker.includes(':')) {
+          chartUrl = `${baseUrl}?symbol=${ticker}`;
+        } else {
+          // Ticker sin exchange, dejar que TradingView use el del chart
+          logger.info({ ticker }, 'Ticker sin exchange, usando símbolo guardado en chart');
+        }
+      }
 
-      logger.debug({ chartUrl }, 'Navegando a chart...');
+      logger.debug({ chartUrl, ticker }, 'Navegando a chart...');
 
       // Configurar viewport
       const width = parseInt(process.env.SCREENSHOT_WIDTH) || 1280;
