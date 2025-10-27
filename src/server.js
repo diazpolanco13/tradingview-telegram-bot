@@ -152,9 +152,16 @@ async function startServer() {
 
     // Test Supabase connection
     logger.info('🔌 Conectando a Supabase...');
-    const supabaseOk = await testSupabaseConnection();
-    if (!supabaseOk) {
-      throw new Error('No se pudo conectar a Supabase');
+    try {
+      const supabaseOk = await testSupabaseConnection();
+      if (!supabaseOk) {
+        logger.warn('⚠️ No se pudo conectar a Supabase - Verifica las variables de entorno');
+      } else {
+        logger.info('✅ Supabase conectado correctamente');
+      }
+    } catch (error) {
+      logger.warn('⚠️ Error al conectar a Supabase:', error.message);
+      logger.warn('⚠️ El servidor iniciará pero las funcionalidades de Supabase estarán deshabilitadas');
     }
 
     // Test Redis connection (opcional)
