@@ -286,6 +286,18 @@ function extractDataFromText(text) {
     data.price = parseFloat(priceMatch[1].replace(/,/g, ''));
   }
 
+  // ✨ Extraer chart_id de la URL
+  const chartUrlMatch = text.match(/tradingview\.com\/chart\/([a-zA-Z0-9]+)/i);
+  if (chartUrlMatch) {
+    data.chart_id = chartUrlMatch[1];
+  }
+
+  // ✨ Extraer signal_type (tipo de señal)
+  const signalMatch = text.match(/(?:Signal|Señal|Signal Type|Tipo)\s*[:\-]?\s*([^\n]+)/i);
+  if (signalMatch) {
+    data.signal_type = signalMatch[1].trim();
+  }
+
   // Detectar dirección
   if (/\b(LONG|BUY|COMPRA)\b/i.test(text)) {
     data.direction = 'LONG';
