@@ -327,6 +327,25 @@ class ScreenshotService {
       logger.info({ waitTime }, '⏳ Esperando carga completa del chart...');
       await page.waitForTimeout(waitTime);
 
+      // 🔍 DEBUG: Verificar cookies aplicadas
+      const appliedCookies = await page.cookies();
+      const sessionCookies = appliedCookies.filter(c => c.name.includes('session'));
+      logger.info({ 
+        cookieCount: appliedCookies.length,
+        sessionCookies: sessionCookies.map(c => ({ name: c.name, valueLength: c.value.length }))
+      }, '🍪 Cookies aplicadas en la página');
+
+      // 🔍 DEBUG: Screenshot ANTES de Alt+S
+      try {
+        const beforeScreenshot = await page.screenshot({ type: 'png' });
+        const fs = require('fs').promises;
+        const beforePath = `/tmp/tradingview-before-alts-${Date.now()}.png`;
+        await fs.writeFile(beforePath, beforeScreenshot);
+        logger.info({ beforePath }, '📸 Screenshot ANTES de Alt+S guardado');
+      } catch (err) {
+        logger.warn('⚠️ No se pudo guardar screenshot ANTES:', err.message);
+      }
+
       // Cerrar cualquier modal que pueda interferir
       logger.info('🔄 Cerrando modales previos...');
       await page.keyboard.press('Escape');
