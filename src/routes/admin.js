@@ -22,6 +22,45 @@ router.get('/admin', (req, res) => {
 });
 
 /**
+ * POST /admin/login
+ * Validar token de administrador
+ */
+router.post('/admin/login', (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        error: 'Token requerido',
+        message: 'Proporciona el token de administrador'
+      });
+    }
+
+    const currentToken = getCurrentAdminToken();
+
+    if (token === currentToken) {
+      return res.json({
+        success: true,
+        message: 'Token válido',
+        token: token
+      });
+    } else {
+      return res.status(401).json({
+        error: 'Token inválido',
+        message: 'El token proporcionado no es válido o ha expirado'
+      });
+    }
+
+  } catch (error) {
+    apiLogger.error({ error: error.message }, 'Login error');
+    res.status(500).json({
+      error: 'Error en login',
+      message: error.message
+    });
+  }
+});
+
+/**
  * GET /admin-token
  * Obtener token admin (SOLO LOCALHOST)
  */
