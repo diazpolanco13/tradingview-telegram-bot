@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microservicio V2 - Testing Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-5xl font-bold mb-2 text-cyan-400">🎯 Microservicio Trading V2</h1>
+            <p class="text-gray-400 text-lg">Panel de Testing y Desarrollo - Multi-tenant System</p>
+            <div class="mt-4 flex gap-4">
+                <span class="bg-green-600 px-3 py-1 rounded text-sm font-semibold">✅ Supabase</span>
+                <span class="bg-blue-600 px-3 py-1 rounded text-sm font-semibold">✅ BullMQ</span>
+                <span class="bg-purple-600 px-3 py-1 rounded text-sm font-semibold">✅ Redis</span>
+                <span class="bg-yellow-600 px-3 py-1 rounded text-sm font-semibold">✅ Puppeteer</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- LEFT COLUMN -->
+            <div class="space-y-6">
+                
+                <!-- System Health -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-red-400">❤️ System Health</h2>
+                    <button onclick="checkHealth()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded mb-4 font-semibold">
+                        🔍 Check Health
+                    </button>
+                    <pre id="health-status" class="bg-gray-900 p-4 rounded text-sm overflow-auto max-h-96">Haz click en "Check Health"</pre>
+                </div>
+
+                <!-- Queue Stats -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-orange-400">📊 BullMQ Queue Stats</h2>
+                    <button onclick="checkQueueStats()" class="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded mb-4 font-semibold">
+                        📈 Ver Estadísticas
+                    </button>
+                    <pre id="queue-stats" class="bg-gray-900 p-4 rounded text-sm overflow-auto">Click para ver stats...</pre>
+                </div>
+
+                <!-- Test Webhook V2 -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-purple-400">📡 Test Webhook V2 (Multi-tenant)</h2>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-2">Webhook Token (del usuario):</label>
+                        <input type="text" id="webhook-token" 
+                            class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white text-sm"
+                            placeholder="Pega aquí el webhook token del usuario">
+                        <p class="text-xs text-gray-400 mt-1">Consulta trading_signals_config.webhook_token en Supabase</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-2">Mensaje JSON:</label>
+                        <textarea id="webhook-message" 
+                            class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white h-48 font-mono text-xs"
+                            placeholder="JSON del mensaje...">{
+  "indicator": "Mi Indicador de Prueba",
+  "ticker": "BINANCE:BTCUSDT",
+  "exchange": "BINANCE",
+  "symbol": "BTCUSDT",
+  "price": 45123.50,
+  "signal_type": "BUY_SIGNAL",
+  "direction": "LONG",
+  "chart_id": "",
+  "timestamp": "2025-10-27T10:30:00Z",
+  "message": "Señal de compra detectada 🚀"
+}</textarea>
+                    </div>
+
+                    <button onclick="testWebhookV2()" class="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded font-semibold">
+                        📤 Enviar al Webhook V2
+                    </button>
+
+                    <pre id="webhook-v2-result" class="bg-gray-900 p-4 rounded text-sm overflow-auto mt-4 hidden"></pre>
+                </div>
+
+                <!-- Legacy Webhook Test -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-blue-400">📨 Test Webhook V1 (Legacy)</h2>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-2">Mensaje:</label>
+                        <textarea id="test-message-v1" 
+                            class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white h-24"
+                            placeholder="Mensaje de prueba...">🧪 Mensaje de prueba V1 desde el panel admin</textarea>
+                    </div>
+
+                    <button onclick="testWebhookV1()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded font-semibold">
+                        📤 Enviar V1 (Telegram)
+                    </button>
+
+                    <pre id="webhook-v1-result" class="bg-gray-900 p-4 rounded text-sm overflow-auto mt-4 hidden"></pre>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="space-y-6">
+                
+                <!-- Supabase Connection Test -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-green-400">🗄️ Supabase Connection</h2>
+                    <button onclick="testSupabase()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded mb-4 font-semibold">
+                        🔌 Test Connection
+                    </button>
+                    <pre id="supabase-test" class="bg-gray-900 p-4 rounded text-sm overflow-auto">Click para probar...</pre>
+                </div>
+
+                <!-- Get User Config -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-cyan-400">👤 User Config (Supabase)</h2>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-2">User ID (UUID):</label>
+                        <input type="text" id="user-id" 
+                            class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white text-sm"
+                            placeholder="UUID del usuario...">
+                    </div>
+
+                    <button onclick="getUserConfig()" class="bg-cyan-600 hover:bg-cyan-700 px-4 py-2 rounded font-semibold">
+                        🔍 Get Config
+                    </button>
+
+                    <pre id="user-config-result" class="bg-gray-900 p-4 rounded text-sm overflow-auto mt-4 max-h-96 hidden"></pre>
+                </div>
+
+                <!-- List Recent Signals -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-yellow-400">📊 Recent Signals</h2>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-2">Limit:</label>
+                        <input type="number" id="signals-limit" value="10"
+                            class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white">
+                    </div>
+
+                    <button onclick="getRecentSignals()" class="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded font-semibold">
+                        📋 Get Recent Signals
+                    </button>
+
+                    <pre id="signals-result" class="bg-gray-900 p-4 rounded text-sm overflow-auto mt-4 max-h-96 hidden"></pre>
+                </div>
+
+                <!-- Encryption Test -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-pink-400">🔐 Test Encryption</h2>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium mb-2">Texto a encriptar:</label>
+                        <input type="text" id="text-to-encrypt" 
+                            class="w-full bg-gray-700 border border-gray-600 rounded px-4 py-2 text-white"
+                            placeholder="Texto de prueba..."
+                            value="my_sessionid_cookie_value">
+                    </div>
+
+                    <button onclick="testEncryption()" class="bg-pink-600 hover:bg-pink-700 px-4 py-2 rounded font-semibold">
+                        🔒 Encrypt & Decrypt
+                    </button>
+
+                    <pre id="encryption-result" class="bg-gray-900 p-4 rounded text-sm overflow-auto mt-4 hidden"></pre>
+                </div>
+
+                <!-- Cookie Status (Legacy V1) -->
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-green-400">🍪 Cookie Status (V1 Legacy)</h2>
+                    <button onclick="checkCookies()" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded mb-4 font-semibold">
+                        🔄 Verificar Cookies
+                    </button>
+                    <pre id="cookie-status" class="bg-gray-900 p-4 rounded text-sm overflow-auto">Haz click en "Verificar Cookies"</pre>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Documentation Section -->
+        <div class="mt-8 bg-gray-800 rounded-lg p-6">
+            <h2 class="text-3xl font-bold mb-4 text-cyan-400">📚 API Endpoints Documentation</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                    <h3 class="font-bold text-yellow-400 mb-2">🔹 Webhook V2 (Multi-tenant)</h3>
+                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">POST /webhook/:token</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block">GET /webhook/:token</code>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-yellow-400 mb-2">🔹 Dashboard API</h3>
+                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">GET /api/signals</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">GET /api/signals/:id</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">PUT /api/signals/:id</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">DELETE /api/signals/:id</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">GET /api/config</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">PUT /api/config</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block">GET /api/stats</code>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-yellow-400 mb-2">🔹 System</h3>
+                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">GET /health</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block">GET /</code>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-yellow-400 mb-2">🔹 Legacy V1</h3>
+                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">POST /v1/webhook</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block">GET /cookies/status</code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // SYSTEM HEALTH
+        // ========================================
+        async function checkHealth() {
+            const statusEl = document.getElementById('health-status');
+            statusEl.textContent = 'Verificando servicios...';
+
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                statusEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                statusEl.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // ========================================
+        // QUEUE STATS
+        // ========================================
+        async function checkQueueStats() {
+            const statusEl = document.getElementById('queue-stats');
+            statusEl.textContent = 'Obteniendo estadísticas...';
+
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                
+                if (data.services && data.services.queue) {
+                    statusEl.textContent = JSON.stringify(data.services.queue, null, 2);
+                } else {
+                    statusEl.textContent = 'No se encontraron stats de la cola';
+                }
+            } catch (error) {
+                statusEl.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // ========================================
+        // WEBHOOK V2 TEST
+        // ========================================
+        async function testWebhookV2() {
+            const token = document.getElementById('webhook-token').value.trim();
+            const messageText = document.getElementById('webhook-message').value;
+            const resultEl = document.getElementById('webhook-v2-result');
+
+            if (!token) {
+                alert('⚠️ Debes proporcionar un webhook token');
+                return;
+            }
+
+            resultEl.classList.remove('hidden');
+            resultEl.textContent = 'Enviando al webhook...';
+
+            try {
+                let message;
+                try {
+                    message = JSON.parse(messageText);
+                } catch {
+                    message = messageText;
+                }
+
+                const response = await fetch(`/webhook/${token}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(message)
+                });
+
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultEl.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // ========================================
+        // WEBHOOK V1 TEST (Legacy)
+        // ========================================
+        async function testWebhookV1() {
+            const message = document.getElementById('test-message-v1').value;
+            const resultEl = document.getElementById('webhook-v1-result');
+
+            resultEl.classList.remove('hidden');
+            resultEl.textContent = 'Enviando a Telegram...';
+
+            try {
+                const response = await fetch('/v1/webhook', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain'
+                    },
+                    body: message
+                });
+
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultEl.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // ========================================
+        // SUPABASE TEST
+        // ========================================
+        async function testSupabase() {
+            const resultEl = document.getElementById('supabase-test');
+            resultEl.textContent = 'Probando conexión a Supabase...';
+
+            try {
+                const response = await fetch('/test/supabase');
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultEl.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // ========================================
+        // GET USER CONFIG
+        // ========================================
+        async function getUserConfig() {
+            const userId = document.getElementById('user-id').value.trim();
+            const resultEl = document.getElementById('user-config-result');
+
+            if (!userId) {
+                alert('⚠️ Debes proporcionar un User ID');
+                return;
+            }
+
+            resultEl.classList.remove('hidden');
+            resultEl.textContent = 'Obteniendo configuración...';
+
+            try {
+                const response = await fetch(`/test/user-config/${userId}`);
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultEl.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // ========================================
+        // GET RECENT SIGNALS
+        // ========================================
+        async function getRecentSignals() {
+            const limit = document.getElementById('signals-limit').value;
+            const resultEl = document.getElementById('signals-result');
+
+            resultEl.classList.remove('hidden');
+            resultEl.textContent = 'Obteniendo señales...';
+
+            try {
+                const response = await fetch(`/test/signals?limit=${limit}`);
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultEl.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // ========================================
+        // TEST ENCRYPTION
+        // ========================================
+        async function testEncryption() {
+            const text = document.getElementById('text-to-encrypt').value;
+            const resultEl = document.getElementById('encryption-result');
+
+            resultEl.classList.remove('hidden');
+            resultEl.textContent = 'Encriptando y desencriptando...';
+
+            try {
+                const response = await fetch('/test/encryption', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text })
+                });
+
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                resultEl.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // ========================================
+        // COOKIE STATUS (V1 Legacy)
+        // ========================================
+        async function checkCookies() {
+            const statusEl = document.getElementById('cookie-status');
+            statusEl.textContent = 'Verificando cookies V1...';
+
+            try {
+                const response = await fetch('/cookies/status');
+                const data = await response.json();
+                statusEl.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                statusEl.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // Auto-check health on load
+        window.onload = () => {
+            checkHealth();
+        };
+    </script>
+</body>
+</html>
+

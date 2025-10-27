@@ -158,6 +158,110 @@ class ScreenshotService {
   }
 
   /**
+   * Capturar screenshot con cookies específicas del usuario
+   * NUEVO: Para sistema multi-tenant
+   * @param {string} ticker - Ticker (símbolo)
+   * @param {string} chartId - ID del chart
+   * @param {Object} userCookies - Cookies del usuario {sessionid, sessionid_sign}
+   * @param {string} resolution - Resolución (720p, 1080p, 4k)
+   * @returns {Promise<Buffer>} Screenshot como buffer
+   */
+  async captureWithUserCookies(ticker, chartId, userCookies, resolution = '1080p') {
+    if (!this.browser) {
+      await this.init();
+    }
+
+    const page = await this.browser.newPage();
+
+    try {
+      logger.info({ ticker, chartId, resolution }, '📸 Capturando screenshot con cookies de usuario...');
+
+      // Validar cookies
+      if (!userCookies || !userCookies.sessionid || !userCookies.sessionid_sign) {
+        throw new Error('Cookies de usuario inválidas o no configuradas');
+      }
+
+      // Inyectar cookies del usuario
+      await page.setCookie(
+        {
+          name: 'sessionid',
+          value: userCookies.sessionid,
+          domain: '.tradingview.com',
+          path: '/',
+          httpOnly: true,
+          secure: true
+        },
+        {
+          name: 'sessionid_sign',
+          value: userCookies.sessionid_sign,
+          domain: '.tradingview.com',
+          path: '/',
+          httpOnly: true,
+          secure: true
+        }
+      );
+
+      // Construir URL del chart
+      const baseUrl = `https://www.tradingview.com/chart/${chartId}/`;
+      let chartUrl = baseUrl;
+      
+      if (ticker && ticker.includes(':')) {
+        chartUrl = `${baseUrl}?symbol=${ticker}`;
+      }
+
+      logger.debug({ chartUrl }, 'Navegando a chart...');
+
+      // Configurar viewport según resolución
+      const viewportConfig = {
+        '720p': { width: 1280, height: 720 },
+        '1080p': { width: 1920, height: 1080 },
+        '4k': { width: 3840, height: 2160 }
+      };
+
+      const { width, height } = viewportConfig[resolution] || viewportConfig['1080p'];
+      await page.setViewport({ width, height });
+
+      // Navegar al chart
+      await page.goto(chartUrl, {
+        waitUntil: 'networkidle2',
+        timeout: parseInt(process.env.SCREENSHOT_TIMEOUT) || 30000
+      });
+
+      // Esperar carga del chart
+      const waitTime = parseInt(process.env.CHART_LOAD_WAIT) || 10000;
+      await page.waitForTimeout(waitTime);
+
+      // Cerrar modales si existen
+      try {
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(1000);
+      } catch (err) {
+        // Ignorar
+      }
+
+      // Capturar screenshot
+      const screenshot = await page.screenshot({
+        type: 'png',
+        fullPage: false
+      });
+
+      logger.info({ size: screenshot.length, resolution }, '✅ Screenshot capturado exitosamente');
+
+      return screenshot;
+
+    } catch (error) {
+      logger.error({ 
+        error: error.message, 
+        ticker, 
+        chartId 
+      }, '❌ Error capturando screenshot con cookies de usuario');
+      throw error;
+    } finally {
+      await page.close();
+    }
+  }
+
+  /**
    * Cerrar navegador
    */
   async close() {
