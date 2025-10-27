@@ -10,9 +10,24 @@ const { logger } = require('../utils/logger');
  * Configuración de Redis según el entorno
  */
 function getRedisConfig() {
-  // Si existe REDIS_URL (Railway, Heroku, etc)
+  // Si existe REDIS_URL, parsearlo y agregar opciones de BullMQ
   if (process.env.REDIS_URL) {
-    return process.env.REDIS_URL;
+    // Parsear URL para extraer componentes
+    const url = new URL(process.env.REDIS_URL.replace('redis://', 'http://'));
+    
+    return {
+      host: url.hostname,
+      port: parseInt(url.port) || 6379,
+      password: url.password || undefined,
+      username: url.username !== 'default' ? url.username : undefined,
+      maxRetriesPerRequest: null, // ✅ REQUERIDO por BullMQ
+      enableReadyCheck: false,
+      retryStrategy(times) {
+        const delay = Math.min(times * 50, 2000);
+        logger.warn(`⚠️ Reintentando conexión a Redis (intento ${times})...`);
+        return delay;
+      }
+    };
   }
 
   // Configuración manual
