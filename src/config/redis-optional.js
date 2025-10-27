@@ -2,40 +2,19 @@
  * Optional Redis Configuration
  * Redis is optional in development but required in production
  * 
- * IMPORTANTE: No se conecta a Redis hasta que se use
+ * IMPORTANTE: Se basa en variables de entorno para determinar disponibilidad
  */
 
 const { logger } = require('../utils/logger');
 
-// Verificar si Redis está disponible SIN conectar
-let isRedisAvailable = false;
-const net = require('net');
+// Verificar si Redis está configurado (basado en variables de entorno)
+const isRedisAvailable = !!(process.env.REDIS_HOST || process.env.REDIS_URL);
 
-function checkRedisSync() {
-  try {
-    const socket = net.createConnection({ 
-      host: process.env.REDIS_HOST || 'localhost', 
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      timeout: 1000
-    });
-    socket.on('connect', () => {
-      isRedisAvailable = true;
-      socket.destroy();
-    });
-    socket.on('error', () => {
-      isRedisAvailable = false;
-      socket.destroy();
-    });
-    socket.on('timeout', () => {
-      isRedisAvailable = false;
-      socket.destroy();
-    });
-  } catch (error) {
-    isRedisAvailable = false;
-  }
+if (!isRedisAvailable) {
+  logger.warn('⚠️ Redis no disponible - Screenshots deshabilitados (modo desarrollo)');
 }
 
-// Solo intentar cargar Redis si está disponible
+// Cargar módulos de Redis solo si está configurado
 let redisConnection = null;
 let testRedisConnection = null;
 let screenshotQueue = null;
@@ -43,9 +22,31 @@ let addScreenshotJob = null;
 let getQueueStats = null;
 let screenshotWorker = null;
 
-// Si Redis no está disponible, retornar módulo vacío
-if (!isRedisAvailable) {
-  logger.warn('⚠️ Redis no disponible - Screenshots deshabilitados (modo desarrollo)');
+if (isRedisAvailable) {
+  try {
+    logger.info('🔌 Redis detectado - Cargando BullMQ...');
+    
+    // Importar configuración de Redis
+    const redisConfig = require('./redis');
+    redisConnection = redisConfig.redisConnection;
+    testRedisConnection = redisConfig.testRedisConnection;
+    
+    // Importar Queue
+    const queueConfig = require('../queues/screenshotQueue');
+    screenshotQueue = queueConfig.screenshotQueue;
+    addScreenshotJob = queueConfig.addScreenshotJob;
+    getQueueStats = queueConfig.getQueueStats;
+    
+    // Importar Worker
+    screenshotWorker = require('../workers/screenshotWorker');
+    
+    logger.info('✅ BullMQ cargado correctamente');
+  } catch (error) {
+    logger.error('❌ Error cargando BullMQ:', error.message);
+    logger.warn('⚠️ Screenshots deshabilitados');
+  }
+} else {
+  logger.warn('⚠️ Redis no configurado - Modo desarrollo sin screenshots');
 }
 
 module.exports = {
@@ -55,6 +56,5 @@ module.exports = {
   addScreenshotJob,
   getQueueStats,
   screenshotWorker,
-  isRedisAvailable: false // Siempre false en desarrollo sin Redis
+  isRedisAvailable // Export actual status
 };
-
