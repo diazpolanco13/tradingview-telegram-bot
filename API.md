@@ -325,14 +325,17 @@ Authorization: Bearer {jwt_token}
 Content-Type: application/json
 
 {
-  "default_chart_id": "NewChartID",
-  "screenshot_resolution": "4k",
+  "default_chart_id": "Q7w5R5x8",
+  "screenshot_resolution": "1080p",
   "tv_sessionid_plain": "rawzln0xokhx1k81oix8vhof6gkjxko6",
-  "tv_sessionid_sign_plain": "v3:5NvaK1e30zMd0x3ZsfXfdd2qjN/QU+RvylXt92x6Mys="
+  "tv_sessionid_sign_plain": "v3:5NvaK1e30zMd0x3ZsfXfdd2qjN/QU+RvylXt92x6Mys=",
+  "telegram_enabled": true,
+  "telegram_bot_token": "8257215317:AAGvfmsjEx_IP4Oh-lb-ETYfyCs4W8ibmsE",
+  "telegram_chat_id": "123456789"
 }
 ```
 
-**Nota:** Las cookies se encriptan automáticamente antes de guardar.
+**Nota:** Las cookies TradingView se encriptan automáticamente antes de guardar.
 
 #### **Campos opcionales:**
 
@@ -344,6 +347,9 @@ Content-Type: application/json
 | `tv_sessionid_plain` | string | Cookie sessionid (se encripta) |
 | `tv_sessionid_sign_plain` | string | Cookie sessionid_sign (se encripta) |
 | `preferred_timezone` | string | Timezone (ej: America/New_York) |
+| `telegram_enabled` | boolean | **Habilitar notificaciones Telegram** |
+| `telegram_bot_token` | string | **Token del bot (de @BotFather)** |
+| `telegram_chat_id` | string | **Chat ID o Canal ID** |
 
 #### **Response:**
 
@@ -593,7 +599,7 @@ export default function AlertsPage() {
 
 ---
 
-### **2. Configuración de Webhook:**
+### **2. Configuración Completa (con Telegram):**
 
 ```typescript
 // app/dashboard/config/page.tsx
@@ -609,6 +615,12 @@ export default function ConfigPage() {
   const [sessionid, setSessionid] = useState('')
   const [sessionidSign, setSessionidSign] = useState('')
   const [chartId, setChartId] = useState('')
+  
+  // Telegram
+  const [telegramEnabled, setTelegramEnabled] = useState(false)
+  const [telegramToken, setTelegramToken] = useState('')
+  const [telegramChatId, setTelegramChatId] = useState('')
+  
   const supabase = createClientComponentClient()
 
   useEffect(() => {
@@ -626,11 +638,31 @@ export default function ConfigPage() {
     if (result.success) {
       setConfig(result.data)
       setChartId(result.data.default_chart_id || '')
+      setTelegramEnabled(result.data.telegram_enabled || false)
+      setTelegramChatId(result.data.telegram_chat_id || '')
+      // Token no se devuelve por seguridad
     }
   }
 
   async function saveConfig() {
     const { data: { session } } = await supabase.auth.getSession()
+    
+    const payload = {
+      default_chart_id: chartId,
+      telegram_enabled: telegramEnabled
+    }
+    
+    // Solo enviar cookies si están llenas
+    if (sessionid && sessionidSign) {
+      payload.tv_sessionid_plain = sessionid
+      payload.tv_sessionid_sign_plain = sessionidSign
+    }
+    
+    // Solo enviar Telegram si está habilitado y hay datos
+    if (telegramEnabled && telegramToken && telegramChatId) {
+      payload.telegram_bot_token = telegramToken
+      payload.telegram_chat_id = telegramChatId
+    }
     
     await fetch(`${MICROSERVICE_URL}/api/config`, {
       method: 'PUT',
@@ -638,11 +670,7 @@ export default function ConfigPage() {
         'Authorization': `Bearer ${session?.access_token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        default_chart_id: chartId,
-        tv_sessionid_plain: sessionid,
-        tv_sessionid_sign_plain: sessionidSign
-      })
+      body: JSON.stringify(payload)
     })
     
     alert('✅ Configuración guardada')
@@ -654,66 +682,229 @@ export default function ConfigPage() {
     : 'Cargando...'
 
   return (
-    <div className="space-y-6">
-      <h1>⚙️ Configuración</h1>
+    <div className="space-y-8 max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl font-bold">⚙️ Configuración</h1>
       
       {/* Webhook URL */}
-      <section>
-        <h2>🔗 Tu Webhook Personalizado</h2>
-        <div className="bg-gray-900 p-4 rounded font-mono text-sm">
+      <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h2 className="text-xl font-bold mb-4">🔗 Tu Webhook Personalizado</h2>
+        <div className="bg-gray-900 p-4 rounded font-mono text-sm break-all text-green-400">
           {webhookUrl}
         </div>
-        <button onClick={() => navigator.clipboard.writeText(webhookUrl)}>
+        <button 
+          onClick={() => {
+            navigator.clipboard.writeText(webhookUrl)
+            alert('✅ Webhook copiado al portapapeles')
+          }}
+          className="mt-3 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
           📋 Copiar Webhook
         </button>
+        <p className="text-sm text-gray-500 mt-3">
+          Usa esta URL en tus alertas de TradingView
+        </p>
       </section>
 
-      {/* Cookies */}
-      <section>
-        <h2>🍪 Cookies de TradingView</h2>
-        <p className="text-sm text-gray-500 mb-2">
-          Necesarias para capturar screenshots con TUS indicadores
+      {/* Cookies TradingView */}
+      <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h2 className="text-xl font-bold mb-4">🍪 Cookies de TradingView</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          Necesarias para capturar screenshots con TUS indicadores personalizados
         </p>
-        <input
-          type="text"
-          placeholder="sessionid"
-          value={sessionid}
-          onChange={e => setSessionid(e.target.value)}
-          className="w-full p-2 border rounded mb-2"
-        />
-        <input
-          type="text"
-          placeholder="sessionid_sign"
-          value={sessionidSign}
-          onChange={e => setSessionidSign(e.target.value)}
-          className="w-full p-2 border rounded"
-        />
-        <div className="mt-2">
-          Estado: {config?.cookies_valid ? '✅ Válidas' : '❌ No configuradas'}
+        
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium mb-1">sessionid:</label>
+            <input
+              type="password"
+              placeholder="sessionid (32 caracteres)"
+              value={sessionid}
+              onChange={e => setSessionid(e.target.value)}
+              className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">sessionid_sign:</label>
+            <input
+              type="password"
+              placeholder="sessionid_sign (47 caracteres)"
+              value={sessionidSign}
+              onChange={e => setSessionidSign(e.target.value)}
+              className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+            />
+          </div>
         </div>
+        
+        <div className="mt-3 flex items-center gap-2">
+          <span className="text-sm">Estado:</span>
+          {config?.cookies_valid ? (
+            <span className="text-green-600 font-semibold">✅ Cookies válidas</span>
+          ) : (
+            <span className="text-red-600 font-semibold">❌ No configuradas</span>
+          )}
+        </div>
+        
+        <details className="mt-4">
+          <summary className="cursor-pointer text-sm text-blue-600 hover:text-blue-700">
+            📖 ¿Cómo obtener las cookies?
+          </summary>
+          <div className="mt-2 text-sm text-gray-600 space-y-2 pl-4">
+            <p>1. Abre TradingView y loguéate</p>
+            <p>2. Presiona <kbd>F12</kbd> (DevTools)</p>
+            <p>3. Ve a <strong>Application</strong> → <strong>Cookies</strong> → <code>tradingview.com</code></p>
+            <p>4. Copia <code>sessionid</code> y <code>sessionid_sign</code></p>
+            <p>5. Pega aquí y guarda</p>
+          </div>
+        </details>
       </section>
 
       {/* Chart ID */}
-      <section>
-        <h2>📊 Chart ID</h2>
+      <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h2 className="text-xl font-bold mb-4">📊 Chart ID</h2>
         <input
           type="text"
           placeholder="Q7w5R5x8"
           value={chartId}
           onChange={e => setChartId(e.target.value)}
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 font-mono"
         />
         <p className="text-sm text-gray-500 mt-2">
-          ID de tu chart con TUS indicadores configurados
+          ID de tu chart en TradingView con TUS indicadores configurados
         </p>
+        <details className="mt-3">
+          <summary className="cursor-pointer text-sm text-blue-600 hover:text-blue-700">
+            📖 ¿Cómo obtener mi Chart ID?
+          </summary>
+          <div className="mt-2 text-sm text-gray-600 space-y-2 pl-4">
+            <p>1. Abre tu chart en TradingView</p>
+            <p>2. Agrega tus indicadores favoritos</p>
+            <p>3. Click en <strong>Share</strong> (compartir)</p>
+            <p>4. Copia el ID de la URL: <code>https://www.tradingview.com/chart/Q7w5R5x8/</code></p>
+            <p>5. El ID es: <code>Q7w5R5x8</code></p>
+          </div>
+        </details>
+      </section>
+
+      {/* Telegram Configuration */}
+      <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h2 className="text-xl font-bold mb-4">📱 Notificaciones a Telegram (Opcional)</h2>
+        
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded mb-4">
+          <p className="text-sm text-blue-800 dark:text-blue-200">
+            💡 <strong>Ventaja:</strong> Recibe alertas en tu móvil, reloj o tablet. 
+            Telegram es multi-dispositivo y funciona donde estés.
+          </p>
+        </div>
+        
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="telegram-enabled"
+              checked={telegramEnabled}
+              onChange={e => setTelegramEnabled(e.target.checked)}
+              className="w-5 h-5"
+            />
+            <label htmlFor="telegram-enabled" className="font-medium">
+              Habilitar notificaciones a Telegram
+            </label>
+          </div>
+          
+          {telegramEnabled && (
+            <>
+              <div>
+                <label className="block text-sm font-medium mb-1">Token del Bot:</label>
+                <input
+                  type="password"
+                  placeholder="8257215317:AAGvfmsjEx_IP4Oh-lb-ETYfyCs4W8ibmsE"
+                  value={telegramToken}
+                  onChange={e => setTelegramToken(e.target.value)}
+                  className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 font-mono text-sm"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Obtén este token de @BotFather en Telegram
+                </p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Chat ID:</label>
+                <input
+                  type="text"
+                  placeholder="123456789 o -1001234567890 (canal)"
+                  value={telegramChatId}
+                  onChange={e => setTelegramChatId(e.target.value)}
+                  className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 font-mono text-sm"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Tu ID de chat personal o de canal
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+        
+        <details className="mt-4">
+          <summary className="cursor-pointer text-sm text-blue-600 hover:text-blue-700 font-medium">
+            📖 Tutorial Completo: Cómo configurar Telegram
+          </summary>
+          <div className="mt-4 space-y-4 text-sm bg-gray-50 dark:bg-gray-900 p-4 rounded">
+            <div>
+              <h4 className="font-bold mb-2">Paso 1: Crear tu Bot</h4>
+              <ol className="list-decimal list-inside space-y-1 text-gray-600 dark:text-gray-400">
+                <li>Abre Telegram y busca <strong>@BotFather</strong></li>
+                <li>Envía el comando: <code>/newbot</code></li>
+                <li>Nombre del bot: "Mis Alertas de Trading"</li>
+                <li>Username: <code>tu_usuario_alertas_bot</code></li>
+                <li>BotFather te dará un <strong>TOKEN</strong> → Cópialo</li>
+              </ol>
+            </div>
+            
+            <div>
+              <h4 className="font-bold mb-2">Paso 2: Obtener Chat ID</h4>
+              <p className="text-gray-600 dark:text-gray-400 mb-2">
+                <strong>Para chat privado:</strong>
+              </p>
+              <ol className="list-decimal list-inside space-y-1 text-gray-600 dark:text-gray-400">
+                <li>Busca tu bot en Telegram</li>
+                <li>Envíale: <code>/start</code></li>
+                <li>Abre: <code>https://api.telegram.org/bot{'{TOKEN}'}/getUpdates</code></li>
+                <li>Busca: <code>"chat":{'{'}"{id}": 123456789{'}'}</code></li>
+                <li>Ese número es tu Chat ID</li>
+              </ol>
+              
+              <p className="text-gray-600 dark:text-gray-400 mt-3 mb-2">
+                <strong>Para canal:</strong>
+              </p>
+              <ol className="list-decimal list-inside space-y-1 text-gray-600 dark:text-gray-400">
+                <li>Crea un canal en Telegram</li>
+                <li>Agrega tu bot como administrador</li>
+                <li>Envía un mensaje al canal</li>
+                <li>Usa el mismo enlace getUpdates</li>
+                <li>El Chat ID será negativo: <code>-1001234567890</code></li>
+              </ol>
+            </div>
+            
+            <div>
+              <h4 className="font-bold mb-2">Paso 3: Guardar Aquí</h4>
+              <p className="text-gray-600 dark:text-gray-400">
+                Pega el Token y Chat ID en los campos de arriba y haz click en "Guardar Configuración"
+              </p>
+            </div>
+          </div>
+        </details>
       </section>
 
       <button 
         onClick={saveConfig}
-        className="bg-blue-600 text-white px-6 py-2 rounded"
+        className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-semibold text-lg"
       >
         💾 Guardar Configuración
       </button>
+      
+      <div className="text-sm text-gray-500 text-center">
+        Las cookies se encriptan automáticamente antes de guardarse
+      </div>
     </div>
   )
 }
@@ -932,6 +1123,86 @@ curl -X PUT https://alerts.apidevs-api.com/api/config \
 
 ---
 
+## 📱 Telegram Notifications
+
+### **Configuración:**
+
+Cada usuario puede habilitar notificaciones a **SU PROPIO bot de Telegram**.
+
+**Campos en `trading_signals_config`:**
+```sql
+telegram_enabled     boolean   # ON/OFF
+telegram_bot_token   varchar   # Token de @BotFather
+telegram_chat_id     varchar   # Chat ID del usuario
+```
+
+---
+
+### **Formato de Mensaje Enviado:**
+
+```markdown
+🚨 *Nueva Señal de Trading*
+
+🪙 *Ticker:* BINANCE:BTCUSDT
+💰 *Precio:* $68,234.50
+📊 *Señal:* Divergencia Alcista 🟢
+📈 *Dirección:* LONG
+🔧 *Indicador:* 🐸 ADX DEF APIDEVS 👑
+
+⏰ 28/10/2025, 3:48:48
+
+📸 [Ver Screenshot en TradingView](https://www.tradingview.com/x/UdQmiPpP/)
+
+_Señal #3531d33b_
+```
+
+**Características:**
+- ✅ Parse mode: Markdown
+- ✅ Preview del screenshot habilitado
+- ✅ Link clickeable
+- ✅ Timezone del usuario (configurable)
+- ✅ Emojis para mejor visualización
+
+---
+
+### **Cuándo se Envía:**
+
+El mensaje de Telegram se envía **DESPUÉS** de completar el screenshot (~25 segundos):
+
+```
+1. Webhook recibe señal (< 1s)
+   ↓
+2. Guarda en Supabase
+   ↓
+3. Worker procesa screenshot (25s)
+   ↓
+4. 📱 Envía a Telegram (si telegram_enabled = true)
+   ↓
+5. Usuario lo recibe en móvil/reloj/tablet
+```
+
+**Ventaja:** El mensaje YA incluye el link al screenshot (no hay que esperar).
+
+---
+
+### **Multi-dispositivo Automático:**
+
+Si el usuario tiene Telegram en:
+- ✅ iPhone → Recibe notificación
+- ✅ Apple Watch → Vibra y muestra mensaje
+- ✅ iPad → Aparece notificación
+- ✅ PC (Telegram Desktop) → Popup
+
+**Todo automático, sin configuración adicional.** 🎯
+
+---
+
+### **Tutorial para Usuarios:**
+
+Ver sección "Configuración Completa (con Telegram)" arriba para el código del componente con tutorial integrado.
+
+---
+
 ## 🎯 Roadmap
 
 ### **Implementado:**
@@ -942,6 +1213,7 @@ curl -X PUT https://alerts.apidevs-api.com/api/config \
 - ✅ Encriptación de cookies
 - ✅ API REST completa
 - ✅ Panel de testing
+- ✅ **Notificaciones a Telegram por usuario** ⭐ NUEVO
 
 ### **Próximo:**
 - [ ] Soporte para Layout ID de TradingView
@@ -949,6 +1221,7 @@ curl -X PUT https://alerts.apidevs-api.com/api/config \
 - [ ] Detección dinámica de carga
 - [ ] WebSocket real-time para dashboard
 - [ ] Analytics avanzados
+- [ ] Notificaciones Discord (opcional)
 
 ---
 

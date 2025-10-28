@@ -17,7 +17,8 @@ Este es el **sistema de alertas inteligente** que convierte los indicadores prem
 
 ### **Para tus clientes:**
 Cuando compran un indicador de APIDevs, obtienen:
-- ✅ **Dashboard personalizado** con todas sus alertas
+- ✅ **Dashboard web personalizado** con todas sus alertas
+- ✅ **Notificaciones push a Telegram** (móvil, reloj, tablet)
 - ✅ **Screenshots automáticos** del chart con SUS indicadores
 - ✅ **Historial completo** de señales y resultados
 - ✅ **Tracking de performance** (win rate, P&L, estadísticas)
@@ -30,10 +31,11 @@ Cuando compran un indicador de APIDevs, obtienen:
    ↓
 2. Sistema le da acceso al indicador en TradingView
    ↓
-3. Cliente configura en su Dashboard:
+3. Cliente configura en su Dashboard (TAB Configuración):
    - Cookies de TradingView (para screenshots personalizados)
    - Obtiene su webhook único (auto-generado)
    - Configura Chart ID (su chart con SUS indicadores)
+   - [OPCIONAL] Configura bot de Telegram para notificaciones móviles
    ↓
 4. Cliente crea alerta en TradingView con su webhook
    ↓
@@ -44,13 +46,22 @@ Cuando compran un indicador de APIDevs, obtienen:
    - Guarda señal en Supabase
    - Captura screenshot con cookies del cliente
    - POST a TradingView → URL oficial gratis
+   - 📱 Envía notificación a Telegram (si está habilitado)
    - Actualiza dashboard en tiempo real
    ↓
-7. Cliente ve en su Dashboard:
-   📸 Screenshot de SU chart con SUS indicadores
-   💰 Precio, ticker, tipo de señal
-   📊 Puede marcar resultado (win/loss)
-   📈 Ver estadísticas y win rate
+7. Cliente recibe notificación:
+   📱 EN TELEGRAM (si configuró bot):
+      - Notificación PUSH instantánea
+      - Mensaje formateado con datos de la señal
+      - Preview del screenshot
+      - Link directo a TradingView
+      - Multi-dispositivo: móvil, reloj, tablet
+   
+   💻 EN DASHBOARD WEB:
+      - Screenshot de SU chart con SUS indicadores
+      - Precio, ticker, tipo de señal
+      - Puede marcar resultado (win/loss)
+      - Ver estadísticas y win rate
 ```
 
 ---
@@ -422,29 +433,141 @@ curl -X POST https://alerts.apidevs-api.com/webhook/TU_TOKEN_REAL \
 │ 3. WORKER (20-25 segundos)             │
 │    📸 Abre Puppeteer con cookies        │
 │    🌐 Navega al chart del usuario       │
-│    ⏳ Espera carga (5-10s)              │
+│    ⏳ Espera carga (5s)                 │
 │    📷 Captura PNG del chart             │
 │    🚀 POST a TradingView /snapshot/     │
 │    ✅ TradingView responde con ID       │
 │    🔗 Construye URL oficial             │
 │    💾 Actualiza señal en Supabase       │
+│    📱 Envía a Telegram (si habilitado)  │
 └──────────────┬──────────────────────────┘
                │
-               ▼
-┌─────────────────────────────────────────┐
-│ 4. DASHBOARD NEXT.JS (Tiempo real)     │
-│    📊 Usuario ve señal nueva            │
-│    📸 Screenshot con SUS indicadores    │
-│    🔗 Link a TradingView interactivo    │
-│    ✅ Puede marcar win/loss/skip        │
-└─────────────────────────────────────────┘
+               ├──────────────┬────────────────┐
+               ▼              ▼                ▼
+┌──────────────────┐ ┌────────────────┐ ┌──────────────┐
+│ 4A. TELEGRAM     │ │ 4B. DASHBOARD  │ │ 4C. RELOJ    │
+│ 📱 Notificación  │ │ 💻 Señal en    │ │ ⌚ Push en    │
+│    PUSH          │ │    tiempo real │ │    muñeca    │
+│                  │ │                │ │              │
+│ - Móvil          │ │ - Screenshot   │ │ - Vibración  │
+│ - Preview chart  │ │ - Marcar win   │ │ - Mensaje    │
+│ - Link directo   │ │ - Stats        │ │ - Acción     │
+└──────────────────┘ └────────────────┘ └──────────────┘
 ```
 
 **Tiempos:**
 - Webhook response: < 1s
 - Screenshot total: ~20-25s
-- Usuario ve alerta: Inmediato (señal sin screenshot)
+- Notificación Telegram: ~25s (después del screenshot)
+- Usuario ve alerta en dashboard: Inmediato
 - Usuario ve screenshot: ~25s después
+
+---
+
+## 📱 Notificaciones a Telegram (Multi-dispositivo)
+
+### **¿Por qué Telegram?**
+
+Tu plataforma es **web**, no una app nativa. Telegram te da:
+
+| Dashboard Web | Telegram |
+|---------------|----------|
+| Solo en navegador | ✅ Móvil (siempre en el bolsillo) |
+| Solo en PC/laptop | ✅ Reloj inteligente |
+| Sin notificaciones push | ✅ Tablet |
+| Requiere abrir sitio | ✅ PUSH instantáneas |
+| - | ✅ Multi-dispositivo automático |
+
+**Resultado:** Cliente recibe alertas **DONDE ESTÉ** 🌍
+
+---
+
+### **Configuración por Usuario:**
+
+Cada cliente tiene **SU PROPIO bot de Telegram**:
+
+```
+trading_signals_config:
+├── telegram_enabled (boolean)        ← ON/OFF
+├── telegram_bot_token (varchar)      ← Token de @BotFather
+└── telegram_chat_id (varchar)        ← ID del chat/canal
+```
+
+**Ventajas:**
+- ✅ Privado (cada uno su bot)
+- ✅ Sin límites (no canal compartido)
+- ✅ Personalizable
+- ✅ Completamente opcional
+
+---
+
+### **Formato del Mensaje:**
+
+```markdown
+🚨 *Nueva Señal de Trading*
+
+🪙 *Ticker:* BINANCE:BTCUSDT
+💰 *Precio:* $68,234.50
+📊 *Señal:* Divergencia Alcista 🟢
+📈 *Dirección:* LONG
+🔧 *Indicador:* 🐸 ADX DEF APIDEVS 👑
+
+⏰ 28/10/2025, 3:48:48
+
+📸 [Ver Screenshot en TradingView](https://www.tradingview.com/x/ABC123/)
+
+_Señal #3531d33b_
+```
+
+**Features:**
+- ✅ Markdown formateado
+- ✅ Preview automático del screenshot
+- ✅ Link clickeable a TradingView
+- ✅ Timestamp con timezone del usuario
+- ✅ ID corto de la señal
+
+---
+
+### **Tutorial para tus Clientes:**
+
+**En el Dashboard (TAB Configuración), mostrar:**
+
+```markdown
+## 📱 Configurar Notificaciones a Telegram
+
+### Paso 1: Crear tu Bot Personal
+1. Abre Telegram
+2. Busca **@BotFather**
+3. Envía: `/newbot`
+4. Nombre: "Mis Alertas de Trading"
+5. Username: `tu_usuario_alertas_bot`
+6. BotFather te dará un **TOKEN** → Cópialo
+
+### Paso 2: Obtener tu Chat ID
+
+**Opción A - Chat Privado:**
+1. Busca tu bot en Telegram
+2. Envíale: `/start`
+3. Abre: `https://api.telegram.org/bot{TOKEN}/getUpdates`
+4. Busca: `"chat":{"id": 123456789}`
+5. Ese número es tu Chat ID
+
+**Opción B - Canal:**
+1. Crea un canal
+2. Agrega tu bot como administrador
+3. Envía un mensaje al canal
+4. Abre: `https://api.telegram.org/bot{TOKEN}/getUpdates`
+5. Busca: `"chat":{"id": -1001234567890}`
+6. Ese número (negativo) es tu Chat ID
+
+### Paso 3: Guardar en Dashboard
+1. Pega tu **Bot Token**
+2. Pega tu **Chat ID**
+3. Marca ✅ **Habilitar notificaciones**
+4. Click **Guardar**
+
+✅ ¡Listo! Recibirás todas tus alertas en Telegram
+```
 
 ---
 
