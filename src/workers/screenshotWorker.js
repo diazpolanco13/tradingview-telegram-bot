@@ -45,22 +45,71 @@ function startWorker(redisConnection) {
         // 1. Actualizar estado a "processing"
         await updateScreenshotStatus(signalId, 'processing');
 
-        // 2. ✨ NUEVO: Capturar usando TradingView Share (Alt + S)
-        logger.info('✨ Usando TradingView Share para capturar screenshot...');
+        // 2. ✨ MÉTODO PRINCIPAL: TradingView Share (POST directo)
+        logger.info('✨ Intentando TradingView Share (POST directo)...');
         
-        const shareUrl = await screenshotService.captureWithTradingViewShare(
-          ticker,
-          chartId,
-          cookies
-        );
+        let shareUrl = null;
+        let method = 'tradingview_share';
+        
+        try {
+          shareUrl = await screenshotService.captureWithTradingViewShare(
+            ticker,
+            chartId,
+            cookies
+          );
 
-        if (!shareUrl) {
-          throw new Error('No se pudo capturar la share URL de TradingView');
+          if (shareUrl) {
+            logger.info({ shareUrl }, '✅ TradingView Share URL obtenida');
+          }
+        } catch (shareError) {
+          logger.warn(`⚠️ TradingView Share falló: ${shareError.message}`);
+          logger.info('🔄 Intentando fallback: captura manual + Supabase Storage...');
+          
+          // 🔄 FALLBACK: Captura manual + upload a Supabase Storage
+          try {
+            const screenshotBuffer = await screenshotService.captureWithUserCookies(
+              ticker,
+              chartId,
+              cookies,
+              resolution || '1080p'
+            );
+
+            // Upload a Supabase Storage
+            const filename = `${signalId}-${Date.now()}.png`;
+            const { data: uploadData, error: uploadError } = await supabase
+              .storage
+              .from('trading-screenshots')
+              .upload(`${userId}/${filename}`, screenshotBuffer, {
+                contentType: 'image/png',
+                cacheControl: '3600',
+                upsert: false
+              });
+
+            if (uploadError) {
+              throw new Error(`Error subiendo a Storage: ${uploadError.message}`);
+            }
+
+            // Obtener URL pública
+            const { data: { publicUrl } } = supabase
+              .storage
+              .from('trading-screenshots')
+              .getPublicUrl(`${userId}/${filename}`);
+
+            shareUrl = publicUrl;
+            method = 'supabase_storage_fallback';
+            
+            logger.info({ shareUrl }, '✅ Screenshot subido a Supabase Storage (fallback)');
+          } catch (fallbackError) {
+            logger.error(`❌ Fallback también falló: ${fallbackError.message}`);
+            throw new Error(`Ambos métodos fallaron: Share=${shareError.message}, Fallback=${fallbackError.message}`);
+          }
         }
 
-        logger.info({ shareUrl }, '✅ TradingView Share URL obtenida');
+        if (!shareUrl) {
+          throw new Error('No se pudo obtener URL del screenshot (ambos métodos fallaron)');
+        }
 
-        // 3. Guardar URL directamente en Supabase (sin upload de imagen)
+        // 3. Guardar URL en Supabase
         const { data, error } = await supabase
           .from('trading_signals')
           .update({ 
@@ -75,13 +124,13 @@ function startWorker(redisConnection) {
           throw new Error(`Error actualizando señal: ${error.message}`);
         }
 
-        logger.info(`✅ Screenshot completado: ${signalId} - ${shareUrl}`);
+        logger.info(`✅ Screenshot completado: ${signalId} - Método: ${method}`);
 
         return {
           success: true,
           signalId,
           screenshotUrl: shareUrl,
-          method: 'tradingview_share'
+          method
         };
       } catch (error) {
         logger.error(`❌ Error procesando screenshot ${signalId}:`, error.message);

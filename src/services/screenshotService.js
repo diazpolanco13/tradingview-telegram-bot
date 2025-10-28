@@ -262,7 +262,8 @@ class ScreenshotService {
   }
 
   /**
-   * Capturar screenshot usando TradingView Share (Alt + S)
+   * Capturar screenshot y subirlo a TradingView vía POST directo
+   * NUEVO MÉTODO: Replica el POST interno de TradingView (más confiable que Alt+S)
    * @param {string} ticker - Símbolo del activo
    * @param {string} chartId - ID del chart de TradingView
    * @param {object} userCookies - Cookies del usuario { sessionid, sessionid_sign }
@@ -270,13 +271,15 @@ class ScreenshotService {
    */
   async captureWithTradingViewShare(ticker, chartId, userCookies) {
     if (!this.browser) {
-      throw new Error('Puppeteer no está inicializado. Llama a init() primero.');
+      await this.init();
     }
 
+    const fetch = require('node-fetch');
+    const FormData = require('form-data');
     const page = await this.browser.newPage();
 
     try {
-      logger.info({ ticker, chartId }, '📸 Capturando screenshot con TradingView Share (Alt+S)');
+      logger.info({ ticker, chartId }, '📸 Capturando screenshot con POST directo a TradingView');
 
       // Validar cookies
       const { sessionid, sessionid_sign } = userCookies;
@@ -313,13 +316,13 @@ class ScreenshotService {
 
       logger.info({ chartUrl }, '🌐 Navegando al chart del usuario...');
 
-      // Configurar viewport (1080p para mejor calidad)
+      // Configurar viewport (1920x1080 para mejor calidad)
       await page.setViewport({ width: 1920, height: 1080 });
 
       // Navegar al chart
       await page.goto(chartUrl, {
         waitUntil: 'networkidle2',
-        timeout: 30000
+        timeout: parseInt(process.env.SCREENSHOT_TIMEOUT) || 30000
       });
 
       // Esperar a que cargue completamente el chart
@@ -327,124 +330,98 @@ class ScreenshotService {
       logger.info({ waitTime }, '⏳ Esperando carga completa del chart...');
       await page.waitForTimeout(waitTime);
 
-      // 🔍 DEBUG: Verificar cookies aplicadas
-      const appliedCookies = await page.cookies();
-      const sessionCookies = appliedCookies.filter(c => c.name.includes('session'));
-      logger.info({ 
-        cookieCount: appliedCookies.length,
-        sessionCookies: sessionCookies.map(c => ({ name: c.name, valueLength: c.value.length }))
-      }, '🍪 Cookies aplicadas en la página');
-
-      // 🔍 DEBUG: Screenshot ANTES de Alt+S
+      // Cerrar modales que puedan interferir
       try {
-        const beforeScreenshot = await page.screenshot({ type: 'png' });
-        const fs = require('fs').promises;
-        const beforePath = `/tmp/tradingview-before-alts-${Date.now()}.png`;
-        await fs.writeFile(beforePath, beforeScreenshot);
-        logger.info({ beforePath }, '📸 Screenshot ANTES de Alt+S guardado');
+        await page.keyboard.press('Escape');
+        await page.waitForTimeout(1000);
       } catch (err) {
-        logger.warn('⚠️ No se pudo guardar screenshot ANTES:', err.message);
+        // Ignorar
       }
 
-      // Cerrar cualquier modal que pueda interferir
-      logger.info('🔄 Cerrando modales previos...');
-      await page.keyboard.press('Escape');
-      await page.waitForTimeout(500);
-
-      // ✨ PRESIONAR ALT + S (TradingView Share)
-      logger.info('✨ Presionando Alt + S para generar share link...');
-      await page.keyboard.down('Alt');
-      await page.keyboard.press('KeyS');
-      await page.keyboard.up('Alt');
-
-      // Esperar a que aparezca el modal de compartir
-      logger.info('⏳ Esperando modal de compartir...');
-      await page.waitForTimeout(3000);
-
-      // 🔍 ESTRATEGIA 1: Buscar input con la URL
-      logger.info('🔍 ESTRATEGIA 1: Buscando input con URL en el modal...');
-      let shareUrl = await page.evaluate(() => {
-        // Buscar TODOS los inputs visibles
-        const allInputs = Array.from(document.querySelectorAll('input'));
+      // 📸 CAPTURAR SCREENSHOT DEL CANVAS (solo el chart, sin UI extra)
+      logger.info('📸 Capturando PNG del chart...');
+      
+      // Intentar capturar solo el contenedor del chart
+      let screenshotBuffer;
+      try {
+        // Esperar a que exista el contenedor del chart
+        await page.waitForSelector('.chart-container, [data-name="chart-container"]', { timeout: 5000 });
         
-        for (const input of allInputs) {
-          const value = input.value || '';
-          // Buscar URL con patrón /x/ de TradingView
-          if (value.includes('tradingview.com/x/') || value.includes('/x/')) {
-            return value.startsWith('http') ? value : `https://www.tradingview.com${value}`;
-          }
+        const chartElement = await page.$('.chart-container, [data-name="chart-container"]');
+        if (chartElement) {
+          screenshotBuffer = await chartElement.screenshot({ type: 'png' });
+          logger.info('✅ Screenshot del chart-container capturado');
+        } else {
+          // Fallback: screenshot completo
+          screenshotBuffer = await page.screenshot({ type: 'png', fullPage: false });
+          logger.info('✅ Screenshot completo capturado (fallback)');
         }
-        
-        return null;
+      } catch (selectorError) {
+        // Si no encuentra el selector, screenshot completo
+        screenshotBuffer = await page.screenshot({ type: 'png', fullPage: false });
+        logger.info('✅ Screenshot completo capturado (sin selector específico)');
+      }
+
+      logger.info({ bufferSize: screenshotBuffer.length }, '✅ PNG generado localmente');
+
+      // 🚀 POST DIRECTO A TRADINGVIEW /snapshot/
+      logger.info('🚀 POSTando imagen a TradingView /snapshot/...');
+
+      const form = new FormData();
+      form.append('preparedImage', screenshotBuffer, {
+        filename: 'snapshot.png',
+        contentType: 'image/png'
       });
 
-      if (shareUrl) {
-        logger.info({ shareUrl }, '✅ URL encontrada en modal');
-        return shareUrl;
-      }
+      // Construir cookie string para el header
+      const cookieString = `sessionid=${sessionid}; sessionid_sign=${sessionid_sign}`;
 
-      // 🔍 ESTRATEGIA 2: Copiar al clipboard con Ctrl+A + Ctrl+C
-      logger.info('🔍 ESTRATEGIA 2: Intentando copiar desde clipboard...');
-      
-      try {
-        // Seleccionar todo el contenido del input activo
-        await page.keyboard.down('Control');
-        await page.keyboard.press('KeyA');
-        await page.keyboard.up('Control');
-        await page.waitForTimeout(200);
-        
-        // Copiar
-        await page.keyboard.down('Control');
-        await page.keyboard.press('KeyC');
-        await page.keyboard.up('Control');
-        await page.waitForTimeout(500);
-
-        // Intentar leer del clipboard con timeout
-        const clipboardData = await Promise.race([
-          page.evaluate(() => {
-            return navigator.clipboard.readText().catch(() => null);
-          }),
-          new Promise((resolve) => setTimeout(() => resolve(null), 2000)) // Timeout de 2s
-        ]);
-        
-        if (clipboardData && (clipboardData.includes('/x/') || clipboardData.includes('tradingview.com'))) {
-          shareUrl = clipboardData.startsWith('http') ? clipboardData : `https://www.tradingview.com${clipboardData}`;
-          logger.info({ shareUrl }, '✅ URL obtenida del clipboard');
-          return shareUrl;
+      const response = await fetch('https://www.tradingview.com/snapshot/', {
+        method: 'POST',
+        body: form,
+        headers: {
+          ...form.getHeaders(),
+          'Cookie': cookieString,
+          'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
+          'Referer': chartUrl,
+          'Accept': '*/*',
+          'Origin': 'https://www.tradingview.com',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Accept-Encoding': 'gzip, deflate, br'
         }
-        
-        logger.warn('⚠️ Clipboard no contiene URL válida');
-      } catch (clipError) {
-        logger.warn('⚠️ Error accediendo al clipboard:', clipError.message);
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        logger.error({ 
+          status: response.status, 
+          statusText: response.statusText,
+          error: errorText
+        }, '❌ Error en POST a /snapshot/');
+        throw new Error(`TradingView POST falló: ${response.status} ${response.statusText}`);
       }
 
-      // 🔍 ESTRATEGIA 3: Tomar screenshot para debugging
-      logger.warn('⚠️ No se pudo obtener URL, tomando screenshot para debugging...');
-      const debugScreenshot = await page.screenshot({ type: 'png' });
-      const debugPath = `/tmp/tradingview-debug-${Date.now()}.png`;
-      const fs = require('fs').promises;
-      await fs.writeFile(debugPath, debugScreenshot);
-      logger.warn({ debugPath }, '📸 Screenshot de debugging guardado');
+      // La respuesta es la URL en texto plano
+      const shareUrl = await response.text();
+      const cleanUrl = shareUrl.trim();
 
-      // 🔍 ESTRATEGIA 4: Buscar en el HTML completo
-      logger.info('🔍 ESTRATEGIA 4: Buscando en HTML completo...');
-      const htmlContent = await page.content();
-      const urlMatch = htmlContent.match(/https:\/\/(?:www\.)?tradingview\.com\/x\/[a-zA-Z0-9]+\//);
-      
-      if (urlMatch) {
-        shareUrl = urlMatch[0];
-        logger.info({ shareUrl }, '✅ URL encontrada en HTML');
-        return shareUrl;
+      logger.info({ shareUrl: cleanUrl }, '✅ URL de TradingView obtenida exitosamente');
+
+      // Validar que la URL sea válida
+      if (!cleanUrl.includes('tradingview.com/x/') && !cleanUrl.includes('/x/')) {
+        throw new Error(`URL inválida recibida de TradingView: ${cleanUrl}`);
       }
 
-      throw new Error('No se pudo capturar la share URL después de 4 intentos. Revisa el screenshot de debugging.');
+      return cleanUrl;
 
     } catch (error) {
       logger.error({ 
         error: error.message, 
         ticker, 
         chartId 
-      }, '❌ Error capturando screenshot con TradingView Share');
+      }, '❌ Error capturando screenshot con POST directo');
+      
+      // Re-lanzar el error para que el worker pueda manejarlo
       throw error;
     } finally {
       await page.close();
