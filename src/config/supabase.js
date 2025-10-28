@@ -5,6 +5,7 @@
 
 const { createClient } = require('@supabase/supabase-js');
 const { logger } = require('../utils/logger');
+const { validateQuota } = require('./plans');
 
 // Validar que las variables de entorno existan
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -82,9 +83,15 @@ async function validateWebhookToken(webhookToken) {
       throw error;
     }
 
-    // Verificar cuota
-    if (data.signals_quota !== -1 && data.signals_used_this_month >= data.signals_quota) {
-      logger.warn(`⚠️ Cuota excedida para usuario ${data.user_id}`);
+    // Verificar cuota usando el sistema configurable
+    const quotaValid = validateQuota(
+      data.signals_used_this_month,
+      data.signals_quota,
+      data.user_id
+    );
+
+    if (!quotaValid) {
+      // Cuota excedida en modo strict
       return null;
     }
 

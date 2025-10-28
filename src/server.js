@@ -12,6 +12,7 @@ const path = require('path');
 
 const { logger } = require('./utils/logger');
 const { testConnection: testSupabaseConnection } = require('./config/supabase');
+const { logPlansConfiguration } = require('./config/plans');
 const screenshotService = require('./services/screenshotService');
 
 // Redis y BullMQ son opcionales en desarrollo
@@ -182,6 +183,10 @@ async function startServer() {
     } catch (error) {
       logger.warn({ error: error.message }, '⚠️ Screenshot service not available');
     }
+
+    // Log plans configuration
+    logger.info('📋 Cargando configuración de planes...');
+    logPlansConfiguration();
 
     // Start server
     app.listen(PORT, () => {

@@ -8,6 +8,11 @@ const router = express.Router();
 const { supabase } = require('../config/supabase');
 const { encryptTradingViewCookies } = require('../utils/encryption');
 const { logger } = require('../utils/logger');
+const { 
+  getUsagePercentage, 
+  getQuotaWarning, 
+  isUnlimitedQuota 
+} = require('../config/plans');
 
 /**
  * Middleware de autenticación (verifica JWT de Supabase)
@@ -342,6 +347,92 @@ router.get('/stats', authenticateUser, async (req, res) => {
     });
   } catch (error) {
     logger.error({ error: error.message }, '❌ Error obteniendo estadísticas');
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/quota
+ * Obtener información de cuota del usuario autenticado
+ * Para mostrar en dashboard: cuota total, usado, restante, porcentaje, advertencias
+ */
+router.get('/quota', authenticateUser, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const { data: config, error } = await supabase
+      .from('trading_signals_config')
+      .select('signals_quota, signals_used_this_month, webhook_token, user_id')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) throw error;
+
+    // Calcular información de cuota
+    const unlimited = isUnlimitedQuota(config.signals_quota);
+    const percentage = getUsagePercentage(
+      config.signals_used_this_month,
+      config.signals_quota
+    );
+    const warning = getQuotaWarning(
+      config.signals_used_this_month,
+      config.signals_quota
+    );
+
+    const remaining = unlimited 
+      ? -1 
+      : Math.max(0, config.signals_quota - config.signals_used_this_month);
+
+    // Determinar estado visual
+    let status = 'OK';
+    let statusColor = 'green';
+    if (!unlimited) {
+      if (percentage >= 100) {
+        status = 'EXCEDIDO';
+        statusColor = 'red';
+      } else if (percentage >= 90) {
+        status = 'CRÍTICO';
+        statusColor = 'orange';
+      } else if (percentage >= 75) {
+        status = 'ADVERTENCIA';
+        statusColor = 'yellow';
+      }
+    } else {
+      status = 'ILIMITADO';
+      statusColor = 'blue';
+    }
+
+    res.json({
+      success: true,
+      quota: {
+        // Valores numéricos
+        total: config.signals_quota,
+        used: config.signals_used_this_month,
+        remaining,
+        
+        // Información formateada para UI
+        total_text: unlimited ? 'Ilimitado' : config.signals_quota.toString(),
+        remaining_text: unlimited ? 'Ilimitado' : remaining.toString(),
+        percentage: unlimited ? -1 : percentage,
+        percentage_text: unlimited ? 'Ilimitado' : `${percentage}%`,
+        
+        // Estado y alertas
+        status,
+        status_color: statusColor,
+        warning,
+        can_receive_signals: remaining > 0 || unlimited,
+        is_unlimited: unlimited,
+        
+        // Info adicional
+        user_id: userId
+      }
+    });
+
+  } catch (error) {
+    logger.error({ error: error.message }, '❌ Error obteniendo cuota');
     res.status(500).json({
       success: false,
       error: error.message

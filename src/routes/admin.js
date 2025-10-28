@@ -10,6 +10,14 @@ const { apiLogger: logger } = require('../utils/logger');
 const { supabase, getUserConfig } = require('../config/supabase');
 const { encrypt, decrypt } = require('../utils/encryption');
 const { getPool } = require('../services/browserPool');
+const { 
+  PLANS_CONFIG, 
+  DEFAULT_QUOTA, 
+  FALLBACK_QUOTA, 
+  QUOTA_MODE,
+  getUsagePercentage,
+  getQuotaWarning
+} = require('../config/plans');
 
 /**
  * GET /admin
@@ -367,6 +375,143 @@ router.get('/test/browser-pool-stats', async (req, res) => {
 
   } catch (error) {
     logger.error({ error: error.message }, 'Error getting pool stats');
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /test/plans
+ * Ver configuración de planes y cuotas desde variables de entorno
+ */
+router.get('/test/plans', async (req, res) => {
+  try {
+    // Formatear planes
+    const plans = Object.entries(PLANS_CONFIG).map(([key, plan]) => ({
+      id: key,
+      name: plan.name,
+      quota: plan.quota,
+      quotaText: plan.quota === -1 ? 'Ilimitado' : `${plan.quota} señales/mes`,
+      screenshots: plan.screenshots,
+      resolution: plan.resolution,
+      telegram: plan.telegram
+    }));
+
+    // Obtener estadísticas de usuarios por plan
+    const { data: userConfigs, error } = await supabase
+      .from('trading_signals_config')
+      .select('signals_quota, signals_used_this_month, user_id');
+
+    let userStats = {};
+    if (!error && userConfigs) {
+      userConfigs.forEach(config => {
+        const quota = config.signals_quota;
+        if (!userStats[quota]) {
+          userStats[quota] = {
+            count: 0,
+            totalUsed: 0,
+            avgUsage: 0
+          };
+        }
+        userStats[quota].count++;
+        userStats[quota].totalUsed += config.signals_used_this_month || 0;
+      });
+
+      // Calcular promedios
+      Object.keys(userStats).forEach(quota => {
+        userStats[quota].avgUsage = Math.round(
+          userStats[quota].totalUsed / userStats[quota].count
+        );
+      });
+    }
+
+    res.json({
+      success: true,
+      config: {
+        plans,
+        defaults: {
+          default_quota: DEFAULT_QUOTA,
+          fallback_quota: FALLBACK_QUOTA,
+          quota_mode: QUOTA_MODE
+        },
+        environment: {
+          PLAN_FREE_QUOTA: process.env.PLAN_FREE_QUOTA || 'not set (default: 100)',
+          PLAN_BASIC_QUOTA: process.env.PLAN_BASIC_QUOTA || 'not set (default: 250)',
+          PLAN_PRO_QUOTA: process.env.PLAN_PRO_QUOTA || 'not set (default: 500)',
+          PLAN_PREMIUM_QUOTA: process.env.PLAN_PREMIUM_QUOTA || 'not set (default: -1)',
+          PLAN_ENTERPRISE_QUOTA: process.env.PLAN_ENTERPRISE_QUOTA || 'not set (default: -1)',
+          DEFAULT_QUOTA: process.env.DEFAULT_QUOTA || 'not set (default: 100)',
+          FALLBACK_QUOTA: process.env.FALLBACK_QUOTA || 'not set (default: 50)',
+          QUOTA_MODE: process.env.QUOTA_MODE || 'not set (default: strict)'
+        },
+        userStats,
+        timestamp: new Date().toISOString()
+      }
+    });
+
+  } catch (error) {
+    logger.error({ error: error.message }, 'Error getting plans config');
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /test/quota/:userId
+ * Ver estado de cuota de un usuario específico
+ */
+router.get('/test/quota/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const { data: config, error } = await supabase
+      .from('trading_signals_config')
+      .select('signals_quota, signals_used_this_month, webhook_token')
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      return res.status(404).json({
+        success: false,
+        error: 'Usuario no encontrado'
+      });
+    }
+
+    const percentage = getUsagePercentage(
+      config.signals_used_this_month,
+      config.signals_quota
+    );
+
+    const warning = getQuotaWarning(
+      config.signals_used_this_month,
+      config.signals_quota
+    );
+
+    const remaining = config.signals_quota === -1 
+      ? -1 
+      : Math.max(0, config.signals_quota - config.signals_used_this_month);
+
+    res.json({
+      success: true,
+      quota: {
+        user_id: userId,
+        total: config.signals_quota,
+        used: config.signals_used_this_month,
+        remaining,
+        percentage: percentage === -1 ? 'Ilimitado' : `${percentage}%`,
+        status: percentage >= 100 ? 'EXCEDIDO' : percentage >= 90 ? 'CRÍTICO' : percentage >= 75 ? 'ADVERTENCIA' : 'OK',
+        warning,
+        webhook_token_preview: config.webhook_token.substring(0, 16) + '...',
+        can_receive_signals: remaining > 0 || remaining === -1
+      }
+    });
+
+  } catch (error) {
+    logger.error({ error: error.message }, 'Error getting quota info');
     res.status(500).json({
       success: false,
       error: error.message
