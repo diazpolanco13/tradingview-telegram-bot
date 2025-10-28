@@ -192,6 +192,7 @@ headers: {
 | `/api/config` | GET | Obtener configuración del usuario |
 | `/api/config` | PUT | Actualizar configuración |
 | `/api/stats` | GET | Obtener estadísticas |
+| **`/api/quota`** | **GET** | **⭐ Obtener cuota del usuario (NUEVO)** |
 
 **Importante:** Alternativamente, puedes consultar **DIRECTAMENTE a Supabase** sin pasar por el microservicio (más rápido).
 
@@ -1133,7 +1134,10 @@ export default function ConfigPage() {
         </div>
       </section>
 
-      {/* SECCIÓN 5: ESTADÍSTICAS */}
+      {/* SECCIÓN 5: CUOTA DEL USUARIO ⭐ NUEVO */}
+      <QuotaWidget />
+
+      {/* SECCIÓN 6: ESTADÍSTICAS */}
       <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
         <h2 className="text-xl font-bold mb-4">📊 Uso del Servicio</h2>
         
@@ -1185,6 +1189,247 @@ export default function ConfigPage() {
     </div>
   )
 }
+```
+
+---
+
+## 📊 Componente: QuotaWidget ⭐ NUEVO
+
+**Widget visual para mostrar la cuota del usuario de forma clara y atractiva.**
+
+```typescript
+// components/trading/QuotaWidget.tsx
+'use client'
+
+import { useEffect, useState } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+
+interface QuotaData {
+  total: number
+  used: number
+  remaining: number
+  total_text: string
+  remaining_text: string
+  percentage: number
+  percentage_text: string
+  status: 'OK' | 'ADVERTENCIA' | 'CRÍTICO' | 'EXCEDIDO' | 'ILIMITADO'
+  status_color: 'green' | 'yellow' | 'orange' | 'red' | 'blue'
+  warning: string | null
+  can_receive_signals: boolean
+  is_unlimited: boolean
+}
+
+export function QuotaWidget() {
+  const [quota, setQuota] = useState<QuotaData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const supabase = createClientComponentClient()
+
+  useEffect(() => {
+    loadQuota()
+  }, [])
+
+  async function loadQuota() {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      const response = await fetch('https://alerts.apidevs-api.com/api/quota', {
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`
+        }
+      })
+      
+      const result = await response.json()
+      if (result.success) {
+        setQuota(result.quota)
+      }
+    } catch (error) {
+      console.error('Error cargando cuota:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow animate-pulse">
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
+        <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+      </div>
+    )
+  }
+
+  if (!quota) return null
+
+  // Colores dinámicos según estado
+  const colorClasses = {
+    green: 'bg-green-500',
+    yellow: 'bg-yellow-500',
+    orange: 'bg-orange-500',
+    red: 'bg-red-500',
+    blue: 'bg-blue-500'
+  }
+
+  const textColorClasses = {
+    green: 'text-green-600 dark:text-green-400',
+    yellow: 'text-yellow-600 dark:text-yellow-400',
+    orange: 'text-orange-600 dark:text-orange-400',
+    red: 'text-red-600 dark:text-red-400',
+    blue: 'text-blue-600 dark:text-blue-400'
+  }
+
+  const bgColorClasses = {
+    green: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
+    yellow: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800',
+    orange: 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800',
+    red: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800',
+    blue: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+  }
+
+  return (
+    <section className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg border-l-4 border-blue-500">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold flex items-center gap-2">
+          📊 Tu Cuota Mensual
+        </h2>
+        
+        {/* Badge de estado */}
+        <span className={`px-3 py-1 rounded-full text-sm font-bold ${bgColorClasses[quota.status_color]} ${textColorClasses[quota.status_color]} border`}>
+          {quota.status}
+        </span>
+      </div>
+      
+      {/* Números grandes */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Usado</p>
+          <p className={`text-3xl font-bold ${textColorClasses[quota.status_color]}`}>
+            {quota.used}
+          </p>
+        </div>
+        
+        <div className="text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Restante</p>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">
+            {quota.remaining_text}
+          </p>
+        </div>
+        
+        <div className="text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total</p>
+          <p className="text-3xl font-bold text-gray-700 dark:text-gray-300">
+            {quota.total_text}
+          </p>
+        </div>
+      </div>
+
+      {/* Barra de progreso */}
+      {!quota.is_unlimited && (
+        <div className="mb-4">
+          <div className="flex justify-between text-sm mb-2">
+            <span className="text-gray-600 dark:text-gray-400">
+              Progreso: {quota.percentage_text}
+            </span>
+            <span className={`font-semibold ${textColorClasses[quota.status_color]}`}>
+              {quota.used} / {quota.total}
+            </span>
+          </div>
+          
+          {/* Barra */}
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
+            <div 
+              className={`h-4 rounded-full transition-all duration-500 ${colorClasses[quota.status_color]}`}
+              style={{ width: `${Math.min(quota.percentage, 100)}%` }}
+            >
+              <div className="h-full w-full opacity-50 bg-white animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Plan ilimitado */}
+      {quota.is_unlimited && (
+        <div className="mb-4 bg-gradient-to-r from-purple-500 to-blue-600 p-4 rounded-lg text-white text-center">
+          <p className="text-2xl font-bold mb-1">∞ Ilimitado</p>
+          <p className="text-sm opacity-90">Disfruta de señales sin límites</p>
+        </div>
+      )}
+
+      {/* Advertencia si existe */}
+      {quota.warning && (
+        <div className={`p-4 rounded-lg border ${bgColorClasses[quota.status_color]}`}>
+          <p className={`text-sm font-medium ${textColorClasses[quota.status_color]} flex items-start gap-2`}>
+            <span className="text-lg">⚠️</span>
+            <span>{quota.warning}</span>
+          </p>
+        </div>
+      )}
+
+      {/* Indicador de señales */}
+      <div className="mt-4 flex items-center justify-between text-sm">
+        <span className="text-gray-600 dark:text-gray-400">
+          ¿Puedo recibir señales?
+        </span>
+        {quota.can_receive_signals ? (
+          <span className="text-green-600 dark:text-green-400 font-semibold flex items-center gap-1">
+            ✅ Sí, todo OK
+          </span>
+        ) : (
+          <span className="text-red-600 dark:text-red-400 font-semibold flex items-center gap-1">
+            ❌ Cuota excedida
+          </span>
+        )}
+      </div>
+
+      {/* Botón de upgrade si está cerca del límite */}
+      {!quota.is_unlimited && quota.percentage >= 75 && (
+        <button className="mt-4 w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 rounded-lg transition-all transform hover:scale-105">
+          🚀 Actualizar Plan
+        </button>
+      )}
+
+      {/* Footer informativo */}
+      <p className="mt-4 text-xs text-center text-gray-500 dark:text-gray-400">
+        La cuota se reinicia automáticamente cada mes
+      </p>
+    </section>
+  )
+}
+```
+
+### **Cómo usar QuotaWidget:**
+
+```typescript
+// En tu página de configuración:
+import { QuotaWidget } from '@/components/trading/QuotaWidget'
+
+export default function ConfigPage() {
+  return (
+    <div className="space-y-6">
+      <h1>⚙️ Configuración</h1>
+      
+      {/* Widget de cuota */}
+      <QuotaWidget />
+      
+      {/* Resto de tu configuración... */}
+    </div>
+  )
+}
+```
+
+### **También puedes usarlo en el dashboard principal:**
+
+```typescript
+// En dashboard/alerts/page.tsx (sidebar o header)
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div className="lg:col-span-2">
+    {/* Lista de alertas */}
+  </div>
+  
+  <div className="space-y-6">
+    <QuotaWidget />
+    <StatsOverview />
+  </div>
+</div>
 ```
 
 ---
@@ -1428,6 +1673,7 @@ function showBrowserNotification(signal: Signal) {
 - [ ] Crear `components/trading/AlertCard.tsx`
 - [ ] Crear `components/trading/AlertFilters.tsx`
 - [ ] Crear `components/trading/StatsOverview.tsx`
+- [ ] **Crear `components/trading/QuotaWidget.tsx`** ⭐ NUEVO
 
 ### **Paso 2: Funcionalidades**
 - [ ] Consulta a `trading_signals` con filtros
@@ -1593,10 +1839,11 @@ async function shareSignal(signal: Signal) {
    - `app/dashboard/alerts/page.tsx` (lista de alertas)
    - `app/dashboard/config/page.tsx` (configuración)
 
-2. **3 componentes clave:**
+2. **4 componentes clave:**
    - `AlertCard` (tarjeta de señal individual)
    - `AlertFilters` (filtros de señales)
    - `StatsOverview` (estadísticas generales)
+   - **`QuotaWidget` (widget de cuota del usuario)** ⭐ NUEVO
 
 3. **Consultas a Supabase:**
    - Tabla: `trading_signals` (señales)
@@ -1618,7 +1865,7 @@ async function shareSignal(signal: Signal) {
 6. **API del microservicio:**
    - Base URL: `https://alerts.apidevs-api.com`
    - Autenticación: JWT de Supabase en header
-   - Endpoints: `/api/signals`, `/api/config`, `/api/stats`
+   - Endpoints: `/api/signals`, `/api/config`, `/api/stats`, **`/api/quota`** ⭐
    - **Alternativa:** Consultar Supabase directamente (más rápido)
 
 ---
