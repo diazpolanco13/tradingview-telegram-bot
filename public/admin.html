@@ -181,17 +181,19 @@
 
         <!-- Documentation Section -->
         <div class="mt-8 bg-gray-800 rounded-lg p-6">
-            <h2 class="text-3xl font-bold mb-4 text-cyan-400">📚 API Endpoints Documentation</h2>
+            <h2 class="text-3xl font-bold mb-4 text-cyan-400">📚 API Endpoints Disponibles</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div>
-                    <h3 class="font-bold text-yellow-400 mb-2">🔹 Webhook V2 (Multi-tenant)</h3>
-                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">POST /webhook/:token</code>
-                    <code class="bg-gray-900 px-2 py-1 rounded block">GET /webhook/:token</code>
+                    <h3 class="font-bold text-purple-400 mb-3">🎯 Webhook (Producción)</h3>
+                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1 text-green-400">POST /webhook/:token</code>
+                    <p class="text-xs text-gray-400 mt-1 mb-3">Recibe alertas de TradingView</p>
+                    <code class="bg-gray-900 px-2 py-1 rounded block text-gray-400">GET /webhook/:token</code>
+                    <p class="text-xs text-gray-400 mt-1">Info del webhook</p>
                 </div>
 
                 <div>
-                    <h3 class="font-bold text-yellow-400 mb-2">🔹 Dashboard API</h3>
+                    <h3 class="font-bold text-blue-400 mb-3">📊 Dashboard API</h3>
                     <code class="bg-gray-900 px-2 py-1 rounded block mb-1">GET /api/signals</code>
                     <code class="bg-gray-900 px-2 py-1 rounded block mb-1">GET /api/signals/:id</code>
                     <code class="bg-gray-900 px-2 py-1 rounded block mb-1">PUT /api/signals/:id</code>
@@ -199,19 +201,34 @@
                     <code class="bg-gray-900 px-2 py-1 rounded block mb-1">GET /api/config</code>
                     <code class="bg-gray-900 px-2 py-1 rounded block mb-1">PUT /api/config</code>
                     <code class="bg-gray-900 px-2 py-1 rounded block">GET /api/stats</code>
+                    <p class="text-xs text-gray-400 mt-2">Requieren JWT de Supabase</p>
                 </div>
 
                 <div>
-                    <h3 class="font-bold text-yellow-400 mb-2">🔹 System</h3>
-                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">GET /health</code>
-                    <code class="bg-gray-900 px-2 py-1 rounded block">GET /</code>
+                    <h3 class="font-bold text-green-400 mb-3">🧪 Testing Endpoints</h3>
+                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">GET /test/supabase</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">GET /test/user-config/:id</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">GET /test/signals</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">POST /test/encryption</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">GET /test/database-stats</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">POST /test/create-test-signal</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block">DELETE /test/clear-test-signals</code>
                 </div>
+            </div>
 
-                <div>
-                    <h3 class="font-bold text-yellow-400 mb-2">🔹 Legacy V1</h3>
-                    <code class="bg-gray-900 px-2 py-1 rounded block mb-1">POST /v1/webhook</code>
-                    <code class="bg-gray-900 px-2 py-1 rounded block">GET /cookies/status</code>
+            <div class="mt-6 border-t border-gray-700 pt-6">
+                <h3 class="font-bold text-yellow-400 mb-3">⚙️ System & Monitoring</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <code class="bg-gray-900 px-2 py-1 rounded block text-center">GET /health</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block text-center">GET /</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block text-center">GET /admin</code>
+                    <code class="bg-gray-900 px-2 py-1 rounded block text-center text-gray-500">POST /v1/webhook (Legacy)</code>
                 </div>
+            </div>
+
+            <div class="mt-6 bg-gray-900 p-4 rounded">
+                <h4 class="font-bold text-cyan-400 mb-2">📖 Documentación Completa:</h4>
+                <p class="text-sm text-gray-300">Ver <code class="bg-gray-800 px-2 py-1 rounded">API.md</code> en el repositorio para ejemplos completos y códigos de integración Next.js</p>
             </div>
         </div>
     </div>
