@@ -1140,13 +1140,15 @@ curl -X PUT https://alerts.apidevs-api.com/api/config \
 
 ## ⚠️ Límites y Cuotas
 
-| Plan | Señales/mes | Screenshots | Resolución |
-|------|-------------|-------------|------------|
-| **Free** | 100 | ✅ | 720p |
-| **Pro** | 500 | ✅ | 1080p |
-| **Premium** | Ilimitado | ✅ | 4K |
+| Plan | Señales/mes | ~Diario | Screenshots | Resolución | Use Case |
+|------|-------------|---------|-------------|------------|----------|
+| **Free** | 1,000 | ~33/día | ✅ | 1080p | 2 gráficos, alertas cada 1h |
+| **Pro** | 15,000 | ~500/día | ✅ | 1080p | 10 gráficos, alertas cada 15min |
+| **Lifetime** | Ilimitado | ∞ | ✅ | 4K | Sin límites - Acceso VIP |
 
 **Nota:** Los límites se configuran en `trading_signals_config.signals_quota`
+
+**Cuotas diseñadas para traders activos:** Los planes están calculados para uso real de múltiples gráficos con alertas frecuentes, no solo 1-2 señales al día.
 
 ---
 

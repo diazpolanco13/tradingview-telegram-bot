@@ -7,60 +7,51 @@ const { logger } = require('../utils/logger');
 
 /**
  * Configuración de planes desde variables de entorno
- * Formatos soportados:
- * - PLAN_FREE_QUOTA=100
- * - PLAN_PRO_QUOTA=500
- * - PLAN_PREMIUM_QUOTA=-1 (ilimitado)
+ * Alineado con planes de APIDevs: Free, Pro, Lifetime
+ * 
+ * Cuotas realistas para traders activos:
+ * - Free: ~33 señales/día (2 gráficos, alertas cada 1h)
+ * - Pro: ~500 señales/día (10 gráficos, alertas cada 15min)
+ * - Lifetime: Ilimitado (beneficio VIP)
  */
 const PLANS_CONFIG = {
   free: {
     name: 'Free',
-    quota: parseInt(process.env.PLAN_FREE_QUOTA || '100', 10),
-    screenshots: true,
-    resolution: '720p',
-    telegram: true
-  },
-  basic: {
-    name: 'Basic',
-    quota: parseInt(process.env.PLAN_BASIC_QUOTA || '250', 10),
+    quota: parseInt(process.env.PLAN_FREE_QUOTA || '1000', 10), // ~33/día
     screenshots: true,
     resolution: '1080p',
-    telegram: true
+    telegram: true,
+    description: 'Plan gratuito - 2 gráficos con alertas cada hora'
   },
   pro: {
     name: 'Pro',
-    quota: parseInt(process.env.PLAN_PRO_QUOTA || '500', 10),
+    quota: parseInt(process.env.PLAN_PRO_QUOTA || '15000', 10), // ~500/día
     screenshots: true,
     resolution: '1080p',
-    telegram: true
+    telegram: true,
+    description: 'Plan Pro (Mensual/Anual) - 10 gráficos cada 15min'
   },
-  premium: {
-    name: 'Premium',
-    quota: parseInt(process.env.PLAN_PREMIUM_QUOTA || '-1', 10), // -1 = ilimitado
+  lifetime: {
+    name: 'Lifetime',
+    quota: parseInt(process.env.PLAN_LIFETIME_QUOTA || '-1', 10), // -1 = ilimitado
     screenshots: true,
     resolution: '4k',
-    telegram: true
-  },
-  enterprise: {
-    name: 'Enterprise',
-    quota: parseInt(process.env.PLAN_ENTERPRISE_QUOTA || '-1', 10), // -1 = ilimitado
-    screenshots: true,
-    resolution: '4k',
-    telegram: true
+    telegram: true,
+    description: 'Acceso de por vida - Sin límites'
   }
 };
 
 /**
  * Cuota por defecto si no se encuentra el plan del usuario
- * Configurable con DEFAULT_QUOTA (default: 100)
+ * Configurable con DEFAULT_QUOTA (default: 1000)
  */
-const DEFAULT_QUOTA = parseInt(process.env.DEFAULT_QUOTA || '100', 10);
+const DEFAULT_QUOTA = parseInt(process.env.DEFAULT_QUOTA || '1000', 10);
 
 /**
  * Cuota para usuarios sin plan asignado
- * Configurable con FALLBACK_QUOTA (default: 50)
+ * Configurable con FALLBACK_QUOTA (default: 500)
  */
-const FALLBACK_QUOTA = parseInt(process.env.FALLBACK_QUOTA || '50', 10);
+const FALLBACK_QUOTA = parseInt(process.env.FALLBACK_QUOTA || '500', 10);
 
 /**
  * Modo de validación de cuota

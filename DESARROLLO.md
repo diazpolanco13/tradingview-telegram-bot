@@ -59,14 +59,12 @@ ENCRYPTION_KEY=a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
 SCREENSHOT_TIMEOUT=30000
 CHART_LOAD_WAIT=5000
 
-# Cuotas por Plan (REQUERIDO)
-PLAN_FREE_QUOTA=100
-PLAN_BASIC_QUOTA=250
-PLAN_PRO_QUOTA=500
-PLAN_PREMIUM_QUOTA=-1
-PLAN_ENTERPRISE_QUOTA=-1
-DEFAULT_QUOTA=100
-FALLBACK_QUOTA=50
+# Cuotas por Plan (REQUERIDO) - Alineado con APIDevs
+PLAN_FREE_QUOTA=1000          # Free: ~33/día
+PLAN_PRO_QUOTA=15000          # Pro: ~500/día
+PLAN_LIFETIME_QUOTA=-1        # Lifetime: Ilimitado
+DEFAULT_QUOTA=1000
+FALLBACK_QUOTA=500
 QUOTA_MODE=strict
 ```
 
@@ -1039,16 +1037,14 @@ Para contribuir al proyecto:
 ### **Configuración desde Variables de Entorno:**
 
 ```env
-# Planes disponibles
-PLAN_FREE_QUOTA=100        # Free: 100 señales/mes
-PLAN_BASIC_QUOTA=250       # Basic: 250 señales/mes
-PLAN_PRO_QUOTA=500         # Pro: 500 señales/mes
-PLAN_PREMIUM_QUOTA=-1      # Premium: Ilimitado
-PLAN_ENTERPRISE_QUOTA=-1   # Enterprise: Ilimitado
+# Planes de APIDevs (realistas para traders activos)
+PLAN_FREE_QUOTA=1000       # Free: ~33/día (2 gráficos, alertas cada 1h)
+PLAN_PRO_QUOTA=15000       # Pro: ~500/día (10 gráficos, alertas cada 15min)
+PLAN_LIFETIME_QUOTA=-1     # Lifetime: Ilimitado (beneficio VIP)
 
 # Cuotas por defecto
-DEFAULT_QUOTA=100          # Si no se encuentra el plan
-FALLBACK_QUOTA=50          # Sin plan asignado
+DEFAULT_QUOTA=1000         # Si no se encuentra el plan
+FALLBACK_QUOTA=500         # Sin plan asignado
 
 # Modo de validación
 QUOTA_MODE=strict          # strict/soft/disabled
@@ -1083,13 +1079,11 @@ curl https://alerts.apidevs-api.com/api/quota \
 ```
 📋 Cargando configuración de planes...
 📊 Configuración de Planes:
-   Free: 100 señales/mes (720p)
-   Basic: 250 señales/mes (1080p)
-   Pro: 500 señales/mes (1080p)
-   Premium: Ilimitado (4k)
-   Enterprise: Ilimitado (4k)
-   Default Quota: 100
-   Fallback Quota: 50
+   Free: 1000 señales/mes (1080p) - ~33/día
+   Pro: 15000 señales/mes (1080p) - ~500/día
+   Lifetime: Ilimitado (4k)
+   Default Quota: 1000
+   Fallback Quota: 500
    Quota Mode: strict
 ```
 

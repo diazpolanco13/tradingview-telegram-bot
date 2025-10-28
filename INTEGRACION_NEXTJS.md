@@ -750,7 +750,7 @@ export default function ConfigPage() {
         user_id: user.id,
         webhook_token: webhookToken,
         webhook_enabled: true,
-        signals_quota: 100, // Free tier
+        signals_quota: 1000, // Free tier (1000 señales/mes)
         signals_used_this_month: 0
       })
       .select()

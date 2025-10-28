@@ -359,8 +359,9 @@ GET https://alerts.apidevs-api.com/admin
 - **Key:** Variable de entorno `ENCRYPTION_KEY` (64 chars hex)
 
 ### **3. Rate Limiting:**
-- Webhooks: Configurable por plan (100-1000 requests/mes)
+- Webhooks: Configurable por plan (1,000-15,000 requests/mes o ilimitado)
 - Queue: 10 screenshots/minuto (BullMQ limiter)
+- Planes diseñados para traders activos con múltiples gráficos
 
 ---
 
