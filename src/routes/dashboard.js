@@ -258,6 +258,7 @@ router.put('/config', authenticateUser, async (req, res) => {
       preferred_timezone,
       telegram_enabled,
       telegram_chat_id,
+      telegram_bot_token,
       discord_webhook_url,
       email_notifications,
       tv_sessionid_plain,
@@ -273,6 +274,7 @@ router.put('/config', authenticateUser, async (req, res) => {
     if (preferred_timezone) updateData.preferred_timezone = preferred_timezone;
     if (telegram_enabled !== undefined) updateData.telegram_enabled = telegram_enabled;
     if (telegram_chat_id) updateData.telegram_chat_id = telegram_chat_id;
+    if (telegram_bot_token) updateData.telegram_bot_token = telegram_bot_token;
     if (discord_webhook_url !== undefined) updateData.discord_webhook_url = discord_webhook_url;
     if (email_notifications !== undefined) updateData.email_notifications = email_notifications;
 
