@@ -401,18 +401,31 @@ class ScreenshotService {
         throw new Error(`TradingView POST falló: ${response.status} ${response.statusText}`);
       }
 
-      // La respuesta es la URL en texto plano
-      const shareUrl = await response.text();
-      const cleanUrl = shareUrl.trim();
+      // La respuesta es la URL o ID en texto plano
+      const shareResponse = await response.text();
+      const cleanResponse = shareResponse.trim();
 
-      logger.info({ shareUrl: cleanUrl }, '✅ URL de TradingView obtenida exitosamente');
+      logger.info({ shareUrl: cleanResponse }, '✅ URL de TradingView obtenida exitosamente');
 
-      // Validar que la URL sea válida
-      if (!cleanUrl.includes('tradingview.com/x/') && !cleanUrl.includes('/x/')) {
-        throw new Error(`URL inválida recibida de TradingView: ${cleanUrl}`);
+      // Construir URL completa si solo devuelve el ID
+      let finalUrl = cleanResponse;
+      
+      if (!cleanResponse.startsWith('http')) {
+        // TradingView devolvió solo el ID (ej: "7vRdVsyc")
+        // Construir URL completa
+        finalUrl = `https://www.tradingview.com/x/${cleanResponse}/`;
+        logger.info({ originalResponse: cleanResponse, finalUrl }, '🔧 URL construida desde ID');
+      } else if (!cleanResponse.endsWith('/')) {
+        // Asegurar que termine con /
+        finalUrl = `${cleanResponse}/`;
       }
 
-      return cleanUrl;
+      // Validar que la URL sea válida
+      if (!finalUrl.includes('tradingview.com/x/')) {
+        throw new Error(`URL inválida recibida de TradingView: ${cleanResponse}`);
+      }
+
+      return finalUrl;
 
     } catch (error) {
       logger.error({ 
