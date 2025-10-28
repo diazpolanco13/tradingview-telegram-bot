@@ -9,6 +9,7 @@ const path = require('path');
 const { apiLogger: logger } = require('../utils/logger');
 const { supabase, getUserConfig } = require('../config/supabase');
 const { encrypt, decrypt } = require('../utils/encryption');
+const { getPool } = require('../services/browserPool');
 
 /**
  * GET /admin
@@ -333,6 +334,39 @@ router.delete('/test/clear-test-signals', async (req, res) => {
 
   } catch (error) {
     logger.error({ error: error.message }, 'Error clearing test signals');
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /test/browser-pool-stats
+ * Obtener estadísticas del pool de browsers
+ */
+router.get('/test/browser-pool-stats', async (req, res) => {
+  try {
+    const pool = getPool();
+    
+    if (!pool.initialized) {
+      return res.json({
+        success: true,
+        message: 'Pool no inicializado aún',
+        initialized: false
+      });
+    }
+
+    const stats = pool.getStats();
+
+    res.json({
+      success: true,
+      ...stats,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    logger.error({ error: error.message }, 'Error getting pool stats');
     res.status(500).json({
       success: false,
       error: error.message

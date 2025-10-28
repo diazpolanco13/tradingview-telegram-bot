@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const { logger } = require('../utils/logger');
 const CookieManager = require('../utils/cookieManager');
+const { getPool } = require('./browserPool');
 
 // Instancia de cookieManager
 const cookieManager = new CookieManager();
@@ -9,6 +10,7 @@ class ScreenshotService {
   constructor() {
     this.browser = null;
     this.initialized = false;
+    this.usePool = process.env.USE_BROWSER_POOL !== 'false'; // Default: true
   }
 
   /**
@@ -264,19 +266,42 @@ class ScreenshotService {
   /**
    * Capturar screenshot y subirlo a TradingView vía POST directo
    * NUEVO MÉTODO: Replica el POST interno de TradingView (más confiable que Alt+S)
+   * USA POOL DE BROWSERS para reducir tiempo de ~20s a ~6-8s
    * @param {string} ticker - Símbolo del activo
    * @param {string} chartId - ID del chart de TradingView
    * @param {object} userCookies - Cookies del usuario { sessionid, sessionid_sign }
    * @returns {Promise<string>} - URL del screenshot compartido por TradingView
    */
   async captureWithTradingViewShare(ticker, chartId, userCookies) {
-    if (!this.browser) {
-      await this.init();
-    }
-
     const fetch = require('node-fetch');
     const FormData = require('form-data');
-    const page = await this.browser.newPage();
+    
+    // Usar pool si está habilitado, sino método tradicional
+    const usingPool = this.usePool && process.env.NODE_ENV === 'production';
+    let browserSlot = null;
+    let page = null;
+
+    try {
+      if (usingPool) {
+        // MÉTODO CON POOL (rápido)
+        logger.info('🔥 Usando Hot Chart Pool...');
+        const pool = getPool();
+        
+        if (!pool.initialized) {
+          await pool.init();
+        }
+        
+        browserSlot = await pool.acquireBrowser();
+        page = browserSlot.page;
+        
+      } else {
+        // MÉTODO TRADICIONAL (fallback)
+        logger.info('🐌 Usando método tradicional (sin pool)...');
+        if (!this.browser) {
+          await this.init();
+        }
+        page = await this.browser.newPage();
+      }
 
     try {
       logger.info({ ticker, chartId }, '📸 Capturando screenshot con POST directo a TradingView');
@@ -436,10 +461,22 @@ class ScreenshotService {
       
       // Re-lanzar el error para que el worker pueda manejarlo
       throw error;
+      
     } finally {
-      await page.close();
+      // Liberar browser según el método usado
+      if (usingPool && browserSlot) {
+        const pool = getPool();
+        await pool.releaseBrowser(browserSlot);
+      } else if (page) {
+        await page.close();
+      }
     }
+  } catch (outerError) {
+    // Error general
+    logger.error({ error: outerError.message }, '❌ Error general en captura');
+    throw outerError;
   }
+}
 
   /**
    * Cerrar navegador
