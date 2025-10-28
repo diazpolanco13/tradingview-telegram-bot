@@ -184,6 +184,11 @@ Content-Type: application/json
 - `:token` = Token único del usuario (64 caracteres hex)
 - `chart_id` = ID del chart en TradingView (opcional si está en config)
 
+**Sistema de Cuotas:** ⭐
+- Valida automáticamente la cuota del usuario
+- Configurable desde variables de entorno (.env)
+- Modos: strict/soft/disabled
+
 ---
 
 ### **2. Health Check**
@@ -249,6 +254,14 @@ Body: {
 GET /api/stats
 Authorization: Bearer {supabase_jwt}
 Response: { total_signals, wins, losses, win_rate, total_pnl }
+
+# ⭐ NUEVO: Obtener cuota del usuario
+GET /api/quota
+Authorization: Bearer {supabase_jwt}
+Response: { 
+  total, used, remaining, percentage, 
+  status, warning, can_receive_signals 
+}
 ```
 
 ---
@@ -755,10 +768,12 @@ http://localhost:5002/admin
 ✅ Sistema de colas (BullMQ)
 ✅ Encriptación de cookies
 ✅ Panel de testing
+✅ Sistema de cuotas configurable (.env)
+✅ Endpoint /api/quota para dashboard
 ✅ Listo para integración con Next.js
 ```
 
-**Versión:** 2.0.0  
+**Versión:** 2.1.0  
 **Estado:** Production Ready 🚀  
 **Última actualización:** 28 Octubre 2025
 

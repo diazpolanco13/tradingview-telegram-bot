@@ -58,6 +58,16 @@ ENCRYPTION_KEY=a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
 # Screenshots (OPCIONAL)
 SCREENSHOT_TIMEOUT=30000
 CHART_LOAD_WAIT=5000
+
+# Cuotas por Plan (REQUERIDO)
+PLAN_FREE_QUOTA=100
+PLAN_BASIC_QUOTA=250
+PLAN_PRO_QUOTA=500
+PLAN_PREMIUM_QUOTA=-1
+PLAN_ENTERPRISE_QUOTA=-1
+DEFAULT_QUOTA=100
+FALLBACK_QUOTA=50
+QUOTA_MODE=strict
 ```
 
 **Generar ENCRYPTION_KEY:**
@@ -989,9 +999,11 @@ Para contribuir al proyecto:
 🟢 Screenshots:     TradingView POST working
 🟢 Fallback:        Supabase Storage ready
 🟢 Multi-tenant:    Completamente funcional
-🟢 API REST:        10+ endpoints activos
+🟢 API REST:        12+ endpoints activos
 🟢 RLS:             Aislamiento completo
 🟢 Encriptación:    AES-256-GCM
+🟢 Cuotas:          Configurables desde .env
+🟢 /api/quota:      Endpoint para dashboard
 ```
 
 ---
@@ -1016,7 +1028,68 @@ Para contribuir al proyecto:
 
 ---
 
-**Versión:** 2.0.0  
+**Versión:** 2.1.0  
 **Última actualización:** 28 Octubre 2025  
 **Autor:** @diazpolanco13
+
+---
+
+## 📊 Sistema de Cuotas Configurable
+
+### **Configuración desde Variables de Entorno:**
+
+```env
+# Planes disponibles
+PLAN_FREE_QUOTA=100        # Free: 100 señales/mes
+PLAN_BASIC_QUOTA=250       # Basic: 250 señales/mes
+PLAN_PRO_QUOTA=500         # Pro: 500 señales/mes
+PLAN_PREMIUM_QUOTA=-1      # Premium: Ilimitado
+PLAN_ENTERPRISE_QUOTA=-1   # Enterprise: Ilimitado
+
+# Cuotas por defecto
+DEFAULT_QUOTA=100          # Si no se encuentra el plan
+FALLBACK_QUOTA=50          # Sin plan asignado
+
+# Modo de validación
+QUOTA_MODE=strict          # strict/soft/disabled
+```
+
+### **Endpoints de Testing:**
+
+```bash
+# Ver configuración de planes
+curl https://alerts.apidevs-api.com/test/plans
+
+# Ver cuota de un usuario
+curl https://alerts.apidevs-api.com/test/quota/:userId
+
+# Ver cuota del usuario autenticado (dashboard)
+curl https://alerts.apidevs-api.com/api/quota \
+  -H "Authorization: Bearer JWT_TOKEN"
+```
+
+### **Cómo Funciona:**
+
+1. **Webhook recibe alerta** → Valida token
+2. **Sistema lee cuota** desde `trading_signals_config.signals_quota`
+3. **Compara con usado** (`signals_used_this_month`)
+4. **Aplica regla según QUOTA_MODE:**
+   - `strict`: Rechaza si excede
+   - `soft`: Permite pero registra advertencia
+   - `disabled`: Ignora validación
+
+### **Logs al Iniciar:**
+
+```
+📋 Cargando configuración de planes...
+📊 Configuración de Planes:
+   Free: 100 señales/mes (720p)
+   Basic: 250 señales/mes (1080p)
+   Pro: 500 señales/mes (1080p)
+   Premium: Ilimitado (4k)
+   Enterprise: Ilimitado (4k)
+   Default Quota: 100
+   Fallback Quota: 50
+   Quota Mode: strict
+```
 

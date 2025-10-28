@@ -399,6 +399,68 @@ Authorization: Bearer {jwt_token}
 
 ---
 
+### **GET `/api/quota`** ⭐ NUEVO
+
+Obtener información de cuota del usuario autenticado (para mostrar en dashboard).
+
+#### **Request:**
+
+```bash
+GET /api/quota
+Authorization: Bearer {jwt_token}
+```
+
+#### **Response:**
+
+```json
+{
+  "success": true,
+  "quota": {
+    "total": 500,
+    "used": 234,
+    "remaining": 266,
+    "total_text": "500",
+    "remaining_text": "266",
+    "percentage": 46,
+    "percentage_text": "46%",
+    "status": "OK",
+    "status_color": "green",
+    "warning": null,
+    "can_receive_signals": true,
+    "is_unlimited": false,
+    "user_id": "uuid-here"
+  }
+}
+```
+
+#### **Estados posibles:**
+
+| Status | Color | Condición |
+|--------|-------|-----------|
+| `OK` | green | < 75% usado |
+| `ADVERTENCIA` | yellow | 75-89% usado |
+| `CRÍTICO` | orange | 90-99% usado |
+| `EXCEDIDO` | red | 100% usado |
+| `ILIMITADO` | blue | Cuota ilimitada (-1) |
+
+#### **Uso en React/Next.js:**
+
+```typescript
+// Hook para obtener cuota
+async function loadQuota() {
+  const { data: { session } } = await supabase.auth.getSession()
+  
+  const response = await fetch('https://alerts.apidevs-api.com/api/quota', {
+    headers: { 'Authorization': `Bearer ${session?.access_token}` }
+  })
+  
+  const result = await response.json()
+  return result.quota
+}
+```
+
+---
+
 ## 🏥 Health & Monitoring
 
 ### **GET `/health`**
@@ -1213,7 +1275,9 @@ Ver sección "Configuración Completa (con Telegram)" arriba para el código del
 - ✅ Encriptación de cookies
 - ✅ API REST completa
 - ✅ Panel de testing
-- ✅ **Notificaciones a Telegram por usuario** ⭐ NUEVO
+- ✅ Notificaciones a Telegram por usuario
+- ✅ **Sistema de cuotas configurable desde .env** ⭐ NUEVO
+- ✅ **Endpoint `/api/quota` para dashboard** ⭐ NUEVO
 
 ### **Próximo:**
 - [ ] Soporte para Layout ID de TradingView
