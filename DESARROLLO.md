@@ -56,10 +56,10 @@ REDIS_URL=redis://default:password@45.137.194.210:6379
 ENCRYPTION_KEY=a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
 
 # Screenshots (OPCIONAL)
-SCREENSHOT_TIMEOUT=30000
-CHART_LOAD_WAIT=5000
-SCREENSHOT_WIDTH=1920    # Full HD width (16:9 ratio)
-SCREENSHOT_HEIGHT=1080   # Full HD height (recomendado para trading charts)
+SCREENSHOT_TIMEOUT=60000      # Timeout navegación (60s para charts complejos)
+CHART_LOAD_WAIT=8000          # Espera carga del chart (8s optimizado)
+SCREENSHOT_WIDTH=1920         # Full HD width (16:9 ratio)
+SCREENSHOT_HEIGHT=1080        # Full HD height (recomendado para trading charts)
 
 # Cuotas por Plan (REQUERIDO) - Alineado con APIDevs
 PLAN_FREE_QUOTA=1000          # Free: ~33/día

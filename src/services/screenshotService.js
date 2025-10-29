@@ -122,14 +122,14 @@ class ScreenshotService {
         deviceScaleFactor: 1 // Sin escalado adicional
       });
 
-      // Navegar al chart
+      // Navegar al chart (timeout aumentado)
       await page.goto(chartUrl, {
         waitUntil: 'networkidle2',
-        timeout: 30000
+        timeout: 60000 // Aumentado a 60s para charts complejos
       });
 
       // Esperar a que cargue el chart
-      const waitTime = parseInt(process.env.CHART_LOAD_WAIT) || 10000;
+      const waitTime = parseInt(process.env.CHART_LOAD_WAIT) || 8000; // Optimizado a 8s
       logger.debug({ waitTime }, 'Esperando carga del chart...');
       await page.waitForTimeout(waitTime);
 
@@ -235,14 +235,14 @@ class ScreenshotService {
         deviceScaleFactor: 1 // Sin escalado adicional
       });
 
-      // Navegar al chart
+      // Navegar al chart (timeout aumentado)
       await page.goto(chartUrl, {
         waitUntil: 'networkidle2',
-        timeout: parseInt(process.env.SCREENSHOT_TIMEOUT) || 30000
+        timeout: parseInt(process.env.SCREENSHOT_TIMEOUT) || 60000 // Aumentado a 60s
       });
 
       // Esperar carga del chart
-      const waitTime = parseInt(process.env.CHART_LOAD_WAIT) || 10000;
+      const waitTime = parseInt(process.env.CHART_LOAD_WAIT) || 8000; // Optimizado a 8s
       await page.waitForTimeout(waitTime);
 
       // Cerrar modales si existen
@@ -368,14 +368,14 @@ class ScreenshotService {
         deviceScaleFactor: 1 // Sin escalado adicional
       });
 
-      // Navegar al chart
+      // Navegar al chart (timeout aumentado para charts complejos)
       await page.goto(chartUrl, {
         waitUntil: 'networkidle2',
-        timeout: parseInt(process.env.SCREENSHOT_TIMEOUT) || 30000
+        timeout: parseInt(process.env.SCREENSHOT_TIMEOUT) || 60000 // Aumentado a 60s
       });
 
       // Esperar a que cargue completamente el chart
-      const waitTime = parseInt(process.env.CHART_LOAD_WAIT) || 10000;
+      const waitTime = parseInt(process.env.CHART_LOAD_WAIT) || 8000; // Optimizado a 8s
       logger.info({ waitTime }, '⏳ Esperando carga completa del chart...');
       await page.waitForTimeout(waitTime);
 
