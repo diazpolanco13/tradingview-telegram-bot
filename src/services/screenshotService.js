@@ -404,10 +404,41 @@ class ScreenshotService {
       logger.info({ waitTime }, '⏳ Esperando carga completa del chart...');
       await page.waitForTimeout(waitTime);
 
-      // Cerrar modales que puedan interferir
+      // 🎯 DETECTAR Y CERRAR POPUP ACTIVAMENTE (Fallback del CSS)
+      try {
+        // Buscar botones de cierre del popup
+        const popupCloseSelectors = [
+          'button:has-text("Don\'t need")',
+          'button:has-text("No thanks")',
+          'button:has-text("Close")',
+          'button:has-text("Cerrar")',
+          'button[aria-label="Close"]',
+          'button[aria-label="Cerrar"]',
+          '.tv-dialog__close',
+          '[data-name="close"]'
+        ];
+
+        for (const selector of popupCloseSelectors) {
+          try {
+            const button = await page.$(selector);
+            if (button) {
+              await button.click();
+              logger.info(`✅ Popup cerrado con: ${selector}`);
+              await page.waitForTimeout(500); // Esperar a que se cierre
+              break;
+            }
+          } catch (e) {
+            // Siguiente selector
+          }
+        }
+      } catch (popupError) {
+        logger.debug('ℹ️ No se detectó popup para cerrar');
+      }
+
+      // Presionar Escape como última barrera
       try {
         await page.keyboard.press('Escape');
-        await page.waitForTimeout(1000);
+        await page.waitForTimeout(500);
       } catch (err) {
         // Ignorar
       }
