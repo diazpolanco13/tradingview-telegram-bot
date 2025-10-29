@@ -37,3 +37,8 @@ coverage/
 # Build
 dist/
 build/
+
+# MCP Configuration (contains secrets)
+mcp
+mcp.json
+*.mcp.json
