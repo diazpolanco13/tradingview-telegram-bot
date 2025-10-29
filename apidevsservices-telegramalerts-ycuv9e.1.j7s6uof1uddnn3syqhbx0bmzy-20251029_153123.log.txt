@@ -1,0 +1,719 @@
+2025-10-29T15:05:16.733Z > tradingview-telegram-bot@1.0.0 start
+2025-10-29T15:05:16.733Z > node src/server.js
+2025-10-29T15:05:17.141Z ⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+2025-10-29T15:05:17.592Z {"level":30,"time":1761750317591,"pid":19,"hostname":"92ef107db885","msg":"🔌 Redis detectado - Cargando BullMQ..."}
+2025-10-29T15:05:17.893Z {"level":30,"time":1761750317805,"pid":19,"hostname":"92ef107db885","msg":"✅ BullMQ Queue cargada correctamente"}
+2025-10-29T15:05:17.893Z {"level":30,"time":1761750317819,"pid":19,"hostname":"92ef107db885","msg":"🚀 Starting TradingView Microservice V2..."}
+2025-10-29T15:05:17.893Z {"level":30,"time":1761750317819,"pid":19,"hostname":"92ef107db885","msg":"🔌 Conectando a Supabase..."}
+2025-10-29T15:05:17.900Z {"level":30,"time":1761750317900,"pid":19,"hostname":"92ef107db885","msg":"✅ Redis conectado correctamente"}
+2025-10-29T15:05:17.908Z {"level":30,"time":1761750317906,"pid":19,"hostname":"92ef107db885","msg":"🔄 Redis ready - Iniciando Screenshot Worker..."}
+2025-10-29T15:05:18.421Z {"level":30,"time":1761750318412,"pid":19,"hostname":"92ef107db885","msg":"🔄 Inicializando Screenshot Worker..."}
+2025-10-29T15:05:18.421Z {"level":30,"time":1761750318414,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot Worker inicializado correctamente"}
+2025-10-29T15:05:18.961Z {"level":30,"time":1761750318960,"pid":19,"hostname":"92ef107db885","msg":"✅ Supabase conectado correctamente"}
+2025-10-29T15:05:18.962Z {"level":30,"time":1761750318960,"pid":19,"hostname":"92ef107db885","msg":"✅ Supabase conectado correctamente"}
+2025-10-29T15:05:18.962Z {"level":30,"time":1761750318960,"pid":19,"hostname":"92ef107db885","msg":"🔌 Conectando a Redis..."}
+2025-10-29T15:05:18.962Z [1m[43m[30m
+2025-10-29T15:05:18.962Z Puppeteer old Headless deprecation warning:[0m[33m
+2025-10-29T15:05:18.962Z In the near future `headless: true` will default to the new Headless mode
+2025-10-29T15:05:18.962Z for Chrome instead of the old Headless implementation. For more
+2025-10-29T15:05:18.962Z information, please see https://developer.chrome.com/articles/new-headless/.
+2025-10-29T15:05:18.962Z Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+2025-10-29T15:05:18.962Z If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+2025-10-29T15:05:18.964Z {"level":30,"time":1761750318961,"pid":19,"hostname":"92ef107db885","msg":"✅ Redis PING exitoso"}
+2025-10-29T15:05:18.965Z {"level":30,"time":1761750318961,"pid":19,"hostname":"92ef107db885","msg":"📸 Inicializando Puppeteer..."}
+2025-10-29T15:05:18.965Z {"level":30,"time":1761750318962,"pid":19,"hostname":"92ef107db885","msg":"🚀 Inicializando Puppeteer..."}
+2025-10-29T15:05:19.723Z {"level":30,"time":1761750319723,"pid":19,"hostname":"92ef107db885","msg":"✅ Puppeteer inicializado correctamente"}
+2025-10-29T15:05:19.730Z {"level":30,"time":1761750319723,"pid":19,"hostname":"92ef107db885","msg":"📋 Cargando configuración de planes..."}
+2025-10-29T15:05:19.730Z {"level":30,"time":1761750319723,"pid":19,"hostname":"92ef107db885","msg":"📊 Configuración de Planes:"}
+2025-10-29T15:05:19.730Z {"level":30,"time":1761750319723,"pid":19,"hostname":"92ef107db885","msg":"   Free: 1000 señales/mes (1080p)"}
+2025-10-29T15:05:19.730Z {"level":30,"time":1761750319723,"pid":19,"hostname":"92ef107db885","msg":"   Pro: 15000 señales/mes (1080p)"}
+2025-10-29T15:05:19.730Z {"level":30,"time":1761750319723,"pid":19,"hostname":"92ef107db885","msg":"   Lifetime: Ilimitado (4k)"}
+2025-10-29T15:05:19.730Z {"level":30,"time":1761750319723,"pid":19,"hostname":"92ef107db885","msg":"   Default Quota: 100"}
+2025-10-29T15:05:19.730Z {"level":30,"time":1761750319723,"pid":19,"hostname":"92ef107db885","msg":"   Fallback Quota: 50"}
+2025-10-29T15:05:19.730Z {"level":30,"time":1761750319724,"pid":19,"hostname":"92ef107db885","msg":"   Quota Mode: strict"}
+2025-10-29T15:05:19.730Z {"level":30,"time":1761750319728,"pid":19,"hostname":"92ef107db885","msg":"\n╔════════════════════════════════════════════════════════════════╗\n║  🎯 TradingView Microservice - RUNNING                         ║\n║                                                                ║\n║  🌐 Server:       http://localhost:5002                     ║\n║  📡 Webhook:      http://localhost:5002/webhook/:token      ║\n║  🔌 API:          http://localhost:5002/api/*               ║\n║  ❤️  Health:       http://localhost:5002/health             ║\n║  🎛️  Admin Panel:  http://localhost:5002/admin              ║\n║                                                                ║\n║  Environment:     production                                    ║\n║  Supabase:        ✅ Connected                                  ║\n║  Redis/BullMQ:    ✅ Connected                    ║\n║  Puppeteer:       ✅ Ready                                   ║\n║  Worker:          ✅ Running (concurrency: 2)                    ║\n║                                                                ║\n║  🚀 Microservicio listo para recibir señales multi-tenant     ║\n╚════════════════════════════════════════════════════════════════╝\n      "}
+2025-10-29T15:09:00.963Z {"level":30,"time":1761750540962,"pid":19,"hostname":"92ef107db885","token":"ab4d53d8...","msg":"📨 Webhook recibido"}
+2025-10-29T15:09:01.366Z {"level":30,"time":1761750541366,"pid":19,"hostname":"92ef107db885","userId":"71b7b58f-6c9d-4133-88e5-c69972dea205","msg":"✅ Token validado correctamente"}
+2025-10-29T15:09:01.377Z {"level":30,"time":1761750541370,"pid":19,"hostname":"92ef107db885","ticker":"OKX:DOGEUSDT.P","signal_type":"Cruce TSI/TSL 🔴","msg":"📊 Señal parseada"}
+2025-10-29T15:09:01.526Z {"level":30,"time":1761750541525,"pid":19,"hostname":"92ef107db885","msg":"✅ Señal insertada: 188a90c2-1697-48d4-9bad-ffd6afb3d718 - OKX:DOGEUSDT.P"}
+2025-10-29T15:09:01.530Z {"level":30,"time":1761750541525,"pid":19,"hostname":"92ef107db885","signalId":"188a90c2-1697-48d4-9bad-ffd6afb3d718","msg":"✅ Señal insertada en Supabase"}
+2025-10-29T15:09:01.571Z {"level":30,"time":1761750541570,"pid":19,"hostname":"92ef107db885","token":"ab4d53d8...","msg":"📨 Webhook recibido"}
+2025-10-29T15:09:01.692Z {"level":30,"time":1761750541691,"pid":19,"hostname":"92ef107db885","msg":"⚠️ Usando cookies en texto plano (no encriptadas)"}
+2025-10-29T15:09:01.697Z {"level":30,"time":1761750541697,"pid":19,"hostname":"92ef107db885","msg":"⏳ Job esperando: 188a90c2-1697-48d4-9bad-ffd6afb3d718"}
+2025-10-29T15:09:01.712Z {"level":30,"time":1761750541697,"pid":19,"hostname":"92ef107db885","msg":"📸 Job de screenshot encolado: 188a90c2-1697-48d4-9bad-ffd6afb3d718"}
+2025-10-29T15:09:01.713Z {"level":30,"time":1761750541697,"pid":19,"hostname":"92ef107db885","signalId":"188a90c2-1697-48d4-9bad-ffd6afb3d718","msg":"📸 Screenshot encolado correctamente"}
+2025-10-29T15:09:01.713Z {"level":30,"time":1761750541707,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 188a90c2-1697-48d4-9bad-ffd6afb3d718 - OKX:DOGEUSDT.P"}
+2025-10-29T15:09:01.840Z {"level":30,"time":1761750541839,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 188a90c2-1697-48d4-9bad-ffd6afb3d718 - processing"}
+2025-10-29T15:09:01.847Z [1m[43m[30m
+2025-10-29T15:09:01.847Z Puppeteer old Headless deprecation warning:[0m[33m
+2025-10-29T15:09:01.848Z In the near future `headless: true` will default to the new Headless mode
+2025-10-29T15:09:01.848Z for Chrome instead of the old Headless implementation. For more
+2025-10-29T15:09:01.848Z information, please see https://developer.chrome.com/articles/new-headless/.
+2025-10-29T15:09:01.848Z Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+2025-10-29T15:09:01.848Z If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+2025-10-29T15:09:01.848Z {"level":30,"time":1761750541839,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:09:01.848Z {"level":30,"time":1761750541844,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:09:01.848Z {"level":30,"time":1761750541845,"pid":19,"hostname":"92ef107db885","minBrowsers":5,"maxBrowsers":12,"msg":"🔥 Inicializando Hot Chart Pool..."}
+2025-10-29T15:09:01.908Z {"level":30,"time":1761750541907,"pid":19,"hostname":"92ef107db885","userId":"71b7b58f-6c9d-4133-88e5-c69972dea205","msg":"✅ Token validado correctamente"}
+2025-10-29T15:09:01.913Z {"level":30,"time":1761750541909,"pid":19,"hostname":"92ef107db885","ticker":"OKX:BNBUSDT.P","signal_type":"Cruce TSI/TSL 🔴","msg":"📊 Señal parseada"}
+2025-10-29T15:09:02.036Z {"level":30,"time":1761750542035,"pid":19,"hostname":"92ef107db885","msg":"✅ Señal insertada: 52c29150-a6e6-41be-898d-a2a528d7bcde - OKX:BNBUSDT.P"}
+2025-10-29T15:09:02.040Z {"level":30,"time":1761750542035,"pid":19,"hostname":"92ef107db885","signalId":"52c29150-a6e6-41be-898d-a2a528d7bcde","msg":"✅ Señal insertada en Supabase"}
+2025-10-29T15:09:02.139Z {"level":30,"time":1761750542138,"pid":19,"hostname":"92ef107db885","msg":"⚠️ Usando cookies en texto plano (no encriptadas)"}
+2025-10-29T15:09:02.153Z {"level":30,"time":1761750542142,"pid":19,"hostname":"92ef107db885","msg":"⏳ Job esperando: 52c29150-a6e6-41be-898d-a2a528d7bcde"}
+2025-10-29T15:09:02.153Z {"level":30,"time":1761750542142,"pid":19,"hostname":"92ef107db885","msg":"📸 Job de screenshot encolado: 52c29150-a6e6-41be-898d-a2a528d7bcde"}
+2025-10-29T15:09:02.153Z {"level":30,"time":1761750542142,"pid":19,"hostname":"92ef107db885","signalId":"52c29150-a6e6-41be-898d-a2a528d7bcde","msg":"📸 Screenshot encolado correctamente"}
+2025-10-29T15:09:02.153Z {"level":30,"time":1761750542144,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 52c29150-a6e6-41be-898d-a2a528d7bcde - OKX:BNBUSDT.P"}
+2025-10-29T15:09:02.259Z [1m[43m[30m
+2025-10-29T15:09:02.259Z Puppeteer old Headless deprecation warning:[0m[33m
+2025-10-29T15:09:02.259Z In the near future `headless: true` will default to the new Headless mode
+2025-10-29T15:09:02.259Z for Chrome instead of the old Headless implementation. For more
+2025-10-29T15:09:02.259Z information, please see https://developer.chrome.com/articles/new-headless/.
+2025-10-29T15:09:02.259Z Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+2025-10-29T15:09:02.259Z If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+2025-10-29T15:09:02.265Z {"level":30,"time":1761750542255,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 52c29150-a6e6-41be-898d-a2a528d7bcde - processing"}
+2025-10-29T15:09:02.274Z {"level":30,"time":1761750542256,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:09:02.274Z {"level":30,"time":1761750542256,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:09:02.274Z {"level":30,"time":1761750542256,"pid":19,"hostname":"92ef107db885","minBrowsers":5,"maxBrowsers":12,"msg":"🔥 Inicializando Hot Chart Pool..."}
+2025-10-29T15:09:06.795Z [1m[43m[30m
+2025-10-29T15:09:06.795Z Puppeteer old Headless deprecation warning:[0m[33m
+2025-10-29T15:09:06.795Z In the near future `headless: true` will default to the new Headless mode
+2025-10-29T15:09:06.795Z for Chrome instead of the old Headless implementation. For more
+2025-10-29T15:09:06.795Z information, please see https://developer.chrome.com/articles/new-headless/.
+2025-10-29T15:09:06.795Z Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+2025-10-29T15:09:06.795Z If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+2025-10-29T15:09:06.797Z {"level":30,"time":1761750546794,"pid":19,"hostname":"92ef107db885","browserId":"browser-0","poolSize":1,"msg":"✅ Browser creado y agregado al pool"}
+2025-10-29T15:09:07.256Z [1m[43m[30m
+2025-10-29T15:09:07.256Z Puppeteer old Headless deprecation warning:[0m[33m
+2025-10-29T15:09:07.256Z In the near future `headless: true` will default to the new Headless mode
+2025-10-29T15:09:07.256Z for Chrome instead of the old Headless implementation. For more
+2025-10-29T15:09:07.256Z information, please see https://developer.chrome.com/articles/new-headless/.
+2025-10-29T15:09:07.256Z Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+2025-10-29T15:09:07.256Z If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+2025-10-29T15:09:07.257Z {"level":30,"time":1761750547256,"pid":19,"hostname":"92ef107db885","browserId":"browser-1","poolSize":2,"msg":"✅ Browser creado y agregado al pool"}
+2025-10-29T15:09:12.748Z [1m[43m[30m
+2025-10-29T15:09:12.748Z Puppeteer old Headless deprecation warning:[0m[33m
+2025-10-29T15:09:12.748Z In the near future `headless: true` will default to the new Headless mode
+2025-10-29T15:09:12.748Z for Chrome instead of the old Headless implementation. For more
+2025-10-29T15:09:12.748Z information, please see https://developer.chrome.com/articles/new-headless/.
+2025-10-29T15:09:12.748Z Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+2025-10-29T15:09:12.748Z If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+2025-10-29T15:09:12.748Z {"level":30,"time":1761750552747,"pid":19,"hostname":"92ef107db885","browserId":"browser-2","poolSize":3,"msg":"✅ Browser creado y agregado al pool"}
+2025-10-29T15:09:13.699Z {"level":30,"time":1761750553698,"pid":19,"hostname":"92ef107db885","browserId":"browser-3","poolSize":4,"msg":"✅ Browser creado y agregado al pool"}
+2025-10-29T15:09:13.699Z [1m[43m[30m
+2025-10-29T15:09:13.700Z Puppeteer old Headless deprecation warning:[0m[33m
+2025-10-29T15:09:13.700Z In the near future `headless: true` will default to the new Headless mode
+2025-10-29T15:09:13.700Z for Chrome instead of the old Headless implementation. For more
+2025-10-29T15:09:13.700Z information, please see https://developer.chrome.com/articles/new-headless/.
+2025-10-29T15:09:13.700Z Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+2025-10-29T15:09:13.700Z If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+2025-10-29T15:09:20.476Z {"level":30,"time":1761750560475,"pid":19,"hostname":"92ef107db885","browserId":"browser-4","poolSize":5,"msg":"✅ Browser creado y agregado al pool"}
+2025-10-29T15:09:20.479Z [1m[43m[30m
+2025-10-29T15:09:20.479Z Puppeteer old Headless deprecation warning:[0m[33m
+2025-10-29T15:09:20.479Z In the near future `headless: true` will default to the new Headless mode
+2025-10-29T15:09:20.479Z for Chrome instead of the old Headless implementation. For more
+2025-10-29T15:09:20.479Z information, please see https://developer.chrome.com/articles/new-headless/.
+2025-10-29T15:09:20.479Z Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+2025-10-29T15:09:20.479Z If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+2025-10-29T15:09:21.739Z {"level":30,"time":1761750561738,"pid":19,"hostname":"92ef107db885","browserId":"browser-5","poolSize":6,"msg":"✅ Browser creado y agregado al pool"}
+2025-10-29T15:09:21.738Z [1m[43m[30m
+2025-10-29T15:09:21.739Z Puppeteer old Headless deprecation warning:[0m[33m
+2025-10-29T15:09:21.739Z In the near future `headless: true` will default to the new Headless mode
+2025-10-29T15:09:21.739Z for Chrome instead of the old Headless implementation. For more
+2025-10-29T15:09:21.739Z information, please see https://developer.chrome.com/articles/new-headless/.
+2025-10-29T15:09:21.739Z Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+2025-10-29T15:09:21.739Z If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+2025-10-29T15:09:30.320Z {"level":30,"time":1761750570318,"pid":19,"hostname":"92ef107db885","browserId":"browser-6","poolSize":7,"msg":"✅ Browser creado y agregado al pool"}
+2025-10-29T15:09:30.323Z [1m[43m[30m
+2025-10-29T15:09:30.323Z Puppeteer old Headless deprecation warning:[0m[33m
+2025-10-29T15:09:30.323Z In the near future `headless: true` will default to the new Headless mode
+2025-10-29T15:09:30.323Z for Chrome instead of the old Headless implementation. For more
+2025-10-29T15:09:30.323Z information, please see https://developer.chrome.com/articles/new-headless/.
+2025-10-29T15:09:30.323Z Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+2025-10-29T15:09:30.323Z If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+2025-10-29T15:09:30.361Z (node:19) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 exit listeners added to [process]. Use emitter.setMaxListeners() to increase limit
+2025-10-29T15:09:30.361Z (Use `node --trace-warnings ...` to show where the warning was created)
+2025-10-29T15:09:30.361Z (node:19) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 SIGINT listeners added to [process]. Use emitter.setMaxListeners() to increase limit
+2025-10-29T15:09:30.361Z (node:19) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 SIGTERM listeners added to [process]. Use emitter.setMaxListeners() to increase limit
+2025-10-29T15:09:32.288Z [1m[43m[30m
+2025-10-29T15:09:32.288Z Puppeteer old Headless deprecation warning:[0m[33m
+2025-10-29T15:09:32.289Z In the near future `headless: true` will default to the new Headless mode
+2025-10-29T15:09:32.289Z for Chrome instead of the old Headless implementation. For more
+2025-10-29T15:09:32.289Z information, please see https://developer.chrome.com/articles/new-headless/.
+2025-10-29T15:09:32.289Z Consider opting in early by passing `headless: "new"` to `puppeteer.launch()`
+2025-10-29T15:09:32.289Z If you encounter any bugs, please report them to https://github.com/puppeteer/puppeteer/issues/new/choose.[0m
+2025-10-29T15:09:32.288Z {"level":30,"time":1761750572288,"pid":19,"hostname":"92ef107db885","browserId":"browser-7","poolSize":8,"msg":"✅ Browser creado y agregado al pool"}
+2025-10-29T15:09:32.313Z (node:19) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 SIGHUP listeners added to [process]. Use emitter.setMaxListeners() to increase limit
+2025-10-29T15:09:42.677Z {"level":30,"time":1761750582677,"pid":19,"hostname":"92ef107db885","browserId":"browser-8","poolSize":9,"msg":"✅ Browser creado y agregado al pool"}
+2025-10-29T15:09:42.684Z {"level":30,"time":1761750582679,"pid":19,"hostname":"92ef107db885","interval":600,"msg":"🧹 Cleanup automático iniciado"}
+2025-10-29T15:09:42.684Z {"level":30,"time":1761750582679,"pid":19,"hostname":"92ef107db885","poolSize":9,"msg":"✅ Hot Chart Pool inicializado correctamente"}
+2025-10-29T15:09:42.684Z {"level":30,"time":1761750582679,"pid":19,"hostname":"92ef107db885","ticker":"OKX:DOGEUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:09:42.696Z {"level":30,"time":1761750582695,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:DOGEUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:09:43.251Z {"level":30,"time":1761750583246,"pid":19,"hostname":"92ef107db885","browserId":"browser-9","poolSize":10,"msg":"✅ Browser creado y agregado al pool"}
+2025-10-29T15:09:43.252Z {"level":30,"time":1761750583249,"pid":19,"hostname":"92ef107db885","interval":600,"msg":"🧹 Cleanup automático iniciado"}
+2025-10-29T15:09:43.252Z {"level":30,"time":1761750583249,"pid":19,"hostname":"92ef107db885","poolSize":10,"msg":"✅ Hot Chart Pool inicializado correctamente"}
+2025-10-29T15:09:43.252Z {"level":30,"time":1761750583249,"pid":19,"hostname":"92ef107db885","ticker":"OKX:BNBUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:09:43.257Z {"level":30,"time":1761750583256,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:BNBUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:10:05.898Z {"level":30,"time":1761750605892,"pid":19,"hostname":"92ef107db885","token":"ab4d53d8...","msg":"📨 Webhook recibido"}
+2025-10-29T15:10:06.181Z {"level":30,"time":1761750606180,"pid":19,"hostname":"92ef107db885","userId":"71b7b58f-6c9d-4133-88e5-c69972dea205","msg":"✅ Token validado correctamente"}
+2025-10-29T15:10:06.193Z {"level":30,"time":1761750606181,"pid":19,"hostname":"92ef107db885","ticker":"OKX:RENDERUSDT.P","signal_type":"TSL Cruza Nivel 0 🔴","msg":"📊 Señal parseada"}
+2025-10-29T15:10:06.385Z {"level":30,"time":1761750606382,"pid":19,"hostname":"92ef107db885","msg":"✅ Señal insertada: 9b1db960-0361-4d86-83e6-fb384cbc4500 - OKX:RENDERUSDT.P"}
+2025-10-29T15:10:06.389Z {"level":30,"time":1761750606384,"pid":19,"hostname":"92ef107db885","signalId":"9b1db960-0361-4d86-83e6-fb384cbc4500","msg":"✅ Señal insertada en Supabase"}
+2025-10-29T15:10:06.547Z {"level":30,"time":1761750606546,"pid":19,"hostname":"92ef107db885","msg":"⚠️ Usando cookies en texto plano (no encriptadas)"}
+2025-10-29T15:10:06.560Z {"level":30,"time":1761750606559,"pid":19,"hostname":"92ef107db885","msg":"⏳ Job esperando: 9b1db960-0361-4d86-83e6-fb384cbc4500"}
+2025-10-29T15:10:06.598Z {"level":30,"time":1761750606559,"pid":19,"hostname":"92ef107db885","msg":"📸 Job de screenshot encolado: 9b1db960-0361-4d86-83e6-fb384cbc4500"}
+2025-10-29T15:10:06.598Z {"level":30,"time":1761750606559,"pid":19,"hostname":"92ef107db885","signalId":"9b1db960-0361-4d86-83e6-fb384cbc4500","msg":"📸 Screenshot encolado correctamente"}
+2025-10-29T15:10:06.598Z {"level":30,"time":1761750606579,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 9b1db960-0361-4d86-83e6-fb384cbc4500 - OKX:RENDERUSDT.P"}
+2025-10-29T15:10:06.762Z {"level":30,"time":1761750606762,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 9b1db960-0361-4d86-83e6-fb384cbc4500 - processing"}
+2025-10-29T15:10:06.770Z {"level":30,"time":1761750606762,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:10:06.770Z {"level":30,"time":1761750606762,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:10:06.770Z {"level":30,"time":1761750606763,"pid":19,"hostname":"92ef107db885","ticker":"OKX:RENDERUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:10:06.778Z {"level":30,"time":1761750606776,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:RENDERUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:10:15.951Z {"level":30,"time":1761750615949,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:10:22.254Z {"level":30,"time":1761750622253,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:10:24.998Z {"level":30,"time":1761750624998,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:10:25.460Z {"level":30,"time":1761750625457,"pid":19,"hostname":"92ef107db885","bufferSize":259662,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:10:25.505Z {"level":30,"time":1761750625457,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:10:26.814Z {"level":30,"time":1761750626814,"pid":19,"hostname":"92ef107db885","shareUrl":"GzTxkaLO","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:10:26.818Z {"level":30,"time":1761750626814,"pid":19,"hostname":"92ef107db885","originalResponse":"GzTxkaLO","finalUrl":"https://www.tradingview.com/x/GzTxkaLO/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:10:27.008Z {"level":30,"time":1761750627008,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/GzTxkaLO/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:10:27.256Z {"level":30,"time":1761750627256,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 188a90c2-1697-48d4-9bad-ffd6afb3d718"}
+2025-10-29T15:10:27.458Z {"level":30,"time":1761750627457,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:DOGEUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:10:28.277Z {"level":30,"time":1761750628277,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:10:28.288Z {"level":50,"time":1761750628277,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 188a90c2-1697-48d4-9bad-ffd6afb3d718:"}
+2025-10-29T15:10:28.428Z {"level":30,"time":1761750628421,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 188a90c2-1697-48d4-9bad-ffd6afb3d718 - failed"}
+2025-10-29T15:10:28.429Z {"level":50,"time":1761750628429,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 188a90c2-1697-48d4-9bad-ffd6afb3d718 - method is not defined"}
+2025-10-29T15:10:31.389Z {"level":30,"time":1761750631387,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:10:31.856Z {"level":30,"time":1761750631856,"pid":19,"hostname":"92ef107db885","bufferSize":262772,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:10:31.867Z {"level":30,"time":1761750631856,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:10:33.184Z {"level":30,"time":1761750633183,"pid":19,"hostname":"92ef107db885","shareUrl":"7xDjTsct","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:10:33.185Z {"level":30,"time":1761750633184,"pid":19,"hostname":"92ef107db885","originalResponse":"7xDjTsct","finalUrl":"https://www.tradingview.com/x/7xDjTsct/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:10:33.326Z {"level":30,"time":1761750633326,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/7xDjTsct/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:10:33.470Z {"level":30,"time":1761750633470,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 52c29150-a6e6-41be-898d-a2a528d7bcde"}
+2025-10-29T15:10:33.523Z {"level":30,"time":1761750633523,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 188a90c2-1697-48d4-9bad-ffd6afb3d718 - OKX:DOGEUSDT.P"}
+2025-10-29T15:10:33.599Z {"level":30,"time":1761750633595,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:BNBUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:10:33.738Z {"level":30,"time":1761750633737,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 188a90c2-1697-48d4-9bad-ffd6afb3d718 - processing"}
+2025-10-29T15:10:33.742Z {"level":30,"time":1761750633738,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:10:33.742Z {"level":30,"time":1761750633738,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:10:33.742Z {"level":30,"time":1761750633738,"pid":19,"hostname":"92ef107db885","ticker":"OKX:DOGEUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:10:33.752Z {"level":30,"time":1761750633748,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:DOGEUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:10:33.891Z {"level":30,"time":1761750633891,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:10:33.899Z {"level":50,"time":1761750633891,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 52c29150-a6e6-41be-898d-a2a528d7bcde:"}
+2025-10-29T15:10:33.996Z {"level":30,"time":1761750633995,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 52c29150-a6e6-41be-898d-a2a528d7bcde - failed"}
+2025-10-29T15:10:33.998Z {"level":50,"time":1761750633997,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 52c29150-a6e6-41be-898d-a2a528d7bcde - method is not defined"}
+2025-10-29T15:10:35.617Z {"level":30,"time":1761750635617,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:10:39.107Z {"level":30,"time":1761750639105,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 52c29150-a6e6-41be-898d-a2a528d7bcde - OKX:BNBUSDT.P"}
+2025-10-29T15:10:39.277Z {"level":30,"time":1761750639277,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 52c29150-a6e6-41be-898d-a2a528d7bcde - processing"}
+2025-10-29T15:10:39.280Z {"level":30,"time":1761750639277,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:10:39.281Z {"level":30,"time":1761750639278,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:10:39.281Z {"level":30,"time":1761750639278,"pid":19,"hostname":"92ef107db885","ticker":"OKX:BNBUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:10:39.289Z {"level":30,"time":1761750639288,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:BNBUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:10:44.676Z {"level":30,"time":1761750644676,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:10:45.162Z {"level":30,"time":1761750645159,"pid":19,"hostname":"92ef107db885","bufferSize":249456,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:10:45.172Z {"level":30,"time":1761750645162,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:10:46.840Z {"level":30,"time":1761750646840,"pid":19,"hostname":"92ef107db885","shareUrl":"n6wKAUoA","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:10:46.844Z {"level":30,"time":1761750646840,"pid":19,"hostname":"92ef107db885","originalResponse":"n6wKAUoA","finalUrl":"https://www.tradingview.com/x/n6wKAUoA/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:10:47.017Z {"level":30,"time":1761750647013,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/n6wKAUoA/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:10:47.212Z {"level":30,"time":1761750647206,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 9b1db960-0361-4d86-83e6-fb384cbc4500"}
+2025-10-29T15:10:47.334Z {"level":30,"time":1761750647334,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:RENDERUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:10:47.629Z {"level":30,"time":1761750647629,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:10:47.633Z {"level":50,"time":1761750647629,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 9b1db960-0361-4d86-83e6-fb384cbc4500:"}
+2025-10-29T15:10:47.766Z {"level":30,"time":1761750647765,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 9b1db960-0361-4d86-83e6-fb384cbc4500 - failed"}
+2025-10-29T15:10:47.768Z {"level":50,"time":1761750647768,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 9b1db960-0361-4d86-83e6-fb384cbc4500 - method is not defined"}
+2025-10-29T15:10:52.823Z {"level":30,"time":1761750652821,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 9b1db960-0361-4d86-83e6-fb384cbc4500 - OKX:RENDERUSDT.P"}
+2025-10-29T15:10:52.985Z {"level":30,"time":1761750652985,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 9b1db960-0361-4d86-83e6-fb384cbc4500 - processing"}
+2025-10-29T15:10:52.986Z {"level":30,"time":1761750652985,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:10:52.986Z {"level":30,"time":1761750652985,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:10:52.986Z {"level":30,"time":1761750652985,"pid":19,"hostname":"92ef107db885","ticker":"OKX:RENDERUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:10:52.992Z {"level":30,"time":1761750652992,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:RENDERUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:10:56.955Z {"level":30,"time":1761750656954,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:11:00.368Z {"level":30,"time":1761750660367,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:11:01.366Z {"level":30,"time":1761750661365,"pid":19,"hostname":"92ef107db885","token":"ab4d53d8...","msg":"📨 Webhook recibido"}
+2025-10-29T15:11:01.388Z {"level":30,"time":1761750661384,"pid":19,"hostname":"92ef107db885","token":"ab4d53d8...","msg":"📨 Webhook recibido"}
+2025-10-29T15:11:01.560Z {"level":30,"time":1761750661559,"pid":19,"hostname":"92ef107db885","userId":"71b7b58f-6c9d-4133-88e5-c69972dea205","msg":"✅ Token validado correctamente"}
+2025-10-29T15:11:01.574Z {"level":30,"time":1761750661564,"pid":19,"hostname":"92ef107db885","ticker":"OKX:SUIUSDT.P","signal_type":"Cruce TSI/TSL 🔴","msg":"📊 Señal parseada"}
+2025-10-29T15:11:01.580Z {"level":30,"time":1761750661573,"pid":19,"hostname":"92ef107db885","userId":"71b7b58f-6c9d-4133-88e5-c69972dea205","msg":"✅ Token validado correctamente"}
+2025-10-29T15:11:01.580Z {"level":30,"time":1761750661574,"pid":19,"hostname":"92ef107db885","ticker":"OKX:SUIUSDT.P","signal_type":"Cruce TSI/TSL 🔴","msg":"📊 Señal parseada"}
+2025-10-29T15:11:01.677Z {"level":30,"time":1761750661670,"pid":19,"hostname":"92ef107db885","token":"ab4d53d8...","msg":"📨 Webhook recibido"}
+2025-10-29T15:11:01.711Z {"level":30,"time":1761750661706,"pid":19,"hostname":"92ef107db885","msg":"✅ Señal insertada: 8d614573-eae2-43a1-abd3-55bc5c0d83b0 - OKX:SUIUSDT.P"}
+2025-10-29T15:11:01.712Z {"level":30,"time":1761750661709,"pid":19,"hostname":"92ef107db885","signalId":"8d614573-eae2-43a1-abd3-55bc5c0d83b0","msg":"✅ Señal insertada en Supabase"}
+2025-10-29T15:11:01.719Z {"level":30,"time":1761750661715,"pid":19,"hostname":"92ef107db885","msg":"✅ Señal insertada: fcc1d982-8267-4512-8553-4c1dfeb69a3b - OKX:SUIUSDT.P"}
+2025-10-29T15:11:01.721Z {"level":30,"time":1761750661715,"pid":19,"hostname":"92ef107db885","signalId":"fcc1d982-8267-4512-8553-4c1dfeb69a3b","msg":"✅ Señal insertada en Supabase"}
+2025-10-29T15:11:01.854Z {"level":30,"time":1761750661854,"pid":19,"hostname":"92ef107db885","userId":"71b7b58f-6c9d-4133-88e5-c69972dea205","msg":"✅ Token validado correctamente"}
+2025-10-29T15:11:01.858Z {"level":30,"time":1761750661854,"pid":19,"hostname":"92ef107db885","ticker":"OKX:BNBUSDT.P","signal_type":"TSL Cruza Nivel 0 🔴","msg":"📊 Señal parseada"}
+2025-10-29T15:11:01.875Z {"level":30,"time":1761750661859,"pid":19,"hostname":"92ef107db885","msg":"⚠️ Usando cookies en texto plano (no encriptadas)"}
+2025-10-29T15:11:01.876Z {"level":30,"time":1761750661862,"pid":19,"hostname":"92ef107db885","msg":"⚠️ Usando cookies en texto plano (no encriptadas)"}
+2025-10-29T15:11:01.876Z {"level":30,"time":1761750661863,"pid":19,"hostname":"92ef107db885","msg":"⏳ Job esperando: fcc1d982-8267-4512-8553-4c1dfeb69a3b"}
+2025-10-29T15:11:01.876Z {"level":30,"time":1761750661863,"pid":19,"hostname":"92ef107db885","msg":"⏳ Job esperando: 8d614573-eae2-43a1-abd3-55bc5c0d83b0"}
+2025-10-29T15:11:01.876Z {"level":30,"time":1761750661863,"pid":19,"hostname":"92ef107db885","msg":"📸 Job de screenshot encolado: fcc1d982-8267-4512-8553-4c1dfeb69a3b"}
+2025-10-29T15:11:01.876Z {"level":30,"time":1761750661863,"pid":19,"hostname":"92ef107db885","msg":"📸 Job de screenshot encolado: 8d614573-eae2-43a1-abd3-55bc5c0d83b0"}
+2025-10-29T15:11:01.876Z {"level":30,"time":1761750661863,"pid":19,"hostname":"92ef107db885","signalId":"fcc1d982-8267-4512-8553-4c1dfeb69a3b","msg":"📸 Screenshot encolado correctamente"}
+2025-10-29T15:11:01.876Z {"level":30,"time":1761750661870,"pid":19,"hostname":"92ef107db885","signalId":"8d614573-eae2-43a1-abd3-55bc5c0d83b0","msg":"📸 Screenshot encolado correctamente"}
+2025-10-29T15:11:01.876Z {"level":30,"time":1761750661872,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal fcc1d982-8267-4512-8553-4c1dfeb69a3b - OKX:SUIUSDT.P"}
+2025-10-29T15:11:01.888Z {"level":30,"time":1761750661885,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 8d614573-eae2-43a1-abd3-55bc5c0d83b0 - OKX:SUIUSDT.P"}
+2025-10-29T15:11:01.977Z {"level":30,"time":1761750661977,"pid":19,"hostname":"92ef107db885","msg":"✅ Señal insertada: 29b0f620-ace3-40eb-b368-186699f1858a - OKX:BNBUSDT.P"}
+2025-10-29T15:11:01.979Z {"level":30,"time":1761750661977,"pid":19,"hostname":"92ef107db885","signalId":"29b0f620-ace3-40eb-b368-186699f1858a","msg":"✅ Señal insertada en Supabase"}
+2025-10-29T15:11:01.986Z {"level":30,"time":1761750661985,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: fcc1d982-8267-4512-8553-4c1dfeb69a3b - processing"}
+2025-10-29T15:11:01.987Z {"level":30,"time":1761750661986,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:11:01.987Z {"level":30,"time":1761750661986,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:11:01.987Z {"level":30,"time":1761750661986,"pid":19,"hostname":"92ef107db885","ticker":"OKX:SUIUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:11:01.991Z {"level":30,"time":1761750661990,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:SUIUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:11:02.017Z {"level":30,"time":1761750662017,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 8d614573-eae2-43a1-abd3-55bc5c0d83b0 - processing"}
+2025-10-29T15:11:02.020Z {"level":30,"time":1761750662017,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:11:02.020Z {"level":30,"time":1761750662017,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:11:02.020Z {"level":30,"time":1761750662017,"pid":19,"hostname":"92ef107db885","ticker":"OKX:SUIUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:11:02.024Z {"level":30,"time":1761750662024,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:SUIUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:11:02.096Z {"level":30,"time":1761750662095,"pid":19,"hostname":"92ef107db885","msg":"⚠️ Usando cookies en texto plano (no encriptadas)"}
+2025-10-29T15:11:02.101Z {"level":30,"time":1761750662101,"pid":19,"hostname":"92ef107db885","msg":"⏳ Job esperando: 29b0f620-ace3-40eb-b368-186699f1858a"}
+2025-10-29T15:11:02.104Z {"level":30,"time":1761750662101,"pid":19,"hostname":"92ef107db885","msg":"📸 Job de screenshot encolado: 29b0f620-ace3-40eb-b368-186699f1858a"}
+2025-10-29T15:11:02.104Z {"level":30,"time":1761750662101,"pid":19,"hostname":"92ef107db885","signalId":"29b0f620-ace3-40eb-b368-186699f1858a","msg":"📸 Screenshot encolado correctamente"}
+2025-10-29T15:11:02.104Z {"level":30,"time":1761750662102,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 29b0f620-ace3-40eb-b368-186699f1858a - OKX:BNBUSDT.P"}
+2025-10-29T15:11:02.272Z {"level":30,"time":1761750662270,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 29b0f620-ace3-40eb-b368-186699f1858a - processing"}
+2025-10-29T15:11:02.275Z {"level":30,"time":1761750662270,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:11:02.275Z {"level":30,"time":1761750662271,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:11:02.275Z {"level":30,"time":1761750662271,"pid":19,"hostname":"92ef107db885","ticker":"OKX:BNBUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:11:02.278Z {"level":30,"time":1761750662277,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:BNBUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:11:05.980Z {"level":30,"time":1761750665980,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:11:06.772Z {"level":30,"time":1761750666771,"pid":19,"hostname":"92ef107db885","bufferSize":282843,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:11:06.786Z {"level":30,"time":1761750666772,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:11:08.086Z {"level":30,"time":1761750668076,"pid":19,"hostname":"92ef107db885","shareUrl":"kjS7HqjI","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:11:08.090Z {"level":30,"time":1761750668086,"pid":19,"hostname":"92ef107db885","originalResponse":"kjS7HqjI","finalUrl":"https://www.tradingview.com/x/kjS7HqjI/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:11:08.270Z {"level":30,"time":1761750668268,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/kjS7HqjI/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:11:08.712Z {"level":30,"time":1761750668709,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 188a90c2-1697-48d4-9bad-ffd6afb3d718"}
+2025-10-29T15:11:09.153Z {"level":30,"time":1761750669149,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:DOGEUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:11:09.463Z {"level":30,"time":1761750669457,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:11:09.472Z {"level":50,"time":1761750669460,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 188a90c2-1697-48d4-9bad-ffd6afb3d718:"}
+2025-10-29T15:11:09.905Z {"level":30,"time":1761750669895,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:11:09.929Z {"level":30,"time":1761750669928,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 188a90c2-1697-48d4-9bad-ffd6afb3d718 - failed"}
+2025-10-29T15:11:09.973Z {"level":50,"time":1761750669973,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 188a90c2-1697-48d4-9bad-ffd6afb3d718 - method is not defined"}
+2025-10-29T15:11:10.823Z {"level":30,"time":1761750670820,"pid":19,"hostname":"92ef107db885","bufferSize":275142,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:11:10.838Z {"level":30,"time":1761750670823,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:11:12.230Z {"level":30,"time":1761750672230,"pid":19,"hostname":"92ef107db885","shareUrl":"do8N7ZF8","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:11:12.238Z {"level":30,"time":1761750672231,"pid":19,"hostname":"92ef107db885","originalResponse":"do8N7ZF8","finalUrl":"https://www.tradingview.com/x/do8N7ZF8/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:11:12.343Z {"level":30,"time":1761750672343,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/do8N7ZF8/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:11:12.693Z {"level":30,"time":1761750672693,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 52c29150-a6e6-41be-898d-a2a528d7bcde"}
+2025-10-29T15:11:12.949Z {"level":30,"time":1761750672945,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:BNBUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:11:13.254Z {"level":30,"time":1761750673254,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:11:13.257Z {"level":50,"time":1761750673254,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 52c29150-a6e6-41be-898d-a2a528d7bcde:"}
+2025-10-29T15:11:13.471Z {"level":30,"time":1761750673468,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 52c29150-a6e6-41be-898d-a2a528d7bcde - failed"}
+2025-10-29T15:11:13.476Z {"level":50,"time":1761750673474,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 52c29150-a6e6-41be-898d-a2a528d7bcde - method is not defined"}
+2025-10-29T15:11:15.636Z {"level":30,"time":1761750675636,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:11:19.969Z {"level":30,"time":1761750679966,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 188a90c2-1697-48d4-9bad-ffd6afb3d718 - OKX:DOGEUSDT.P"}
+2025-10-29T15:11:20.314Z {"level":30,"time":1761750680313,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 188a90c2-1697-48d4-9bad-ffd6afb3d718 - processing"}
+2025-10-29T15:11:20.320Z {"level":30,"time":1761750680314,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:11:20.320Z {"level":30,"time":1761750680318,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:11:20.320Z {"level":30,"time":1761750680318,"pid":19,"hostname":"92ef107db885","ticker":"OKX:DOGEUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:11:20.338Z {"level":30,"time":1761750680337,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:DOGEUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:11:23.531Z {"level":30,"time":1761750683525,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 52c29150-a6e6-41be-898d-a2a528d7bcde - OKX:BNBUSDT.P"}
+2025-10-29T15:11:23.731Z {"level":30,"time":1761750683728,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 52c29150-a6e6-41be-898d-a2a528d7bcde - processing"}
+2025-10-29T15:11:23.736Z {"level":30,"time":1761750683728,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:11:23.736Z {"level":30,"time":1761750683729,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:11:23.736Z {"level":30,"time":1761750683729,"pid":19,"hostname":"92ef107db885","ticker":"OKX:BNBUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:11:23.775Z {"level":30,"time":1761750683742,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:BNBUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:11:24.683Z {"level":30,"time":1761750684680,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:11:25.254Z {"level":30,"time":1761750685253,"pid":19,"hostname":"92ef107db885","bufferSize":274476,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:11:25.271Z {"level":30,"time":1761750685253,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:11:26.570Z {"level":30,"time":1761750686569,"pid":19,"hostname":"92ef107db885","shareUrl":"hIdc8dc4","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:11:26.572Z {"level":30,"time":1761750686569,"pid":19,"hostname":"92ef107db885","originalResponse":"hIdc8dc4","finalUrl":"https://www.tradingview.com/x/hIdc8dc4/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:11:26.719Z {"level":30,"time":1761750686719,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/hIdc8dc4/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:11:27.253Z {"level":30,"time":1761750687252,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 9b1db960-0361-4d86-83e6-fb384cbc4500"}
+2025-10-29T15:11:27.527Z {"level":30,"time":1761750687527,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:RENDERUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:11:27.989Z {"level":30,"time":1761750687988,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:11:28.008Z {"level":50,"time":1761750687990,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 9b1db960-0361-4d86-83e6-fb384cbc4500:"}
+2025-10-29T15:11:28.186Z {"level":30,"time":1761750688184,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 9b1db960-0361-4d86-83e6-fb384cbc4500 - failed"}
+2025-10-29T15:11:28.195Z {"level":50,"time":1761750688192,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 9b1db960-0361-4d86-83e6-fb384cbc4500 - method is not defined"}
+2025-10-29T15:11:32.875Z {"level":30,"time":1761750692874,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:11:36.713Z {"level":30,"time":1761750696712,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:11:38.276Z {"level":30,"time":1761750698276,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 9b1db960-0361-4d86-83e6-fb384cbc4500 - OKX:RENDERUSDT.P"}
+2025-10-29T15:11:38.513Z {"level":30,"time":1761750698512,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 9b1db960-0361-4d86-83e6-fb384cbc4500 - processing"}
+2025-10-29T15:11:38.514Z {"level":30,"time":1761750698513,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:11:38.514Z {"level":30,"time":1761750698513,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:11:38.514Z {"level":30,"time":1761750698513,"pid":19,"hostname":"92ef107db885","ticker":"OKX:RENDERUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:11:38.522Z {"level":30,"time":1761750698521,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:RENDERUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:11:38.579Z {"level":30,"time":1761750698579,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:11:39.152Z {"level":30,"time":1761750699151,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:11:39.260Z {"level":30,"time":1761750699259,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:11:41.913Z {"level":30,"time":1761750701913,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:11:42.176Z {"level":30,"time":1761750702175,"pid":19,"hostname":"92ef107db885","bufferSize":253502,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:11:42.181Z {"level":30,"time":1761750702175,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:11:43.853Z {"level":30,"time":1761750703853,"pid":19,"hostname":"92ef107db885","shareUrl":"1xYUI5zU","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:11:43.855Z {"level":30,"time":1761750703853,"pid":19,"hostname":"92ef107db885","originalResponse":"1xYUI5zU","finalUrl":"https://www.tradingview.com/x/1xYUI5zU/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:11:43.999Z {"level":30,"time":1761750703999,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/1xYUI5zU/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:11:44.432Z {"level":30,"time":1761750704431,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 29b0f620-ace3-40eb-b368-186699f1858a"}
+2025-10-29T15:11:44.633Z {"level":30,"time":1761750704633,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:BNBUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:11:44.925Z {"level":30,"time":1761750704924,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:11:44.926Z {"level":50,"time":1761750704924,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 29b0f620-ace3-40eb-b368-186699f1858a:"}
+2025-10-29T15:11:45.099Z {"level":30,"time":1761750705098,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 29b0f620-ace3-40eb-b368-186699f1858a - failed"}
+2025-10-29T15:11:45.103Z {"level":50,"time":1761750705102,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 29b0f620-ace3-40eb-b368-186699f1858a - method is not defined"}
+2025-10-29T15:11:45.727Z {"level":30,"time":1761750705726,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:11:46.019Z {"level":30,"time":1761750706018,"pid":19,"hostname":"92ef107db885","bufferSize":250537,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:11:46.026Z {"level":30,"time":1761750706019,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:11:47.283Z {"level":30,"time":1761750707283,"pid":19,"hostname":"92ef107db885","shareUrl":"Dj0r5VKn","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:11:47.285Z {"level":30,"time":1761750707283,"pid":19,"hostname":"92ef107db885","originalResponse":"Dj0r5VKn","finalUrl":"https://www.tradingview.com/x/Dj0r5VKn/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:11:47.402Z {"level":30,"time":1761750707401,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/Dj0r5VKn/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:11:47.552Z {"level":30,"time":1761750707551,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:11:47.616Z {"level":30,"time":1761750707615,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:11:47.629Z {"level":30,"time":1761750707627,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 8d614573-eae2-43a1-abd3-55bc5c0d83b0"}
+2025-10-29T15:11:47.833Z {"level":30,"time":1761750707833,"pid":19,"hostname":"92ef107db885","bufferSize":250513,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:11:47.844Z {"level":30,"time":1761750707836,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:11:47.852Z {"level":30,"time":1761750707851,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:SUIUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:11:48.167Z {"level":30,"time":1761750708167,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:11:48.265Z {"level":30,"time":1761750708264,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:11:48.269Z {"level":50,"time":1761750708265,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 8d614573-eae2-43a1-abd3-55bc5c0d83b0:"}
+2025-10-29T15:11:48.271Z {"level":30,"time":1761750708270,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:11:48.435Z {"level":30,"time":1761750708435,"pid":19,"hostname":"92ef107db885","bufferSize":269205,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:11:48.444Z {"level":30,"time":1761750708437,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:11:48.461Z {"level":30,"time":1761750708457,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 8d614573-eae2-43a1-abd3-55bc5c0d83b0 - failed"}
+2025-10-29T15:11:48.475Z {"level":50,"time":1761750708467,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 8d614573-eae2-43a1-abd3-55bc5c0d83b0 - method is not defined"}
+2025-10-29T15:11:48.514Z {"level":30,"time":1761750708514,"pid":19,"hostname":"92ef107db885","bufferSize":264314,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:11:48.519Z {"level":30,"time":1761750708515,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:11:49.115Z {"level":30,"time":1761750709115,"pid":19,"hostname":"92ef107db885","shareUrl":"tFiYPvRi","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:11:49.118Z {"level":30,"time":1761750709115,"pid":19,"hostname":"92ef107db885","originalResponse":"tFiYPvRi","finalUrl":"https://www.tradingview.com/x/tFiYPvRi/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:11:49.258Z {"level":30,"time":1761750709257,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/tFiYPvRi/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:11:49.427Z {"level":30,"time":1761750709425,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: fcc1d982-8267-4512-8553-4c1dfeb69a3b"}
+2025-10-29T15:11:49.649Z {"level":30,"time":1761750709648,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:SUIUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:11:49.768Z {"level":30,"time":1761750709768,"pid":19,"hostname":"92ef107db885","shareUrl":"x8pyqIOt","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:11:49.772Z {"level":30,"time":1761750709770,"pid":19,"hostname":"92ef107db885","originalResponse":"x8pyqIOt","finalUrl":"https://www.tradingview.com/x/x8pyqIOt/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:11:49.865Z {"level":30,"time":1761750709865,"pid":19,"hostname":"92ef107db885","shareUrl":"UZax7uzo","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:11:49.867Z {"level":30,"time":1761750709866,"pid":19,"hostname":"92ef107db885","originalResponse":"UZax7uzo","finalUrl":"https://www.tradingview.com/x/UZax7uzo/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:11:49.885Z {"level":30,"time":1761750709885,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/x8pyqIOt/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:11:49.938Z {"level":30,"time":1761750709938,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:11:49.944Z {"level":50,"time":1761750709938,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot fcc1d982-8267-4512-8553-4c1dfeb69a3b:"}
+2025-10-29T15:11:49.983Z {"level":30,"time":1761750709983,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/UZax7uzo/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:11:50.028Z {"level":30,"time":1761750710028,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 188a90c2-1697-48d4-9bad-ffd6afb3d718"}
+2025-10-29T15:11:50.087Z {"level":30,"time":1761750710086,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: fcc1d982-8267-4512-8553-4c1dfeb69a3b - failed"}
+2025-10-29T15:11:50.089Z {"level":50,"time":1761750710089,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: fcc1d982-8267-4512-8553-4c1dfeb69a3b - method is not defined"}
+2025-10-29T15:11:50.124Z {"level":30,"time":1761750710123,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 52c29150-a6e6-41be-898d-a2a528d7bcde"}
+2025-10-29T15:11:50.162Z {"level":30,"time":1761750710162,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:DOGEUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:11:50.195Z {"level":30,"time":1761750710195,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 29b0f620-ace3-40eb-b368-186699f1858a - OKX:BNBUSDT.P"}
+2025-10-29T15:11:50.247Z {"level":30,"time":1761750710244,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:BNBUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:11:50.328Z {"level":30,"time":1761750710327,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 29b0f620-ace3-40eb-b368-186699f1858a - processing"}
+2025-10-29T15:11:50.333Z {"level":30,"time":1761750710328,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:11:50.333Z {"level":30,"time":1761750710328,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:11:50.333Z {"level":30,"time":1761750710328,"pid":19,"hostname":"92ef107db885","ticker":"OKX:BNBUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:11:50.340Z {"level":30,"time":1761750710340,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:BNBUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:11:50.454Z {"level":30,"time":1761750710454,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:11:50.461Z {"level":50,"time":1761750710454,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 188a90c2-1697-48d4-9bad-ffd6afb3d718:"}
+2025-10-29T15:11:50.609Z {"level":30,"time":1761750710608,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 188a90c2-1697-48d4-9bad-ffd6afb3d718 - failed"}
+2025-10-29T15:11:50.616Z {"level":50,"time":1761750710615,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 188a90c2-1697-48d4-9bad-ffd6afb3d718 - method is not defined"}
+2025-10-29T15:11:50.851Z {"level":30,"time":1761750710849,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:11:50.852Z {"level":50,"time":1761750710850,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 52c29150-a6e6-41be-898d-a2a528d7bcde:"}
+2025-10-29T15:11:50.987Z {"level":30,"time":1761750710987,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 52c29150-a6e6-41be-898d-a2a528d7bcde - failed"}
+2025-10-29T15:11:50.990Z {"level":50,"time":1761750710990,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 52c29150-a6e6-41be-898d-a2a528d7bcde - method is not defined"}
+2025-10-29T15:11:53.536Z {"level":30,"time":1761750713536,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 8d614573-eae2-43a1-abd3-55bc5c0d83b0 - OKX:SUIUSDT.P"}
+2025-10-29T15:11:53.684Z {"level":30,"time":1761750713683,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 8d614573-eae2-43a1-abd3-55bc5c0d83b0 - processing"}
+2025-10-29T15:11:53.687Z {"level":30,"time":1761750713684,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:11:53.687Z {"level":30,"time":1761750713684,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:11:53.687Z {"level":30,"time":1761750713684,"pid":19,"hostname":"92ef107db885","ticker":"OKX:SUIUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:11:53.696Z {"level":30,"time":1761750713695,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:SUIUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:11:55.148Z {"level":30,"time":1761750715148,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal fcc1d982-8267-4512-8553-4c1dfeb69a3b - OKX:SUIUSDT.P"}
+2025-10-29T15:11:55.352Z {"level":30,"time":1761750715351,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: fcc1d982-8267-4512-8553-4c1dfeb69a3b - processing"}
+2025-10-29T15:11:55.358Z {"level":30,"time":1761750715351,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:11:55.358Z {"level":30,"time":1761750715352,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:11:55.358Z {"level":30,"time":1761750715352,"pid":19,"hostname":"92ef107db885","ticker":"OKX:SUIUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:11:55.361Z {"level":30,"time":1761750715361,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:SUIUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:11:56.568Z {"level":30,"time":1761750716567,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:11:56.853Z {"level":30,"time":1761750716851,"pid":19,"hostname":"92ef107db885","bufferSize":261515,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:11:56.859Z {"level":30,"time":1761750716853,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:11:58.213Z {"level":30,"time":1761750718212,"pid":19,"hostname":"92ef107db885","shareUrl":"SvSHsiME","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:11:58.215Z {"level":30,"time":1761750718212,"pid":19,"hostname":"92ef107db885","originalResponse":"SvSHsiME","finalUrl":"https://www.tradingview.com/x/SvSHsiME/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:11:58.392Z {"level":30,"time":1761750718391,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/SvSHsiME/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:11:58.603Z {"level":30,"time":1761750718603,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 9b1db960-0361-4d86-83e6-fb384cbc4500"}
+2025-10-29T15:11:58.826Z {"level":30,"time":1761750718824,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:RENDERUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:11:59.122Z {"level":30,"time":1761750719120,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:11:59.131Z {"level":50,"time":1761750719122,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 9b1db960-0361-4d86-83e6-fb384cbc4500:"}
+2025-10-29T15:11:59.287Z {"level":30,"time":1761750719285,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 9b1db960-0361-4d86-83e6-fb384cbc4500 - failed"}
+2025-10-29T15:11:59.294Z {"level":50,"time":1761750719293,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 9b1db960-0361-4d86-83e6-fb384cbc4500 - method is not defined"}
+2025-10-29T15:12:04.772Z {"level":30,"time":1761750724770,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:12:11.152Z {"level":30,"time":1761750731152,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:12:12.268Z {"level":30,"time":1761750732267,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:12:13.793Z {"level":30,"time":1761750733792,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:12:14.214Z {"level":30,"time":1761750734213,"pid":19,"hostname":"92ef107db885","bufferSize":262391,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:12:14.232Z {"level":30,"time":1761750734214,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:12:15.622Z {"level":30,"time":1761750735620,"pid":19,"hostname":"92ef107db885","shareUrl":"KVgcRhuj","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:12:15.625Z {"level":30,"time":1761750735620,"pid":19,"hostname":"92ef107db885","originalResponse":"KVgcRhuj","finalUrl":"https://www.tradingview.com/x/KVgcRhuj/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:12:15.716Z {"level":30,"time":1761750735716,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/KVgcRhuj/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:12:15.887Z {"level":30,"time":1761750735884,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 29b0f620-ace3-40eb-b368-186699f1858a"}
+2025-10-29T15:12:16.008Z {"level":30,"time":1761750736008,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:BNBUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:12:16.306Z {"level":30,"time":1761750736303,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:12:16.308Z {"level":50,"time":1761750736304,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 29b0f620-ace3-40eb-b368-186699f1858a:"}
+2025-10-29T15:12:16.425Z {"level":30,"time":1761750736421,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 29b0f620-ace3-40eb-b368-186699f1858a - failed"}
+2025-10-29T15:12:16.434Z {"level":50,"time":1761750736433,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 29b0f620-ace3-40eb-b368-186699f1858a - method is not defined"}
+2025-10-29T15:12:20.242Z {"level":30,"time":1761750740241,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:12:20.511Z {"level":30,"time":1761750740511,"pid":19,"hostname":"92ef107db885","bufferSize":262878,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:12:20.524Z {"level":30,"time":1761750740511,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:12:21.286Z {"level":30,"time":1761750741285,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:12:21.609Z {"level":30,"time":1761750741608,"pid":19,"hostname":"92ef107db885","bufferSize":263322,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:12:21.616Z {"level":30,"time":1761750741609,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:12:21.807Z {"level":30,"time":1761750741807,"pid":19,"hostname":"92ef107db885","shareUrl":"vbzQJuCQ","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:12:21.809Z {"level":30,"time":1761750741807,"pid":19,"hostname":"92ef107db885","originalResponse":"vbzQJuCQ","finalUrl":"https://www.tradingview.com/x/vbzQJuCQ/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:12:21.905Z {"level":30,"time":1761750741904,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/vbzQJuCQ/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:12:22.255Z {"level":30,"time":1761750742254,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 8d614573-eae2-43a1-abd3-55bc5c0d83b0"}
+2025-10-29T15:12:22.424Z {"level":30,"time":1761750742417,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:SUIUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:12:22.725Z {"level":30,"time":1761750742724,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:12:22.730Z {"level":50,"time":1761750742725,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 8d614573-eae2-43a1-abd3-55bc5c0d83b0:"}
+2025-10-29T15:12:22.853Z {"level":30,"time":1761750742849,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 8d614573-eae2-43a1-abd3-55bc5c0d83b0 - failed"}
+2025-10-29T15:12:22.862Z {"level":50,"time":1761750742861,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 8d614573-eae2-43a1-abd3-55bc5c0d83b0 - method is not defined"}
+2025-10-29T15:12:22.982Z {"level":30,"time":1761750742982,"pid":19,"hostname":"92ef107db885","shareUrl":"HQECiGLd","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:12:22.987Z {"level":30,"time":1761750742982,"pid":19,"hostname":"92ef107db885","originalResponse":"HQECiGLd","finalUrl":"https://www.tradingview.com/x/HQECiGLd/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:12:23.117Z {"level":30,"time":1761750743116,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/HQECiGLd/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:12:23.240Z {"level":30,"time":1761750743239,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: fcc1d982-8267-4512-8553-4c1dfeb69a3b"}
+2025-10-29T15:12:23.366Z {"level":30,"time":1761750743366,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:SUIUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:12:23.668Z {"level":30,"time":1761750743666,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:12:23.669Z {"level":50,"time":1761750743667,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot fcc1d982-8267-4512-8553-4c1dfeb69a3b:"}
+2025-10-29T15:12:23.793Z {"level":30,"time":1761750743792,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: fcc1d982-8267-4512-8553-4c1dfeb69a3b - failed"}
+2025-10-29T15:12:23.796Z {"level":50,"time":1761750743796,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: fcc1d982-8267-4512-8553-4c1dfeb69a3b - method is not defined"}
+2025-10-29T15:12:26.512Z {"level":30,"time":1761750746510,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 29b0f620-ace3-40eb-b368-186699f1858a - OKX:BNBUSDT.P"}
+2025-10-29T15:12:26.646Z {"level":30,"time":1761750746646,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 29b0f620-ace3-40eb-b368-186699f1858a - processing"}
+2025-10-29T15:12:26.650Z {"level":30,"time":1761750746646,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:12:26.650Z {"level":30,"time":1761750746647,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:12:26.650Z {"level":30,"time":1761750746648,"pid":19,"hostname":"92ef107db885","ticker":"OKX:BNBUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:12:26.658Z {"level":30,"time":1761750746656,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:BNBUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:12:32.867Z {"level":30,"time":1761750752867,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 8d614573-eae2-43a1-abd3-55bc5c0d83b0 - OKX:SUIUSDT.P"}
+2025-10-29T15:12:33.043Z {"level":30,"time":1761750753043,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 8d614573-eae2-43a1-abd3-55bc5c0d83b0 - processing"}
+2025-10-29T15:12:33.051Z {"level":30,"time":1761750753043,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:12:33.051Z {"level":30,"time":1761750753043,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:12:33.051Z {"level":30,"time":1761750753043,"pid":19,"hostname":"92ef107db885","ticker":"OKX:SUIUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:12:33.052Z {"level":30,"time":1761750753050,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:SUIUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:12:33.879Z {"level":30,"time":1761750753879,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal fcc1d982-8267-4512-8553-4c1dfeb69a3b - OKX:SUIUSDT.P"}
+2025-10-29T15:12:34.051Z {"level":30,"time":1761750754051,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: fcc1d982-8267-4512-8553-4c1dfeb69a3b - processing"}
+2025-10-29T15:12:34.052Z {"level":30,"time":1761750754051,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:12:34.052Z {"level":30,"time":1761750754051,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:12:34.052Z {"level":30,"time":1761750754051,"pid":19,"hostname":"92ef107db885","ticker":"OKX:SUIUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:12:34.056Z {"level":30,"time":1761750754056,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:SUIUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:12:38.002Z {"level":30,"time":1761750758001,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:12:46.714Z {"level":30,"time":1761750766714,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:12:47.026Z {"level":30,"time":1761750767025,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:12:47.244Z {"level":30,"time":1761750767243,"pid":19,"hostname":"92ef107db885","bufferSize":262441,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:12:47.252Z {"level":30,"time":1761750767244,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:12:47.289Z {"level":30,"time":1761750767289,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:12:48.564Z {"level":30,"time":1761750768562,"pid":19,"hostname":"92ef107db885","shareUrl":"LmKWW1Cc","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:12:48.568Z {"level":30,"time":1761750768564,"pid":19,"hostname":"92ef107db885","originalResponse":"LmKWW1Cc","finalUrl":"https://www.tradingview.com/x/LmKWW1Cc/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:12:48.673Z {"level":30,"time":1761750768673,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/LmKWW1Cc/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:12:48.841Z {"level":30,"time":1761750768841,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 29b0f620-ace3-40eb-b368-186699f1858a"}
+2025-10-29T15:12:48.988Z {"level":30,"time":1761750768986,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:BNBUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:12:49.269Z {"level":30,"time":1761750769269,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:12:49.271Z {"level":50,"time":1761750769269,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 29b0f620-ace3-40eb-b368-186699f1858a:"}
+2025-10-29T15:12:49.394Z {"level":30,"time":1761750769392,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 29b0f620-ace3-40eb-b368-186699f1858a - failed"}
+2025-10-29T15:12:49.396Z {"level":50,"time":1761750769396,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 29b0f620-ace3-40eb-b368-186699f1858a - method is not defined"}
+2025-10-29T15:12:55.743Z {"level":30,"time":1761750775741,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:12:55.978Z {"level":30,"time":1761750775977,"pid":19,"hostname":"92ef107db885","bufferSize":262889,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:12:55.990Z {"level":30,"time":1761750775977,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:12:56.309Z {"level":30,"time":1761750776308,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:12:56.693Z {"level":30,"time":1761750776692,"pid":19,"hostname":"92ef107db885","bufferSize":263067,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:12:56.703Z {"level":30,"time":1761750776692,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:12:57.356Z {"level":30,"time":1761750777356,"pid":19,"hostname":"92ef107db885","shareUrl":"G6yzb7ui","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:12:57.361Z {"level":30,"time":1761750777357,"pid":19,"hostname":"92ef107db885","originalResponse":"G6yzb7ui","finalUrl":"https://www.tradingview.com/x/G6yzb7ui/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:12:57.467Z {"level":30,"time":1761750777466,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/G6yzb7ui/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:12:57.656Z {"level":30,"time":1761750777655,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 8d614573-eae2-43a1-abd3-55bc5c0d83b0"}
+2025-10-29T15:12:57.789Z {"level":30,"time":1761750777789,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:SUIUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:12:58.016Z {"level":30,"time":1761750778015,"pid":19,"hostname":"92ef107db885","shareUrl":"VixOcDTB","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:12:58.017Z {"level":30,"time":1761750778015,"pid":19,"hostname":"92ef107db885","originalResponse":"VixOcDTB","finalUrl":"https://www.tradingview.com/x/VixOcDTB/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:12:58.089Z {"level":30,"time":1761750778089,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:12:58.093Z {"level":50,"time":1761750778089,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 8d614573-eae2-43a1-abd3-55bc5c0d83b0:"}
+2025-10-29T15:12:58.143Z {"level":30,"time":1761750778141,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/VixOcDTB/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:12:58.226Z {"level":30,"time":1761750778223,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 8d614573-eae2-43a1-abd3-55bc5c0d83b0 - failed"}
+2025-10-29T15:12:58.229Z {"level":50,"time":1761750778228,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 8d614573-eae2-43a1-abd3-55bc5c0d83b0 - method is not defined"}
+2025-10-29T15:12:58.351Z {"level":30,"time":1761750778350,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: fcc1d982-8267-4512-8553-4c1dfeb69a3b"}
+2025-10-29T15:12:58.479Z {"level":30,"time":1761750778478,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:SUIUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:12:58.767Z {"level":30,"time":1761750778767,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:12:58.771Z {"level":50,"time":1761750778767,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot fcc1d982-8267-4512-8553-4c1dfeb69a3b:"}
+2025-10-29T15:12:58.929Z {"level":30,"time":1761750778928,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: fcc1d982-8267-4512-8553-4c1dfeb69a3b - failed"}
+2025-10-29T15:12:58.933Z {"level":50,"time":1761750778933,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: fcc1d982-8267-4512-8553-4c1dfeb69a3b - method is not defined"}
+2025-10-29T15:14:01.383Z {"level":30,"time":1761750841380,"pid":19,"hostname":"92ef107db885","token":"ab4d53d8...","msg":"📨 Webhook recibido"}
+2025-10-29T15:14:01.786Z {"level":30,"time":1761750841782,"pid":19,"hostname":"92ef107db885","userId":"71b7b58f-6c9d-4133-88e5-c69972dea205","msg":"✅ Token validado correctamente"}
+2025-10-29T15:14:01.795Z {"level":30,"time":1761750841786,"pid":19,"hostname":"92ef107db885","ticker":"OKX:SUIUSDT.P","signal_type":"TSL Cruza Nivel 0 🔴","msg":"📊 Señal parseada"}
+2025-10-29T15:14:02.081Z {"level":30,"time":1761750842079,"pid":19,"hostname":"92ef107db885","msg":"✅ Señal insertada: 00eac3a2-4e5a-41e0-a594-338fa97fc06f - OKX:SUIUSDT.P"}
+2025-10-29T15:14:02.088Z {"level":30,"time":1761750842081,"pid":19,"hostname":"92ef107db885","signalId":"00eac3a2-4e5a-41e0-a594-338fa97fc06f","msg":"✅ Señal insertada en Supabase"}
+2025-10-29T15:14:02.248Z {"level":30,"time":1761750842248,"pid":19,"hostname":"92ef107db885","msg":"⚠️ Usando cookies en texto plano (no encriptadas)"}
+2025-10-29T15:14:02.268Z {"level":30,"time":1761750842268,"pid":19,"hostname":"92ef107db885","msg":"⏳ Job esperando: 00eac3a2-4e5a-41e0-a594-338fa97fc06f"}
+2025-10-29T15:14:02.284Z {"level":30,"time":1761750842268,"pid":19,"hostname":"92ef107db885","msg":"📸 Job de screenshot encolado: 00eac3a2-4e5a-41e0-a594-338fa97fc06f"}
+2025-10-29T15:14:02.284Z {"level":30,"time":1761750842268,"pid":19,"hostname":"92ef107db885","signalId":"00eac3a2-4e5a-41e0-a594-338fa97fc06f","msg":"📸 Screenshot encolado correctamente"}
+2025-10-29T15:14:02.287Z {"level":30,"time":1761750842284,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 00eac3a2-4e5a-41e0-a594-338fa97fc06f - OKX:SUIUSDT.P"}
+2025-10-29T15:14:02.439Z {"level":30,"time":1761750842439,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 00eac3a2-4e5a-41e0-a594-338fa97fc06f - processing"}
+2025-10-29T15:14:02.448Z {"level":30,"time":1761750842439,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:14:02.448Z {"level":30,"time":1761750842440,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:14:02.448Z {"level":30,"time":1761750842440,"pid":19,"hostname":"92ef107db885","ticker":"OKX:SUIUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:14:02.454Z {"level":30,"time":1761750842452,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:SUIUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:14:14.454Z {"level":30,"time":1761750854454,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:14:23.492Z {"level":30,"time":1761750863487,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:14:23.782Z {"level":30,"time":1761750863781,"pid":19,"hostname":"92ef107db885","bufferSize":262930,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:14:23.798Z {"level":30,"time":1761750863781,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:14:25.279Z {"level":30,"time":1761750865278,"pid":19,"hostname":"92ef107db885","shareUrl":"PsApsHEn","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:14:25.281Z {"level":30,"time":1761750865278,"pid":19,"hostname":"92ef107db885","originalResponse":"PsApsHEn","finalUrl":"https://www.tradingview.com/x/PsApsHEn/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:14:25.386Z {"level":30,"time":1761750865385,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/PsApsHEn/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:14:25.630Z {"level":30,"time":1761750865628,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 00eac3a2-4e5a-41e0-a594-338fa97fc06f"}
+2025-10-29T15:14:25.761Z {"level":30,"time":1761750865760,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:SUIUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:14:26.058Z {"level":30,"time":1761750866058,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:14:26.061Z {"level":50,"time":1761750866058,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 00eac3a2-4e5a-41e0-a594-338fa97fc06f:"}
+2025-10-29T15:14:26.219Z {"level":30,"time":1761750866218,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 00eac3a2-4e5a-41e0-a594-338fa97fc06f - failed"}
+2025-10-29T15:14:26.227Z {"level":50,"time":1761750866226,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 00eac3a2-4e5a-41e0-a594-338fa97fc06f - method is not defined"}
+2025-10-29T15:14:31.298Z {"level":30,"time":1761750871298,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 00eac3a2-4e5a-41e0-a594-338fa97fc06f - OKX:SUIUSDT.P"}
+2025-10-29T15:14:31.460Z {"level":30,"time":1761750871460,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 00eac3a2-4e5a-41e0-a594-338fa97fc06f - processing"}
+2025-10-29T15:14:31.462Z {"level":30,"time":1761750871460,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:14:31.462Z {"level":30,"time":1761750871460,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:14:31.462Z {"level":30,"time":1761750871460,"pid":19,"hostname":"92ef107db885","ticker":"OKX:SUIUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:14:31.467Z {"level":30,"time":1761750871466,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:SUIUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:14:43.425Z {"level":30,"time":1761750883424,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:14:52.467Z {"level":30,"time":1761750892466,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:14:52.880Z {"level":30,"time":1761750892879,"pid":19,"hostname":"92ef107db885","bufferSize":262210,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:14:52.891Z {"level":30,"time":1761750892880,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:14:54.242Z {"level":30,"time":1761750894241,"pid":19,"hostname":"92ef107db885","shareUrl":"gP6SFCIu","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:14:54.249Z {"level":30,"time":1761750894242,"pid":19,"hostname":"92ef107db885","originalResponse":"gP6SFCIu","finalUrl":"https://www.tradingview.com/x/gP6SFCIu/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:14:54.376Z {"level":30,"time":1761750894373,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/gP6SFCIu/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:14:54.565Z {"level":30,"time":1761750894563,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 00eac3a2-4e5a-41e0-a594-338fa97fc06f"}
+2025-10-29T15:14:54.698Z {"level":30,"time":1761750894697,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:SUIUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:14:54.987Z {"level":30,"time":1761750894986,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:14:54.989Z {"level":50,"time":1761750894987,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 00eac3a2-4e5a-41e0-a594-338fa97fc06f:"}
+2025-10-29T15:14:55.105Z {"level":30,"time":1761750895104,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 00eac3a2-4e5a-41e0-a594-338fa97fc06f - failed"}
+2025-10-29T15:14:55.109Z {"level":50,"time":1761750895108,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 00eac3a2-4e5a-41e0-a594-338fa97fc06f - method is not defined"}
+2025-10-29T15:15:01.261Z {"level":30,"time":1761750901257,"pid":19,"hostname":"92ef107db885","token":"ab4d53d8...","msg":"📨 Webhook recibido"}
+2025-10-29T15:15:01.454Z {"level":30,"time":1761750901452,"pid":19,"hostname":"92ef107db885","userId":"71b7b58f-6c9d-4133-88e5-c69972dea205","msg":"✅ Token validado correctamente"}
+2025-10-29T15:15:01.458Z {"level":30,"time":1761750901456,"pid":19,"hostname":"92ef107db885","ticker":"OKX:LINKUSDT.P","signal_type":"TSL Cruza Nivel 0 🔴","msg":"📊 Señal parseada"}
+2025-10-29T15:15:01.640Z {"level":30,"time":1761750901639,"pid":19,"hostname":"92ef107db885","msg":"✅ Señal insertada: f1fadea6-b6d7-4f09-94b6-df1d77438672 - OKX:LINKUSDT.P"}
+2025-10-29T15:15:01.643Z {"level":30,"time":1761750901640,"pid":19,"hostname":"92ef107db885","signalId":"f1fadea6-b6d7-4f09-94b6-df1d77438672","msg":"✅ Señal insertada en Supabase"}
+2025-10-29T15:15:01.838Z {"level":30,"time":1761750901838,"pid":19,"hostname":"92ef107db885","msg":"⚠️ Usando cookies en texto plano (no encriptadas)"}
+2025-10-29T15:15:01.842Z {"level":30,"time":1761750901842,"pid":19,"hostname":"92ef107db885","msg":"⏳ Job esperando: f1fadea6-b6d7-4f09-94b6-df1d77438672"}
+2025-10-29T15:15:01.850Z {"level":30,"time":1761750901842,"pid":19,"hostname":"92ef107db885","msg":"📸 Job de screenshot encolado: f1fadea6-b6d7-4f09-94b6-df1d77438672"}
+2025-10-29T15:15:01.850Z {"level":30,"time":1761750901842,"pid":19,"hostname":"92ef107db885","signalId":"f1fadea6-b6d7-4f09-94b6-df1d77438672","msg":"📸 Screenshot encolado correctamente"}
+2025-10-29T15:15:01.857Z {"level":30,"time":1761750901852,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal f1fadea6-b6d7-4f09-94b6-df1d77438672 - OKX:LINKUSDT.P"}
+2025-10-29T15:15:02.009Z {"level":30,"time":1761750902008,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: f1fadea6-b6d7-4f09-94b6-df1d77438672 - processing"}
+2025-10-29T15:15:02.013Z {"level":30,"time":1761750902009,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:15:02.013Z {"level":30,"time":1761750902010,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:15:02.013Z {"level":30,"time":1761750902010,"pid":19,"hostname":"92ef107db885","ticker":"OKX:LINKUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:15:02.026Z {"level":30,"time":1761750902025,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:LINKUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:15:02.630Z {"level":30,"time":1761750902626,"pid":19,"hostname":"92ef107db885","token":"ab4d53d8...","msg":"📨 Webhook recibido"}
+2025-10-29T15:15:02.772Z {"level":30,"time":1761750902772,"pid":19,"hostname":"92ef107db885","userId":"71b7b58f-6c9d-4133-88e5-c69972dea205","msg":"✅ Token validado correctamente"}
+2025-10-29T15:15:02.781Z {"level":30,"time":1761750902773,"pid":19,"hostname":"92ef107db885","ticker":"OKX:AVAXUSDT.P","signal_type":"Cruce TSI/TSL 🔴","msg":"📊 Señal parseada"}
+2025-10-29T15:15:02.996Z {"level":30,"time":1761750902990,"pid":19,"hostname":"92ef107db885","msg":"✅ Señal insertada: 7a452157-2a36-4983-b80d-2a3b05c3bf84 - OKX:AVAXUSDT.P"}
+2025-10-29T15:15:02.997Z {"level":30,"time":1761750902993,"pid":19,"hostname":"92ef107db885","signalId":"7a452157-2a36-4983-b80d-2a3b05c3bf84","msg":"✅ Señal insertada en Supabase"}
+2025-10-29T15:15:03.151Z {"level":30,"time":1761750903151,"pid":19,"hostname":"92ef107db885","msg":"⚠️ Usando cookies en texto plano (no encriptadas)"}
+2025-10-29T15:15:03.158Z {"level":30,"time":1761750903157,"pid":19,"hostname":"92ef107db885","msg":"⏳ Job esperando: 7a452157-2a36-4983-b80d-2a3b05c3bf84"}
+2025-10-29T15:15:03.168Z {"level":30,"time":1761750903158,"pid":19,"hostname":"92ef107db885","msg":"📸 Job de screenshot encolado: 7a452157-2a36-4983-b80d-2a3b05c3bf84"}
+2025-10-29T15:15:03.168Z {"level":30,"time":1761750903158,"pid":19,"hostname":"92ef107db885","signalId":"7a452157-2a36-4983-b80d-2a3b05c3bf84","msg":"📸 Screenshot encolado correctamente"}
+2025-10-29T15:15:03.168Z {"level":30,"time":1761750903160,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 7a452157-2a36-4983-b80d-2a3b05c3bf84 - OKX:AVAXUSDT.P"}
+2025-10-29T15:15:03.340Z {"level":30,"time":1761750903340,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 7a452157-2a36-4983-b80d-2a3b05c3bf84 - processing"}
+2025-10-29T15:15:03.343Z {"level":30,"time":1761750903340,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:15:03.343Z {"level":30,"time":1761750903340,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:15:03.343Z {"level":30,"time":1761750903341,"pid":19,"hostname":"92ef107db885","ticker":"OKX:AVAXUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:15:03.347Z {"level":30,"time":1761750903346,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:AVAXUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:15:05.170Z {"level":30,"time":1761750905169,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 00eac3a2-4e5a-41e0-a594-338fa97fc06f - OKX:SUIUSDT.P"}
+2025-10-29T15:15:05.346Z {"level":30,"time":1761750905345,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 00eac3a2-4e5a-41e0-a594-338fa97fc06f - processing"}
+2025-10-29T15:15:05.348Z {"level":30,"time":1761750905345,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:15:05.348Z {"level":30,"time":1761750905346,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:15:05.348Z {"level":30,"time":1761750905346,"pid":19,"hostname":"92ef107db885","ticker":"OKX:SUIUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:15:05.352Z {"level":30,"time":1761750905351,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:SUIUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:15:17.862Z {"level":30,"time":1761750917860,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:15:20.590Z {"level":30,"time":1761750920589,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:15:20.726Z {"level":30,"time":1761750920726,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:15:26.891Z {"level":30,"time":1761750926890,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:15:27.188Z {"level":30,"time":1761750927186,"pid":19,"hostname":"92ef107db885","bufferSize":273255,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:15:27.211Z {"level":30,"time":1761750927186,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:15:29.019Z {"level":30,"time":1761750929019,"pid":19,"hostname":"92ef107db885","shareUrl":"N65q0SvO","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:15:29.023Z {"level":30,"time":1761750929019,"pid":19,"hostname":"92ef107db885","originalResponse":"N65q0SvO","finalUrl":"https://www.tradingview.com/x/N65q0SvO/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:15:29.148Z {"level":30,"time":1761750929147,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/N65q0SvO/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:15:29.399Z {"level":30,"time":1761750929399,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: f1fadea6-b6d7-4f09-94b6-df1d77438672"}
+2025-10-29T15:15:29.529Z {"level":30,"time":1761750929529,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:LINKUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:15:29.631Z {"level":30,"time":1761750929631,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:15:29.747Z {"level":30,"time":1761750929747,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:15:29.824Z {"level":30,"time":1761750929823,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:15:29.829Z {"level":50,"time":1761750929824,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot f1fadea6-b6d7-4f09-94b6-df1d77438672:"}
+2025-10-29T15:15:29.929Z {"level":30,"time":1761750929926,"pid":19,"hostname":"92ef107db885","bufferSize":261991,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:15:29.933Z {"level":30,"time":1761750929926,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:15:29.960Z {"level":30,"time":1761750929959,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: f1fadea6-b6d7-4f09-94b6-df1d77438672 - failed"}
+2025-10-29T15:15:29.967Z {"level":50,"time":1761750929966,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: f1fadea6-b6d7-4f09-94b6-df1d77438672 - method is not defined"}
+2025-10-29T15:15:30.049Z {"level":30,"time":1761750930049,"pid":19,"hostname":"92ef107db885","bufferSize":275588,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:15:30.054Z {"level":30,"time":1761750930049,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:15:31.165Z {"level":30,"time":1761750931165,"pid":19,"hostname":"92ef107db885","shareUrl":"6YVAcaQr","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:15:31.167Z {"level":30,"time":1761750931165,"pid":19,"hostname":"92ef107db885","originalResponse":"6YVAcaQr","finalUrl":"https://www.tradingview.com/x/6YVAcaQr/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:15:31.262Z {"level":30,"time":1761750931262,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/6YVAcaQr/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:15:31.340Z {"level":30,"time":1761750931337,"pid":19,"hostname":"92ef107db885","shareUrl":"mIxmZUFk","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:15:31.342Z {"level":30,"time":1761750931340,"pid":19,"hostname":"92ef107db885","originalResponse":"mIxmZUFk","finalUrl":"https://www.tradingview.com/x/mIxmZUFk/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:15:31.431Z {"level":30,"time":1761750931430,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 00eac3a2-4e5a-41e0-a594-338fa97fc06f"}
+2025-10-29T15:15:31.466Z {"level":30,"time":1761750931465,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/mIxmZUFk/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:15:31.625Z {"level":30,"time":1761750931622,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 7a452157-2a36-4983-b80d-2a3b05c3bf84"}
+2025-10-29T15:15:31.636Z {"level":30,"time":1761750931636,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:SUIUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:15:31.764Z {"level":30,"time":1761750931763,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:AVAXUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:15:31.921Z {"level":30,"time":1761750931920,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:15:31.929Z {"level":50,"time":1761750931921,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 00eac3a2-4e5a-41e0-a594-338fa97fc06f:"}
+2025-10-29T15:15:32.050Z {"level":30,"time":1761750932049,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:15:32.054Z {"level":50,"time":1761750932049,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 7a452157-2a36-4983-b80d-2a3b05c3bf84:"}
+2025-10-29T15:15:32.082Z {"level":30,"time":1761750932081,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 00eac3a2-4e5a-41e0-a594-338fa97fc06f - failed"}
+2025-10-29T15:15:32.086Z {"level":50,"time":1761750932086,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 00eac3a2-4e5a-41e0-a594-338fa97fc06f - method is not defined"}
+2025-10-29T15:15:32.181Z {"level":30,"time":1761750932181,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 7a452157-2a36-4983-b80d-2a3b05c3bf84 - failed"}
+2025-10-29T15:15:32.186Z {"level":50,"time":1761750932185,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 7a452157-2a36-4983-b80d-2a3b05c3bf84 - method is not defined"}
+2025-10-29T15:15:35.000Z {"level":30,"time":1761750935000,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal f1fadea6-b6d7-4f09-94b6-df1d77438672 - OKX:LINKUSDT.P"}
+2025-10-29T15:15:35.188Z {"level":30,"time":1761750935188,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: f1fadea6-b6d7-4f09-94b6-df1d77438672 - processing"}
+2025-10-29T15:15:35.190Z {"level":30,"time":1761750935188,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:15:35.190Z {"level":30,"time":1761750935188,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:15:35.190Z {"level":30,"time":1761750935188,"pid":19,"hostname":"92ef107db885","ticker":"OKX:LINKUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:15:35.198Z {"level":30,"time":1761750935197,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:LINKUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:15:37.215Z {"level":30,"time":1761750937214,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 7a452157-2a36-4983-b80d-2a3b05c3bf84 - OKX:AVAXUSDT.P"}
+2025-10-29T15:15:37.391Z {"level":30,"time":1761750937388,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 7a452157-2a36-4983-b80d-2a3b05c3bf84 - processing"}
+2025-10-29T15:15:37.395Z {"level":30,"time":1761750937392,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:15:37.395Z {"level":30,"time":1761750937392,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:15:37.395Z {"level":30,"time":1761750937392,"pid":19,"hostname":"92ef107db885","ticker":"OKX:AVAXUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:15:37.402Z {"level":30,"time":1761750937402,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:AVAXUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:15:48.156Z {"level":30,"time":1761750948154,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:15:50.277Z {"level":30,"time":1761750950277,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:15:57.185Z {"level":30,"time":1761750957183,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:15:57.412Z {"level":30,"time":1761750957411,"pid":19,"hostname":"92ef107db885","bufferSize":270695,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:15:57.427Z {"level":30,"time":1761750957411,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:15:58.798Z {"level":30,"time":1761750958798,"pid":19,"hostname":"92ef107db885","shareUrl":"KaNp5gWv","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:15:58.803Z {"level":30,"time":1761750958798,"pid":19,"hostname":"92ef107db885","originalResponse":"KaNp5gWv","finalUrl":"https://www.tradingview.com/x/KaNp5gWv/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:15:58.940Z {"level":30,"time":1761750958937,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/KaNp5gWv/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:15:59.109Z {"level":30,"time":1761750959109,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: f1fadea6-b6d7-4f09-94b6-df1d77438672"}
+2025-10-29T15:15:59.276Z {"level":30,"time":1761750959276,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:LINKUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:15:59.303Z {"level":30,"time":1761750959302,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:15:59.520Z {"level":30,"time":1761750959518,"pid":19,"hostname":"92ef107db885","bufferSize":274932,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:15:59.525Z {"level":30,"time":1761750959518,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:15:59.569Z {"level":30,"time":1761750959569,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:15:59.572Z {"level":50,"time":1761750959569,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot f1fadea6-b6d7-4f09-94b6-df1d77438672:"}
+2025-10-29T15:15:59.709Z {"level":30,"time":1761750959708,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: f1fadea6-b6d7-4f09-94b6-df1d77438672 - failed"}
+2025-10-29T15:15:59.718Z {"level":50,"time":1761750959718,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: f1fadea6-b6d7-4f09-94b6-df1d77438672 - method is not defined"}
+2025-10-29T15:16:00.813Z {"level":30,"time":1761750960813,"pid":19,"hostname":"92ef107db885","shareUrl":"9nU9knDF","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:16:00.814Z {"level":30,"time":1761750960813,"pid":19,"hostname":"92ef107db885","originalResponse":"9nU9knDF","finalUrl":"https://www.tradingview.com/x/9nU9knDF/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:16:00.977Z {"level":30,"time":1761750960977,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/9nU9knDF/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:16:01.114Z {"level":30,"time":1761750961113,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 7a452157-2a36-4983-b80d-2a3b05c3bf84"}
+2025-10-29T15:16:01.242Z {"level":30,"time":1761750961242,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:AVAXUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:16:01.536Z {"level":30,"time":1761750961534,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:16:01.537Z {"level":50,"time":1761750961534,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 7a452157-2a36-4983-b80d-2a3b05c3bf84:"}
+2025-10-29T15:16:01.658Z {"level":30,"time":1761750961657,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 7a452157-2a36-4983-b80d-2a3b05c3bf84 - failed"}
+2025-10-29T15:16:01.662Z {"level":50,"time":1761750961661,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 7a452157-2a36-4983-b80d-2a3b05c3bf84 - method is not defined"}
+2025-10-29T15:16:09.715Z {"level":30,"time":1761750969715,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal f1fadea6-b6d7-4f09-94b6-df1d77438672 - OKX:LINKUSDT.P"}
+2025-10-29T15:16:09.930Z {"level":30,"time":1761750969930,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: f1fadea6-b6d7-4f09-94b6-df1d77438672 - processing"}
+2025-10-29T15:16:09.934Z {"level":30,"time":1761750969930,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:16:09.934Z {"level":30,"time":1761750969932,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:16:09.934Z {"level":30,"time":1761750969932,"pid":19,"hostname":"92ef107db885","ticker":"OKX:LINKUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:16:09.943Z {"level":30,"time":1761750969942,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:LINKUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:16:11.732Z {"level":30,"time":1761750971731,"pid":19,"hostname":"92ef107db885","msg":"🔄 Procesando screenshot para señal 7a452157-2a36-4983-b80d-2a3b05c3bf84 - OKX:AVAXUSDT.P"}
+2025-10-29T15:16:11.886Z {"level":30,"time":1761750971883,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 7a452157-2a36-4983-b80d-2a3b05c3bf84 - processing"}
+2025-10-29T15:16:11.887Z {"level":30,"time":1761750971883,"pid":19,"hostname":"92ef107db885","msg":"✨ Capturando screenshot vía TradingView Share..."}
+2025-10-29T15:16:11.887Z {"level":30,"time":1761750971884,"pid":19,"hostname":"92ef107db885","msg":"🔥 Usando Hot Chart Pool..."}
+2025-10-29T15:16:11.887Z {"level":30,"time":1761750971884,"pid":19,"hostname":"92ef107db885","ticker":"OKX:AVAXUSDT.P","chartId":"Xff0p3sf","msg":"📸 Capturando screenshot con POST directo a TradingView"}
+2025-10-29T15:16:11.896Z {"level":30,"time":1761750971895,"pid":19,"hostname":"92ef107db885","chartUrl":"https://www.tradingview.com/chart/Xff0p3sf/?symbol=OKX:AVAXUSDT.P","msg":"🌐 Navegando al chart del usuario..."}
+2025-10-29T15:16:21.275Z {"level":30,"time":1761750981274,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:16:24.544Z {"level":30,"time":1761750984544,"pid":19,"hostname":"92ef107db885","waitTime":8000,"msg":"⏳ Esperando carga completa del chart..."}
+2025-10-29T15:16:30.302Z {"level":30,"time":1761750990300,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:16:30.611Z {"level":30,"time":1761750990610,"pid":19,"hostname":"92ef107db885","bufferSize":389728,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:16:30.632Z {"level":30,"time":1761750990611,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:16:32.307Z {"level":30,"time":1761750992306,"pid":19,"hostname":"92ef107db885","shareUrl":"gbCIEcp6","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:16:32.314Z {"level":30,"time":1761750992306,"pid":19,"hostname":"92ef107db885","originalResponse":"gbCIEcp6","finalUrl":"https://www.tradingview.com/x/gbCIEcp6/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:16:32.409Z {"level":30,"time":1761750992408,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/gbCIEcp6/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:16:32.606Z {"level":30,"time":1761750992606,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: f1fadea6-b6d7-4f09-94b6-df1d77438672"}
+2025-10-29T15:16:32.739Z {"level":30,"time":1761750992739,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:LINKUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:16:33.056Z {"level":30,"time":1761750993056,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:16:33.059Z {"level":50,"time":1761750993056,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot f1fadea6-b6d7-4f09-94b6-df1d77438672:"}
+2025-10-29T15:16:33.182Z {"level":30,"time":1761750993180,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: f1fadea6-b6d7-4f09-94b6-df1d77438672 - failed"}
+2025-10-29T15:16:33.187Z {"level":50,"time":1761750993186,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: f1fadea6-b6d7-4f09-94b6-df1d77438672 - method is not defined"}
+2025-10-29T15:16:33.604Z {"level":30,"time":1761750993604,"pid":19,"hostname":"92ef107db885","msg":"📸 Capturando PNG del chart completo..."}
+2025-10-29T15:16:33.977Z {"level":30,"time":1761750993976,"pid":19,"hostname":"92ef107db885","bufferSize":393038,"dimensions":"1920x1080","msg":"✅ PNG rectangular generado localmente"}
+2025-10-29T15:16:33.985Z {"level":30,"time":1761750993977,"pid":19,"hostname":"92ef107db885","msg":"🚀 POSTando imagen a TradingView /snapshot/..."}
+2025-10-29T15:16:35.756Z {"level":30,"time":1761750995755,"pid":19,"hostname":"92ef107db885","shareUrl":"JKbth8pS","msg":"✅ URL de TradingView obtenida exitosamente"}
+2025-10-29T15:16:35.758Z {"level":30,"time":1761750995756,"pid":19,"hostname":"92ef107db885","originalResponse":"JKbth8pS","finalUrl":"https://www.tradingview.com/x/JKbth8pS/","msg":"🔧 URL construida desde ID"}
+2025-10-29T15:16:35.862Z {"level":30,"time":1761750995861,"pid":19,"hostname":"92ef107db885","shareUrl":"https://www.tradingview.com/x/JKbth8pS/","msg":"✅ TradingView Share URL obtenida"}
+2025-10-29T15:16:36.046Z {"level":30,"time":1761750996043,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot completado: 7a452157-2a36-4983-b80d-2a3b05c3bf84"}
+2025-10-29T15:16:36.208Z {"level":30,"time":1761750996207,"pid":19,"hostname":"92ef107db885","chatId":"1073407935","ticker":"OKX:AVAXUSDT.P","msg":"📱 Enviando notificación a Telegram..."}
+2025-10-29T15:16:36.493Z {"level":30,"time":1761750996492,"pid":19,"hostname":"92ef107db885","msg":"✅ Notificación enviada a Telegram correctamente"}
+2025-10-29T15:16:36.500Z {"level":50,"time":1761750996493,"pid":19,"hostname":"92ef107db885","msg":"❌ Error procesando screenshot 7a452157-2a36-4983-b80d-2a3b05c3bf84:"}
+2025-10-29T15:16:36.688Z {"level":30,"time":1761750996687,"pid":19,"hostname":"92ef107db885","msg":"✅ Screenshot actualizado: 7a452157-2a36-4983-b80d-2a3b05c3bf84 - failed"}
+2025-10-29T15:16:36.689Z {"level":50,"time":1761750996689,"pid":19,"hostname":"92ef107db885","msg":"❌ Worker falló job: 7a452157-2a36-4983-b80d-2a3b05c3bf84 - method is not defined"}

@@ -182,7 +182,7 @@ function startWorker(redisConnection) {
           success: true,
           signalId,
           screenshotUrl: shareUrl,
-          method,
+          method: 'tradingview_share',
           telegram_sent: userConfig?.telegram_enabled || false
         };
       } catch (error) {
