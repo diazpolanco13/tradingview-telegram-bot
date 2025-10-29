@@ -815,5 +815,53 @@ router.get('/admin/queue-stats', async (req, res) => {
   }
 });
 
+/**
+ * POST /admin/queue-clean
+ * Limpiar jobs completados y fallidos de la cola (resetear contadores)
+ */
+router.post('/admin/queue-clean', async (req, res) => {
+  try {
+    const { Queue } = require('bullmq');
+    const { getRedisConnection } = require('../config/redis-optional');
+    const redis = getRedisConnection();
+
+    if (!redis) {
+      return res.status(503).json({
+        success: false,
+        message: 'Redis no disponible'
+      });
+    }
+
+    const queue = new Queue('screenshot-processing', { connection: redis });
+    
+    // Limpiar jobs completados y fallidos (mantener waiting/active)
+    const cleanedCompleted = await queue.clean(0, 1000, 'completed');
+    const cleanedFailed = await queue.clean(0, 1000, 'failed');
+    
+    logger.info({ 
+      cleanedCompleted: cleanedCompleted.length,
+      cleanedFailed: cleanedFailed.length
+    }, '🧹 Cola limpiada');
+
+    res.json({
+      success: true,
+      message: 'Cola limpiada correctamente',
+      cleaned: {
+        completed: cleanedCompleted.length,
+        failed: cleanedFailed.length,
+        total: cleanedCompleted.length + cleanedFailed.length
+      },
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    logger.error({ error: error.message }, 'Error limpiando cola');
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
 
