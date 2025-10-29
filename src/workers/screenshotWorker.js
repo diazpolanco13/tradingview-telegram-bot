@@ -196,10 +196,15 @@ function startWorker(redisConnection) {
     },
     {
       connection: redisConnection,
-      concurrency: 2, // Procesar 2 screenshots simultáneamente
+      concurrency: parseInt(process.env.WORKER_CONCURRENCY) || 10, // Screenshots simultáneos
       limiter: {
-        max: 10, // Máximo 10 jobs
-        duration: 60000 // Por minuto
+        max: parseInt(process.env.WORKER_RATE_LIMIT_MAX) || 50, // Jobs por minuto
+        duration: parseInt(process.env.WORKER_RATE_LIMIT_DURATION) || 60000
+      },
+      settings: {
+        lockDuration: parseInt(process.env.WORKER_LOCK_DURATION) || 30000, // Timeout por job
+        maxStalledCount: parseInt(process.env.WORKER_MAX_STALLED) || 3,
+        stalledInterval: parseInt(process.env.WORKER_STALLED_INTERVAL) || 5000
       }
     }
   );

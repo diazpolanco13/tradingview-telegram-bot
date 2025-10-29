@@ -1,0 +1,25 @@
+# ============================================
+# 🚀 NUEVAS VARIABLES DE ENTORNO - FASE 1
+# ============================================
+# Agregar estas variables en Dockploy o tu .env local
+
+# ⚙️ WORKER CONFIGURATION (Aumenta capacidad de procesamiento)
+WORKER_CONCURRENCY=10           # Screenshots simultáneos (default: 10)
+WORKER_RATE_LIMIT_MAX=50        # Máximo jobs por minuto (default: 50)
+WORKER_RATE_LIMIT_DURATION=60000 # Duración ventana rate limit en ms (default: 60000 = 1min)
+WORKER_LOCK_DURATION=30000      # Timeout por job en ms (default: 30000 = 30s)
+WORKER_MAX_STALLED=3            # Reintentos máximos si job se estanca (default: 3)
+WORKER_STALLED_INTERVAL=5000    # Verificar estancados cada X ms (default: 5000 = 5s)
+
+# ============================================
+# 📊 IMPACTO ESPERADO:
+# ============================================
+# ANTES (concurrency=2):  ~34,560 screenshots/día  → ~70 usuarios
+# AHORA (concurrency=10): ~172,800 screenshots/día → ~345 usuarios
+#
+# Esto aprovecha completamente tu Browser Pool de 12 navegadores
+# ============================================
+
+# ⚠️ NOTA: Si experimentas problemas de memoria o CPU alto,
+# reduce WORKER_CONCURRENCY a 5-7 y POOL_MAX_BROWSERS a 8
+
