@@ -113,10 +113,14 @@ class ScreenshotService {
 
       logger.debug({ chartUrl, ticker }, 'Navegando a chart...');
 
-      // Configurar viewport
-      const width = parseInt(process.env.SCREENSHOT_WIDTH) || 1280;
-      const height = parseInt(process.env.SCREENSHOT_HEIGHT) || 720;
-      await page.setViewport({ width, height });
+      // Configurar viewport rectangular (16:9 ratio)
+      const width = parseInt(process.env.SCREENSHOT_WIDTH) || 1920;  // Full HD por defecto
+      const height = parseInt(process.env.SCREENSHOT_HEIGHT) || 1080; // 16:9 ratio
+      await page.setViewport({ 
+        width, 
+        height,
+        deviceScaleFactor: 1 // Sin escalado adicional
+      });
 
       // Navegar al chart
       await page.goto(chartUrl, {
@@ -137,13 +141,17 @@ class ScreenshotService {
         // Ignorar si no hay modales
       }
 
-      // Capturar screenshot
+      // Capturar screenshot del viewport completo (rectangular 16:9)
       const screenshot = await page.screenshot({
         type: 'png',
-        fullPage: false
+        fullPage: false, // Captura solo viewport visible
+        clip: undefined  // Sin recorte, toma el viewport completo
       });
 
-      logger.info({ size: screenshot.length }, '✅ Screenshot capturado exitosamente');
+      logger.info({ 
+        size: screenshot.length,
+        dimensions: `${width}x${height}`
+      }, '✅ Screenshot rectangular capturado exitosamente');
 
       return screenshot;
 
@@ -213,15 +221,19 @@ class ScreenshotService {
 
       logger.debug({ chartUrl }, 'Navegando a chart...');
 
-      // Configurar viewport según resolución
+      // Configurar viewport según resolución (16:9 ratio para todos)
       const viewportConfig = {
-        '720p': { width: 1280, height: 720 },
-        '1080p': { width: 1920, height: 1080 },
-        '4k': { width: 3840, height: 2160 }
+        '720p': { width: 1280, height: 720 },   // 16:9 HD
+        '1080p': { width: 1920, height: 1080 }, // 16:9 Full HD
+        '4k': { width: 3840, height: 2160 }     // 16:9 4K
       };
 
       const { width, height } = viewportConfig[resolution] || viewportConfig['1080p'];
-      await page.setViewport({ width, height });
+      await page.setViewport({ 
+        width, 
+        height,
+        deviceScaleFactor: 1 // Sin escalado adicional
+      });
 
       // Navegar al chart
       await page.goto(chartUrl, {
@@ -241,13 +253,18 @@ class ScreenshotService {
         // Ignorar
       }
 
-      // Capturar screenshot
+      // Capturar screenshot del viewport completo (rectangular 16:9)
       const screenshot = await page.screenshot({
         type: 'png',
-        fullPage: false
+        fullPage: false, // Captura solo viewport visible
+        clip: undefined  // Sin recorte, toma el viewport completo
       });
 
-      logger.info({ size: screenshot.length, resolution }, '✅ Screenshot capturado exitosamente');
+      logger.info({ 
+        size: screenshot.length, 
+        resolution,
+        dimensions: `${width}x${height}`
+      }, '✅ Screenshot rectangular capturado exitosamente');
 
       return screenshot;
 
@@ -341,8 +358,15 @@ class ScreenshotService {
 
       logger.info({ chartUrl }, '🌐 Navegando al chart del usuario...');
 
-      // Configurar viewport (1920x1080 para mejor calidad)
-      await page.setViewport({ width: 1920, height: 1080 });
+      // Configurar viewport panorámico (16:9 para charts de trading)
+      // Dimensiones ajustadas para captura rectangular completa
+      const width = 1920;  // Full HD width
+      const height = 1080; // Full HD height (16:9 ratio)
+      await page.setViewport({ 
+        width, 
+        height,
+        deviceScaleFactor: 1 // Sin escalado adicional
+      });
 
       // Navegar al chart
       await page.goto(chartUrl, {
@@ -363,31 +387,21 @@ class ScreenshotService {
         // Ignorar
       }
 
-      // 📸 CAPTURAR SCREENSHOT DEL CANVAS (solo el chart, sin UI extra)
-      logger.info('📸 Capturando PNG del chart...');
+      // 📸 CAPTURAR SCREENSHOT COMPLETO (viewport completo en 16:9)
+      logger.info('📸 Capturando PNG del chart completo...');
       
-      // Intentar capturar solo el contenedor del chart
-      let screenshotBuffer;
-      try {
-        // Esperar a que exista el contenedor del chart
-        await page.waitForSelector('.chart-container, [data-name="chart-container"]', { timeout: 5000 });
-        
-        const chartElement = await page.$('.chart-container, [data-name="chart-container"]');
-        if (chartElement) {
-          screenshotBuffer = await chartElement.screenshot({ type: 'png' });
-          logger.info('✅ Screenshot del chart-container capturado');
-        } else {
-          // Fallback: screenshot completo
-          screenshotBuffer = await page.screenshot({ type: 'png', fullPage: false });
-          logger.info('✅ Screenshot completo capturado (fallback)');
-        }
-      } catch (selectorError) {
-        // Si no encuentra el selector, screenshot completo
-        screenshotBuffer = await page.screenshot({ type: 'png', fullPage: false });
-        logger.info('✅ Screenshot completo capturado (sin selector específico)');
-      }
+      // Capturar screenshot del viewport completo (respeta el 1920x1080 configurado)
+      // fullPage: false garantiza que capture exactamente el viewport (rectangular)
+      const screenshotBuffer = await page.screenshot({ 
+        type: 'png', 
+        fullPage: false, // Captura solo viewport visible
+        clip: undefined  // Sin recorte, toma el viewport completo
+      });
 
-      logger.info({ bufferSize: screenshotBuffer.length }, '✅ PNG generado localmente');
+      logger.info({ 
+        bufferSize: screenshotBuffer.length,
+        dimensions: `${width}x${height}` 
+      }, '✅ PNG rectangular generado localmente');
 
       // 🚀 POST DIRECTO A TRADINGVIEW /snapshot/
       logger.info('🚀 POSTando imagen a TradingView /snapshot/...');

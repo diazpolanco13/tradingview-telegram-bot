@@ -58,6 +58,8 @@ ENCRYPTION_KEY=a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
 # Screenshots (OPCIONAL)
 SCREENSHOT_TIMEOUT=30000
 CHART_LOAD_WAIT=5000
+SCREENSHOT_WIDTH=1920    # Full HD width (16:9 ratio)
+SCREENSHOT_HEIGHT=1080   # Full HD height (recomendado para trading charts)
 
 # Cuotas por Plan (REQUERIDO) - Alineado con APIDevs
 PLAN_FREE_QUOTA=1000          # Free: ~33/día
