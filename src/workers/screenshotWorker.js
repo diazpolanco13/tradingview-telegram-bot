@@ -60,17 +60,16 @@ async function sendTelegramNotification(signalData, userConfig) {
       lines.push(`🔧 *Indicador:* ${signalData.indicator}`);
     }
     
-    // Timestamp
+    // Timestamp y Screenshot juntos (sin salto entre ellos)
     lines.push('');
     lines.push(`⏰ ${new Date(signalData.timestamp).toLocaleString('es-ES', { timeZone: userConfig.preferred_timezone || 'UTC' })}`);
     
-    // Screenshot si existe
+    // Screenshot si existe (sin salto extra antes del ID)
     if (signalData.screenshot_url) {
       lines.push(`📸 [Ver Screenshot en TradingView](${signalData.screenshot_url})`);
     }
     
-    // ID de señal
-    lines.push('');
+    // ID de señal (sin salto de línea antes)
     lines.push(`_Señal #${signalData.id.split('-')[0]}_`);
     
     const message = lines.join('\n');
