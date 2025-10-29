@@ -378,9 +378,13 @@ class ScreenshotService {
       try {
         await page.addStyleTag({
           content: `
-            /* Ocultar popups de upgrade y paywalls */
+            /* Ocultar popups de upgrade y paywalls - SELECTORES EXACTOS */
+            .dialog-weMtdaMN,
+            .modal-Ve0lVFO4,
             div[data-name="upgrade-dialog"],
             div[data-name="go-to-pro-dialog"],
+            div[class*="dialog-"],
+            div[class*="modal-"],
             div[class*="upgrade"],
             div[class*="paywall"],
             div[class*="subscription"],
@@ -391,6 +395,7 @@ class ScreenshotService {
               display: none !important;
               visibility: hidden !important;
               opacity: 0 !important;
+              pointer-events: none !important;
             }
           `
         });
@@ -406,8 +411,10 @@ class ScreenshotService {
 
       // 🎯 DETECTAR Y CERRAR POPUP ACTIVAMENTE (Fallback del CSS)
       try {
-        // Buscar botones de cierre del popup
+        // Buscar botones de cierre del popup con selectores EXACTOS del HTML
         const popupCloseSelectors = [
+          'button.button-2aNb8h1c:has-text("Don\'t need")',  // Selector exacto del HTML
+          'button.button-D4RPB3ZC:has-text("Don\'t need")',  // Clase secundaria
           'button:has-text("Don\'t need")',
           'button:has-text("No thanks")',
           'button:has-text("Close")',
