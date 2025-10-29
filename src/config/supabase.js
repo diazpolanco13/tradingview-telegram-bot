@@ -170,38 +170,9 @@ async function incrementWebhookUsage(webhookToken) {
   }
 }
 
-/**
- * Subir screenshot a Supabase Storage
- * @param {Buffer} buffer - Buffer de la imagen
- * @param {string} userId - ID del usuario
- * @param {string} filename - Nombre del archivo
- * @returns {Promise<string|null>} - URL pública o null
- */
-async function uploadScreenshot(buffer, userId, filename) {
-  try {
-    const filePath = `${userId}/${filename}`;
-
-    const { data, error } = await supabase.storage
-      .from('trading-screenshots')
-      .upload(filePath, buffer, {
-        contentType: 'image/png',
-        upsert: false
-      });
-
-    if (error) throw error;
-
-    // Obtener URL pública
-    const { data: publicUrlData } = supabase.storage
-      .from('trading-screenshots')
-      .getPublicUrl(filePath);
-
-    logger.info(`✅ Screenshot subido: ${publicUrlData.publicUrl}`);
-    return publicUrlData.publicUrl;
-  } catch (error) {
-    logger.error('❌ Error subiendo screenshot:', error.message);
-    return null;
-  }
-}
+// ⚠️ ELIMINADO: uploadScreenshot()
+// El sistema ahora usa exclusivamente TradingView CDN URLs
+// No se suben imágenes a Supabase Storage
 
 /**
  * Obtener configuración del usuario por user_id
@@ -231,7 +202,6 @@ module.exports = {
   insertSignal,
   updateScreenshotStatus,
   incrementWebhookUsage,
-  uploadScreenshot,
   getUserConfig
 };
 
