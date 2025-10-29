@@ -481,8 +481,10 @@ class ScreenshotService {
       if (usingPool && browserSlot) {
         const pool = getPool();
         await pool.releaseBrowser(browserSlot);
-      } else if (page) {
+        logger.debug('🔓 Browser liberado al pool');
+      } else if (!usingPool && page && typeof page.close === 'function') {
         await page.close();
+        logger.debug('🔒 Página cerrada (modo sin pool)');
       }
     }
   } catch (outerError) {
