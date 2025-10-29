@@ -40,18 +40,40 @@ async function sendTelegramNotification(signalData, userConfig) {
     // Crear instancia del bot del usuario
     const bot = new TelegramBot(userConfig.telegram_bot_token, { polling: false });
 
-    // Formatear mensaje (formato compacto según recomendación)
-    const message = `🚨 *Nueva Señal de Trading*
-
-🪙 *Ticker:* ${signalData.ticker}
-💰 *Precio:* $${signalData.price}
-📊 *Señal:* ${signalData.signal_type || 'N/A'}
-${signalData.direction ? `📈 *Dirección:* ${signalData.direction}\n` : ''}${signalData.indicator ? `🔧 *Indicador:* ${signalData.indicator}` : ''}
-
-⏰ ${new Date(signalData.timestamp).toLocaleString('es-ES', { timeZone: userConfig.preferred_timezone || 'UTC' })}
-${signalData.screenshot_url ? `\n📸 [Ver Screenshot en TradingView](${signalData.screenshot_url})` : ''}
-
-_Señal #${signalData.id.split('-')[0]}_`;
+    // Formatear mensaje (formato compacto - sin saltos extras)
+    // Construir líneas de forma dinámica
+    const lines = [
+      '🚨 *Nueva Señal de Trading*',
+      '',
+      `🪙 *Ticker:* ${signalData.ticker}`,
+      `💰 *Precio:* $${signalData.price}`,
+      `📊 *Señal:* ${signalData.signal_type || 'N/A'}`
+    ];
+    
+    // Agregar dirección si existe
+    if (signalData.direction) {
+      lines.push(`📈 *Dirección:* ${signalData.direction}`);
+    }
+    
+    // Agregar indicador si existe
+    if (signalData.indicator) {
+      lines.push(`🔧 *Indicador:* ${signalData.indicator}`);
+    }
+    
+    // Timestamp
+    lines.push('');
+    lines.push(`⏰ ${new Date(signalData.timestamp).toLocaleString('es-ES', { timeZone: userConfig.preferred_timezone || 'UTC' })}`);
+    
+    // Screenshot si existe
+    if (signalData.screenshot_url) {
+      lines.push(`📸 [Ver Screenshot en TradingView](${signalData.screenshot_url})`);
+    }
+    
+    // ID de señal
+    lines.push('');
+    lines.push(`_Señal #${signalData.id.split('-')[0]}_`);
+    
+    const message = lines.join('\n');
 
     // Enviar mensaje
     await bot.sendMessage(userConfig.telegram_chat_id, message, {
