@@ -12,6 +12,7 @@ const {
   incrementWebhookUsage
 } = require('../config/supabase');
 const { decryptTradingViewCookies } = require('../utils/encryption');
+const { checkRateLimit } = require('../middleware/rateLimiter');
 
 // BullMQ es opcional (puede no estar en desarrollo local)
 const { addScreenshotJob } = require('../config/redis-optional');
@@ -58,7 +59,34 @@ router.post('/webhook/:token', async (req, res) => {
 
     logger.info({ userId: userConfig.user_id }, '✅ Token validado correctamente');
 
-    // 2. PARSEAR MENSAJE DE TRADINGVIEW
+    // 2. VERIFICAR RATE LIMIT (PROTECCIÓN ANTI-ABUSO)
+    const rateLimitCheck = await checkRateLimit(
+      userConfig.user_id,
+      userConfig.user_plan || 'free'
+    );
+
+    if (!rateLimitCheck.allowed) {
+      logger.warn({ 
+        userId: userConfig.user_id, 
+        reason: rateLimitCheck.reason,
+        limits: rateLimitCheck.limits
+      }, '🚫 Rate limit excedido');
+      
+      return res.status(429).json({
+        success: false,
+        error: 'rate_limit_exceeded',
+        message: rateLimitCheck.message,
+        limits: rateLimitCheck.limits,
+        retry_after: rateLimitCheck.limits.waitSeconds || rateLimitCheck.limits.waitMinutes
+      });
+    }
+
+    logger.debug({ 
+      userId: userConfig.user_id,
+      limits: rateLimitCheck.limits
+    }, '✅ Rate limit OK');
+
+    // 3. PARSEAR MENSAJE DE TRADINGVIEW
     let parsedData = {};
     let rawMessage = '';
 

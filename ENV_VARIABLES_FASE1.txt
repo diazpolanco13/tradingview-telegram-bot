@@ -1,5 +1,5 @@
 # ============================================
-# 🚀 NUEVAS VARIABLES DE ENTORNO - FASE 1
+# 🚀 NUEVAS VARIABLES DE ENTORNO - FASE 1 y 3B
 # ============================================
 # Agregar estas variables en Dockploy o tu .env local
 
@@ -10,6 +10,13 @@ WORKER_RATE_LIMIT_DURATION=60000 # Duración ventana rate limit en ms (default: 
 WORKER_LOCK_DURATION=30000      # Timeout por job en ms (default: 30000 = 30s)
 WORKER_MAX_STALLED=3            # Reintentos máximos si job se estanca (default: 3)
 WORKER_STALLED_INTERVAL=5000    # Verificar estancados cada X ms (default: 5000 = 5s)
+
+# 🛡️ RATE LIMITING (NUEVO - FASE 3B - ANTI-ABUSO)
+RATE_LIMIT_PER_MINUTE=10        # Máximo alertas por minuto por usuario (default: 10)
+RATE_LIMIT_PER_HOUR=100         # Máximo alertas por hora por usuario (default: 100)
+DAILY_LIMIT_FREE=50             # Límite diario para plan Free (default: 50)
+DAILY_LIMIT_PRO=600             # Límite diario para plan Pro (default: 600)
+# Nota: Lifetime no tiene límite diario (-1 = ilimitado)
 
 # ============================================
 # 📊 IMPACTO ESPERADO:

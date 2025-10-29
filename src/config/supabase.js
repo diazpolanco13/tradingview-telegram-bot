@@ -63,6 +63,7 @@ async function validateWebhookToken(webhookToken) {
         webhook_enabled,
         signals_quota,
         signals_used_this_month,
+        user_plan,
         default_chart_id,
         tv_sessionid,
         tv_sessionid_sign,
