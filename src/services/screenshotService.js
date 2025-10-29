@@ -374,6 +374,31 @@ class ScreenshotService {
         timeout: parseInt(process.env.SCREENSHOT_TIMEOUT) || 60000 // Aumentado a 60s
       });
 
+      // 🚫 BLOQUEAR POPUPS DE UPGRADE/PAYWALL CON CSS
+      try {
+        await page.addStyleTag({
+          content: `
+            /* Ocultar popups de upgrade y paywalls */
+            div[data-name="upgrade-dialog"],
+            div[data-name="go-to-pro-dialog"],
+            div[class*="upgrade"],
+            div[class*="paywall"],
+            div[class*="subscription"],
+            .tv-dialog--popup,
+            .tv-dialog__modal-wrap,
+            [data-role="dialog"],
+            div[data-outside-boundary-for="upgrade-dialog"] {
+              display: none !important;
+              visibility: hidden !important;
+              opacity: 0 !important;
+            }
+          `
+        });
+        logger.debug('🚫 CSS anti-popup inyectado');
+      } catch (cssError) {
+        logger.warn('⚠️ No se pudo inyectar CSS anti-popup (continuando...)');
+      }
+
       // Esperar a que cargue completamente el chart
       const waitTime = parseInt(process.env.CHART_LOAD_WAIT) || 8000; // Optimizado a 8s
       logger.info({ waitTime }, '⏳ Esperando carga completa del chart...');
