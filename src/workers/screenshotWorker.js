@@ -42,22 +42,24 @@ async function sendTelegramNotification(signalData, userConfig) {
 
     // Formatear mensaje (formato compacto - sin saltos extras)
     // Construir líneas de forma dinámica
-    const lines = [
-      '🚨 *Nueva Señal de Trading*',
-      '',
-      `🪙 *Ticker:* ${signalData.ticker}`,
-      `💰 *Precio:* $${signalData.price}`,
-      `📊 *Señal:* ${signalData.signal_type || 'N/A'}`
-    ];
+    const lines = ['🚨 *Nueva Señal de Trading*'];
+    
+    // Agregar indicador PRIMERO si existe
+    if (signalData.indicator) {
+      lines.push(`🔧 *${signalData.indicator}*`);
+    }
+    
+    // Salto de línea antes de los datos
+    lines.push('');
+    
+    // Datos de la señal
+    lines.push(`🪙 *Ticker:* ${signalData.ticker}`);
+    lines.push(`💰 *Precio:* $${signalData.price}`);
+    lines.push(`📊 *Señal:* ${signalData.signal_type || 'N/A'}`);
     
     // Agregar dirección si existe
     if (signalData.direction) {
       lines.push(`📈 *Dirección:* ${signalData.direction}`);
-    }
-    
-    // Agregar indicador si existe
-    if (signalData.indicator) {
-      lines.push(`🔧 *Indicador:* ${signalData.indicator}`);
     }
     
     // Timestamp y Screenshot juntos (sin salto entre ellos)
