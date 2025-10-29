@@ -40,17 +40,15 @@ async function sendTelegramNotification(signalData, userConfig) {
     // Crear instancia del bot del usuario
     const bot = new TelegramBot(userConfig.telegram_bot_token, { polling: false });
 
-    // Formatear mensaje
+    // Formatear mensaje (formato compacto según recomendación)
     const message = `🚨 *Nueva Señal de Trading*
 
 🪙 *Ticker:* ${signalData.ticker}
 💰 *Precio:* $${signalData.price}
 📊 *Señal:* ${signalData.signal_type || 'N/A'}
-${signalData.direction ? `📈 *Dirección:* ${signalData.direction}` : ''}
-${signalData.indicator ? `🔧 *Indicador:* ${signalData.indicator}` : ''}
+${signalData.direction ? `📈 *Dirección:* ${signalData.direction}\n` : ''}${signalData.indicator ? `🔧 *Indicador:* ${signalData.indicator}` : ''}
 
 ⏰ ${new Date(signalData.timestamp).toLocaleString('es-ES', { timeZone: userConfig.preferred_timezone || 'UTC' })}
-
 ${signalData.screenshot_url ? `\n📸 [Ver Screenshot en TradingView](${signalData.screenshot_url})` : ''}
 
 _Señal #${signalData.id.split('-')[0]}_`;
