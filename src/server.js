@@ -80,32 +80,120 @@ app.get('/', (req, res) => {
   });
 });
 
-// Health check endpoint
+// Health check endpoint - MEJORADO
 app.get('/health', async (req, res) => {
+  const checks = {
+    supabase: false,
+    redis: false,
+    worker: false,
+    browserPool: false
+  };
+  
+  let overallStatus = 'healthy';
+  const errors = [];
+
   try {
+    // 1. Check Supabase
+    try {
+      const { supabase } = require('./config/supabase');
+      const { data, error } = await supabase
+        .from('trading_signals_config')
+        .select('id', { count: 'exact', head: true });
+      
+      if (error) throw error;
+      checks.supabase = true;
+    } catch (e) {
+      checks.supabase = false;
+      errors.push(`Supabase: ${e.message}`);
+      overallStatus = 'degraded';
+    }
+
+    // 2. Check Redis
+    if (redisAvailable) {
+      try {
+        const { getRedisConnection } = require('./config/redis-optional');
+        const redis = getRedisConnection();
+        if (redis) {
+          await redis.ping();
+          checks.redis = true;
+        }
+      } catch (e) {
+        checks.redis = false;
+        errors.push(`Redis: ${e.message}`);
+        overallStatus = 'degraded';
+      }
+    } else {
+      checks.redis = 'not_configured';
+    }
+
+    // 3. Check Worker
+    try {
+      const { getWorkerInstance } = require('./workers/screenshotWorker');
+      const worker = getWorkerInstance();
+      checks.worker = worker ? true : 'not_started';
+    } catch (e) {
+      checks.worker = false;
+      errors.push(`Worker: ${e.message}`);
+    }
+
+    // 4. Check Browser Pool
+    try {
+      const { getPool } = require('./services/browserPool');
+      const pool = getPool();
+      checks.browserPool = pool?.initialized ? true : 'not_initialized';
+    } catch (e) {
+      checks.browserPool = false;
+      errors.push(`BrowserPool: ${e.message}`);
+    }
+
+    // 5. Get Queue Stats
     let queueStats = null;
     if (redisAvailable && getQueueStats) {
       queueStats = await getQueueStats();
     }
 
-    res.status(200).json({
-      status: 'healthy',
-      uptime: process.uptime(),
+    // Determinar HTTP status code
+    const httpStatus = overallStatus === 'healthy' ? 200 : 503;
+
+    res.status(httpStatus).json({
+      status: overallStatus,
+      uptime: Math.floor(process.uptime()),
+      uptimeFormatted: formatUptime(process.uptime()),
       timestamp: new Date().toISOString(),
+      checks: checks,
       services: {
-        supabase: true,
-        redis: redisAvailable,
-        puppeteer: screenshotService.initialized,
-        queue: queueStats || { message: 'Redis no disponible' }
+        supabase: checks.supabase,
+        redis: checks.redis,
+        worker: checks.worker,
+        browserPool: checks.browserPool,
+        puppeteer: screenshotService.initialized
+      },
+      queue: queueStats || { message: 'Redis no disponible' },
+      errors: errors.length > 0 ? errors : undefined,
+      memory: {
+        used: `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`,
+        total: `${(process.memoryUsage().heapTotal / 1024 / 1024).toFixed(2)} MB`
       }
     });
   } catch (error) {
     res.status(503).json({
-      status: 'degraded',
-      error: error.message
+      status: 'unhealthy',
+      error: error.message,
+      timestamp: new Date().toISOString()
     });
   }
 });
+
+// Helper para formatear uptime
+function formatUptime(seconds) {
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  
+  if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+}
 
 // API Routes
 app.use(webhookRoutes);          // POST /webhook/:token
@@ -188,8 +276,8 @@ async function startServer() {
     logger.info('📋 Cargando configuración de planes...');
     logPlansConfiguration();
 
-    // Start server
-    app.listen(PORT, () => {
+    // Start server y guardar referencia para graceful shutdown
+    server = app.listen(PORT, () => {
       logger.info(`
 ╔════════════════════════════════════════════════════════════════╗
 ║  🎯 TradingView Microservice - RUNNING                         ║
@@ -217,27 +305,96 @@ async function startServer() {
   }
 }
 
-// Graceful shutdown
-async function shutdown() {
-  logger.info('🛑 Shutting down gracefully...');
+// Graceful shutdown - MEJORADO
+let server;
+let isShuttingDown = false;
+
+async function shutdown(signal) {
+  if (isShuttingDown) {
+    logger.warn('⚠️ Shutdown already in progress...');
+    return;
+  }
   
+  isShuttingDown = true;
+  logger.info(`🛑 Received ${signal}, shutting down gracefully...`);
+  
+  // Establecer timeout de 30 segundos para shutdown forzado
+  const forceShutdownTimer = setTimeout(() => {
+    logger.error('❌ Graceful shutdown timeout, forcing exit');
+    process.exit(1);
+  }, 30000);
+
   try {
-    await screenshotService.close();
-    
-    // Cerrar worker si está disponible
+    // 1. Dejar de aceptar nuevas conexiones
+    if (server) {
+      logger.info('🚫 Cerrando servidor HTTP (no aceptar nuevas conexiones)...');
+      server.close(() => {
+        logger.info('✅ Servidor HTTP cerrado');
+      });
+    }
+
+    // 2. Cerrar worker (esperar que terminen jobs activos)
+    logger.info('⏳ Esperando que terminen jobs activos...');
     const { stopWorker } = require('./workers/screenshotWorker');
     await stopWorker();
-    
-    logger.info('✅ Shutdown complete');
+    logger.info('✅ Worker cerrado correctamente');
+
+    // 3. Cerrar Browser Pool
+    logger.info('🌐 Cerrando Browser Pool...');
+    try {
+      const { getPool } = require('./services/browserPool');
+      const pool = getPool();
+      if (pool && pool.initialized) {
+        await pool.shutdown();
+        logger.info('✅ Browser Pool cerrado');
+      }
+    } catch (e) {
+      logger.warn(`⚠️ Error cerrando Browser Pool: ${e.message}`);
+    }
+
+    // 4. Cerrar Screenshot Service
+    logger.info('📸 Cerrando Screenshot Service...');
+    await screenshotService.close();
+    logger.info('✅ Screenshot Service cerrado');
+
+    // 5. Cerrar Redis
+    if (redisAvailable) {
+      logger.info('🔴 Cerrando conexión Redis...');
+      try {
+        const { closeRedisConnection } = require('./config/redis-optional');
+        if (closeRedisConnection) {
+          await closeRedisConnection();
+          logger.info('✅ Redis cerrado');
+        }
+      } catch (e) {
+        logger.warn(`⚠️ Error cerrando Redis: ${e.message}`);
+      }
+    }
+
+    clearTimeout(forceShutdownTimer);
+    logger.info('✅ Graceful shutdown complete');
     process.exit(0);
   } catch (error) {
+    clearTimeout(forceShutdownTimer);
     logger.error({ error: error.message }, '❌ Error during shutdown');
     process.exit(1);
   }
 }
 
-process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown);
+// Capturar señales de shutdown
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
+// Capturar errores no manejados
+process.on('uncaughtException', (error) => {
+  logger.error({ error: error.message, stack: error.stack }, '❌ Uncaught Exception');
+  shutdown('uncaughtException');
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error({ reason, promise }, '❌ Unhandled Promise Rejection');
+  shutdown('unhandledRejection');
+});
 
 // Start server
 startServer();

@@ -58,6 +58,26 @@ if (isRedisAvailable) {
   logger.warn('⚠️ Redis no configurado - Modo desarrollo sin screenshots');
 }
 
+// Función para cerrar Redis (graceful shutdown)
+async function closeRedisConnection() {
+  if (redisConnection) {
+    logger.info('🔴 Cerrando conexión Redis...');
+    try {
+      await redisConnection.quit();
+      logger.info('✅ Redis desconectado correctamente');
+    } catch (error) {
+      logger.error(`❌ Error cerrando Redis: ${error.message}`);
+      // Forzar cierre
+      await redisConnection.disconnect();
+    }
+  }
+}
+
+// Función para obtener conexión Redis
+function getRedisConnection() {
+  return redisConnection;
+}
+
 module.exports = {
   redisConnection,
   testRedisConnection,
@@ -65,5 +85,7 @@ module.exports = {
   addScreenshotJob,
   getQueueStats,
   screenshotWorker,
-  isRedisAvailable // Export actual status
+  isRedisAvailable, // Export actual status
+  closeRedisConnection, // Para graceful shutdown
+  getRedisConnection // Para health check
 };
