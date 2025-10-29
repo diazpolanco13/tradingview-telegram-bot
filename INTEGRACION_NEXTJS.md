@@ -1878,7 +1878,390 @@ async function shareSignal(signal: Signal) {
 
 ---
 
-**Versión:** 1.0  
-**Última actualización:** 28 Octubre 2025  
-**Listo para implementar** ✅
+---
+
+## 📊 NUEVOS ENDPOINTS DE MONITORING (FASE 2)
+
+### **1. `/admin/metrics` - Dashboard Completo del Sistema**
+
+**Propósito:** Obtener métricas completas del microservicio para crear un dashboard de administración.
+
+**Uso:**
+```typescript
+const response = await fetch('https://alerts.apidevs-api.com/admin/metrics');
+const metrics = await response.json();
+```
+
+**Respuesta:**
+```json
+{
+  "success": true,
+  "timestamp": "2025-10-29T16:00:00Z",
+  "uptime": "2d 5h 30m",
+  "uptimeSeconds": 192600,
+  
+  "browserPool": {
+    "total": 8,
+    "available": 5,
+    "inUse": 3,
+    "status": "healthy",  // healthy | busy | saturated
+    "totalCreated": 12,
+    "totalClosed": 4,
+    "totalCaptures": 1543,
+    "activeCaptures": 3
+  },
+  
+  "queue": {
+    "waiting": 12,
+    "active": 10,
+    "completed": 1543,
+    "failed": 7,
+    "delayed": 0,
+    "paused": 0,
+    "total": 1572
+  },
+  
+  "performance": {
+    "screenshotsCompleted": 1543,
+    "screenshotsFailed": 7,
+    "successRate": "99.55%",
+    "estimatedPerHour": 132,
+    "screenshotsToday": 234,
+    "avgScreenshotTime": "6.2s"
+  },
+  
+  "capacity": {
+    "currentLoad": "37.5%",
+    "maxConcurrency": 10,
+    "maxBrowsers": 12,
+    "estimatedUsers": 120,
+    "maxCapacity": 345,
+    "utilizationPercent": "34.8"
+  },
+  
+  "database": {
+    "totalSignals": 15234,
+    "totalUsers": 45,
+    "signalsToday": 234
+  },
+  
+  "system": {
+    "nodeVersion": "v18.17.0",
+    "platform": "linux",
+    "memory": {
+      "used": "245.67 MB",
+      "total": "512.00 MB"
+    }
+  }
+}
+```
+
+**Componente React para visualizar:**
+```typescript
+export function SystemMetrics() {
+  const [metrics, setMetrics] = useState(null);
+  
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      const res = await fetch('https://alerts.apidevs-api.com/admin/metrics');
+      const data = await res.json();
+      setMetrics(data);
+    };
+    
+    fetchMetrics();
+    const interval = setInterval(fetchMetrics, 5000); // Actualizar cada 5s
+    
+    return () => clearInterval(interval);
+  }, []);
+  
+  if (!metrics) return <div>Cargando métricas...</div>;
+  
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      {/* Browser Pool */}
+      <Card>
+        <h3>Browser Pool</h3>
+        <div className="flex items-center gap-2">
+          <Progress value={(metrics.browserPool.inUse / metrics.browserPool.total) * 100} />
+          <span>{metrics.browserPool.inUse}/{metrics.browserPool.total}</span>
+        </div>
+        <Badge variant={metrics.browserPool.status === 'healthy' ? 'success' : 'warning'}>
+          {metrics.browserPool.status}
+        </Badge>
+      </Card>
+      
+      {/* Queue Stats */}
+      <Card>
+        <h3>Cola de Procesamiento</h3>
+        <div className="space-y-2">
+          <div>Esperando: {metrics.queue.waiting}</div>
+          <div>Activos: {metrics.queue.active}</div>
+          <div>Completados: {metrics.queue.completed}</div>
+        </div>
+      </Card>
+      
+      {/* Capacity */}
+      <Card>
+        <h3>Capacidad del Sistema</h3>
+        <Progress value={metrics.capacity.utilizationPercent} />
+        <div className="text-sm text-muted">
+          {metrics.capacity.estimatedUsers} de {metrics.capacity.maxCapacity} usuarios
+        </div>
+      </Card>
+    </div>
+  );
+}
+```
+
+---
+
+### **2. `/admin/pool-status` - Estado del Browser Pool**
+
+**Propósito:** Ver estado detallado de cada navegador en el pool.
+
+**Respuesta:**
+```json
+{
+  "success": true,
+  "initialized": true,
+  "config": {
+    "minBrowsers": 5,
+    "maxBrowsers": 12,
+    "idleTimeout": "30min",
+    "cleanupInterval": "10min",
+    "warmup": true
+  },
+  "stats": {
+    "total": 8,
+    "available": 5,
+    "inUse": 3,
+    "totalCreated": 12,
+    "totalClosed": 4,
+    "totalCaptures": 1543,
+    "activeCaptures": 3
+  },
+  "browsers": [
+    {
+      "id": "browser-1",
+      "status": "in_use",
+      "lastUsed": "2s ago",
+      "createdAt": "2025-10-29T14:30:00Z",
+      "uptime": "90m"
+    },
+    {
+      "id": "browser-2",
+      "status": "available",
+      "lastUsed": "45s ago",
+      "createdAt": "2025-10-29T14:30:00Z",
+      "uptime": "90m"
+    }
+  ]
+}
+```
+
+---
+
+### **3. `/admin/queue-stats` - Estadísticas de Cola BullMQ**
+
+**Propósito:** Ver jobs recientes y estado de la cola en detalle.
+
+**Respuesta:**
+```json
+{
+  "success": true,
+  "counts": {
+    "waiting": 12,
+    "active": 10,
+    "completed": 1543,
+    "failed": 7,
+    "delayed": 0,
+    "paused": 0
+  },
+  "recentCompleted": [
+    {
+      "id": "screenshot-job-123",
+      "status": "completed",
+      "processedOn": "2025-10-29T16:00:00Z",
+      "finishedOn": "2025-10-29T16:00:06Z",
+      "duration": "6.2s",
+      "data": {
+        "ticker": "BINANCE:BTCUSDT",
+        "userId": "71b7b58f..."
+      }
+    }
+  ],
+  "activeJobs": [
+    {
+      "id": "screenshot-job-456",
+      "status": "active",
+      "processedOn": "2025-10-29T16:00:10Z",
+      "data": {
+        "ticker": "OKX:ETHUSDT.P",
+        "userId": "a1b2c3d4..."
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 🎨 Componente de Admin Dashboard Completo
+
+```typescript
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+
+export function AdminDashboard() {
+  const [metrics, setMetrics] = useState(null);
+  const [poolStatus, setPoolStatus] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [metricsRes, poolRes] = await Promise.all([
+          fetch('https://alerts.apidevs-api.com/admin/metrics'),
+          fetch('https://alerts.apidevs-api.com/admin/pool-status')
+        ]);
+        
+        const metricsData = await metricsRes.json();
+        const poolData = await poolRes.json();
+        
+        setMetrics(metricsData);
+        setPoolStatus(poolData);
+      } catch (error) {
+        console.error('Error fetching metrics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 5000); // Refresh cada 5s
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) {
+    return <div className="p-8 text-center">Cargando métricas del sistema...</div>;
+  }
+
+  if (!metrics) {
+    return <div className="p-8 text-center text-red-500">Error cargando métricas</div>;
+  }
+
+  return (
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Dashboard del Sistema</h1>
+        <Badge variant="outline">Uptime: {metrics.uptime}</Badge>
+      </div>
+
+      {/* Métricas Principales */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Browser Pool</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics.browserPool.inUse}/{metrics.browserPool.total}</div>
+            <Progress value={(metrics.browserPool.inUse / metrics.browserPool.total) * 100} className="mt-2" />
+            <Badge className="mt-2" variant={
+              metrics.browserPool.status === 'healthy' ? 'success' : 
+              metrics.browserPool.status === 'busy' ? 'warning' : 'destructive'
+            }>
+              {metrics.browserPool.status}
+            </Badge>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Cola de Procesamiento</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">Esperando:</span>
+                <span className="font-semibold">{metrics.queue.waiting}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">Activos:</span>
+                <span className="font-semibold text-blue-600">{metrics.queue.active}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">Completados:</span>
+                <span className="font-semibold text-green-600">{metrics.queue.completed}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Performance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics.performance.successRate}</div>
+            <p className="text-sm text-muted-foreground">Tasa de éxito</p>
+            <div className="mt-2 text-sm">
+              <div>Screenshots hoy: {metrics.performance.screenshotsToday}</div>
+              <div>Promedio: {metrics.performance.avgScreenshotTime}</div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Capacidad</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics.capacity.utilizationPercent}%</div>
+            <Progress value={parseFloat(metrics.capacity.utilizationPercent)} className="mt-2" />
+            <p className="text-sm text-muted-foreground mt-2">
+              {metrics.capacity.estimatedUsers} de {metrics.capacity.maxCapacity} usuarios
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Estado de Navegadores */}
+      {poolStatus?.initialized && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Estado de Navegadores en el Pool</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {poolStatus.browsers.map((browser) => (
+                <div key={browser.id} className="border rounded-lg p-4">
+                  <div className="font-semibold">{browser.id}</div>
+                  <Badge variant={browser.status === 'in_use' ? 'default' : 'secondary'}>
+                    {browser.status}
+                  </Badge>
+                  <div className="text-sm text-muted-foreground mt-2">
+                    <div>Usado: {browser.lastUsed}</div>
+                    <div>Uptime: {browser.uptime}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+**Versión:** 2.0  
+**Última actualización:** 29 Octubre 2025  
+**FASE 2 - Monitoring completado** ✅
 

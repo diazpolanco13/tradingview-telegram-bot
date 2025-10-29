@@ -519,5 +519,301 @@ router.get('/test/quota/:userId', async (req, res) => {
   }
 });
 
+/**
+ * GET /admin/metrics
+ * Dashboard completo de métricas del sistema
+ */
+router.get('/admin/metrics', async (req, res) => {
+  try {
+    const startTime = process.uptime();
+    const pool = getPool();
+    const { getWorkerInstance } = require('../workers/screenshotWorker');
+    const worker = getWorkerInstance();
+
+    // 1. BROWSER POOL STATS
+    const poolStats = pool?.getStats() || {
+      total: 0,
+      available: 0,
+      inUse: 0,
+      totalCreated: 0,
+      totalClosed: 0,
+      totalCaptures: 0,
+      activeCaptures: 0
+    };
+
+    // 2. BULLMQ QUEUE STATS
+    let queueStats = {
+      waiting: 0,
+      active: 0,
+      completed: 0,
+      failed: 0,
+      delayed: 0,
+      paused: 0
+    };
+
+    if (worker) {
+      try {
+        const { Queue } = require('bullmq');
+        const { getRedisConnection } = require('../config/redis-optional');
+        const redis = getRedisConnection();
+        
+        if (redis) {
+          const queue = new Queue('screenshot-processing', { connection: redis });
+          const counts = await queue.getJobCounts('waiting', 'active', 'completed', 'failed', 'delayed', 'paused');
+          queueStats = counts;
+        }
+      } catch (queueError) {
+        logger.warn('No se pudieron obtener stats de BullMQ');
+      }
+    }
+
+    // 3. SUPABASE STATS
+    const { count: totalSignals } = await supabase
+      .from('trading_signals')
+      .select('*', { count: 'exact', head: true });
+
+    const { count: totalUsers } = await supabase
+      .from('trading_signals_config')
+      .select('*', { count: 'exact', head: true });
+
+    // Señales de hoy
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const { count: signalsToday } = await supabase
+      .from('trading_signals')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', today.toISOString());
+
+    // 4. PERFORMANCE METRICS
+    const screenshotsCompleted = queueStats.completed || 0;
+    const screenshotsFailed = queueStats.failed || 0;
+    const totalScreenshots = screenshotsCompleted + screenshotsFailed;
+    const successRate = totalScreenshots > 0 
+      ? ((screenshotsCompleted / totalScreenshots) * 100).toFixed(2)
+      : 100;
+
+    // Estimación de screenshots por hora (basado en active + waiting)
+    const estimatedPerHour = (queueStats.active + queueStats.waiting) * 6; // Asumiendo 10 workers = 60/min = 360/hr
+
+    // 5. CAPACITY ANALYSIS
+    const maxConcurrency = parseInt(process.env.WORKER_CONCURRENCY) || 10;
+    const maxBrowsers = parseInt(process.env.POOL_MAX_BROWSERS) || 12;
+    const currentLoad = poolStats.total > 0 
+      ? ((poolStats.inUse / poolStats.total) * 100).toFixed(1)
+      : 0;
+
+    // Estimación de usuarios soportados (500 alerts/día por usuario)
+    const screenshotsPerDay = screenshotsCompleted * (24 / (startTime / 3600)); // Extrapolación
+    const estimatedUsers = Math.floor(screenshotsPerDay / 500);
+    const maxCapacity = 345; // De nuestro cálculo anterior
+
+    // 6. UPTIME FORMATTING
+    const uptimeSeconds = Math.floor(startTime);
+    const days = Math.floor(uptimeSeconds / 86400);
+    const hours = Math.floor((uptimeSeconds % 86400) / 3600);
+    const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+    const uptimeFormatted = days > 0 
+      ? `${days}d ${hours}h ${minutes}m`
+      : hours > 0
+        ? `${hours}h ${minutes}m`
+        : `${minutes}m`;
+
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      uptime: uptimeFormatted,
+      uptimeSeconds: uptimeSeconds,
+      
+      browserPool: {
+        total: poolStats.total,
+        available: poolStats.available,
+        inUse: poolStats.inUse,
+        status: poolStats.inUse / poolStats.total > 0.8 ? 'saturated' : 
+                poolStats.inUse / poolStats.total > 0.5 ? 'busy' : 'healthy',
+        totalCreated: poolStats.totalCreated,
+        totalClosed: poolStats.totalClosed,
+        totalCaptures: poolStats.totalCaptures,
+        activeCaptures: poolStats.activeCaptures
+      },
+
+      queue: {
+        waiting: queueStats.waiting,
+        active: queueStats.active,
+        completed: queueStats.completed,
+        failed: queueStats.failed,
+        delayed: queueStats.delayed,
+        paused: queueStats.paused,
+        total: queueStats.waiting + queueStats.active + queueStats.completed + queueStats.failed
+      },
+
+      performance: {
+        screenshotsCompleted: screenshotsCompleted,
+        screenshotsFailed: screenshotsFailed,
+        successRate: `${successRate}%`,
+        estimatedPerHour: estimatedPerHour,
+        screenshotsToday: signalsToday || 0,
+        avgScreenshotTime: poolStats.totalCaptures > 0 
+          ? `${((uptimeSeconds / poolStats.totalCaptures)).toFixed(1)}s`
+          : 'N/A'
+      },
+
+      capacity: {
+        currentLoad: `${currentLoad}%`,
+        maxConcurrency: maxConcurrency,
+        maxBrowsers: maxBrowsers,
+        estimatedUsers: estimatedUsers,
+        maxCapacity: maxCapacity,
+        utilizationPercent: ((estimatedUsers / maxCapacity) * 100).toFixed(1)
+      },
+
+      database: {
+        totalSignals: totalSignals || 0,
+        totalUsers: totalUsers || 0,
+        signalsToday: signalsToday || 0
+      },
+
+      system: {
+        nodeVersion: process.version,
+        platform: process.platform,
+        memory: {
+          used: `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`,
+          total: `${(process.memoryUsage().heapTotal / 1024 / 1024).toFixed(2)} MB`
+        }
+      }
+    });
+
+  } catch (error) {
+    logger.error({ error: error.message }, 'Error getting metrics');
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /admin/pool-status
+ * Estado detallado del Browser Pool
+ */
+router.get('/admin/pool-status', async (req, res) => {
+  try {
+    const pool = getPool();
+    
+    if (!pool || !pool.initialized) {
+      return res.json({
+        success: true,
+        initialized: false,
+        message: 'Browser pool no inicializado (se inicializa con el primer screenshot)'
+      });
+    }
+
+    const stats = pool.getStats();
+    const browsers = pool.pool.map((slot, index) => ({
+      id: slot.id,
+      status: slot.inUse ? 'in_use' : 'available',
+      lastUsed: slot.lastUsed ? `${Math.floor((Date.now() - slot.lastUsed) / 1000)}s ago` : 'never',
+      createdAt: slot.createdAt ? new Date(slot.createdAt).toISOString() : null,
+      uptime: slot.createdAt ? `${Math.floor((Date.now() - slot.createdAt) / 1000 / 60)}m` : 'N/A'
+    }));
+
+    res.json({
+      success: true,
+      initialized: true,
+      config: {
+        minBrowsers: pool.config.minBrowsers,
+        maxBrowsers: pool.config.maxBrowsers,
+        idleTimeout: `${pool.config.idleTimeout / 1000 / 60}min`,
+        cleanupInterval: `${pool.config.cleanupInterval / 1000 / 60}min`,
+        warmup: pool.config.warmup
+      },
+      stats: {
+        total: stats.total,
+        available: stats.available,
+        inUse: stats.inUse,
+        totalCreated: stats.totalCreated,
+        totalClosed: stats.totalClosed,
+        totalCaptures: stats.totalCaptures,
+        activeCaptures: stats.activeCaptures
+      },
+      browsers: browsers,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    logger.error({ error: error.message }, 'Error getting pool status');
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /admin/queue-stats
+ * Estadísticas detalladas de la cola BullMQ
+ */
+router.get('/admin/queue-stats', async (req, res) => {
+  try {
+    const { Queue } = require('bullmq');
+    const { getRedisConnection } = require('../config/redis-optional');
+    const redis = getRedisConnection();
+
+    if (!redis) {
+      return res.json({
+        success: false,
+        message: 'Redis no disponible'
+      });
+    }
+
+    const queue = new Queue('screenshot-processing', { connection: redis });
+    
+    // Obtener counts
+    const counts = await queue.getJobCounts('waiting', 'active', 'completed', 'failed', 'delayed', 'paused');
+    
+    // Obtener jobs recientes (últimos 10 completados)
+    const completedJobs = await queue.getJobs(['completed'], 0, 9, true);
+    const recentCompleted = completedJobs.map(job => ({
+      id: job.id,
+      status: 'completed',
+      processedOn: job.processedOn ? new Date(job.processedOn).toISOString() : null,
+      finishedOn: job.finishedOn ? new Date(job.finishedOn).toISOString() : null,
+      duration: job.finishedOn && job.processedOn 
+        ? `${((job.finishedOn - job.processedOn) / 1000).toFixed(1)}s`
+        : 'N/A',
+      data: {
+        ticker: job.data?.ticker,
+        userId: job.data?.userId?.substring(0, 8) + '...'
+      }
+    }));
+
+    // Obtener jobs activos
+    const activeJobs = await queue.getJobs(['active'], 0, 9, true);
+    const recentActive = activeJobs.map(job => ({
+      id: job.id,
+      status: 'active',
+      processedOn: job.processedOn ? new Date(job.processedOn).toISOString() : null,
+      data: {
+        ticker: job.data?.ticker,
+        userId: job.data?.userId?.substring(0, 8) + '...'
+      }
+    }));
+
+    res.json({
+      success: true,
+      counts: counts,
+      recentCompleted: recentCompleted,
+      activeJobs: recentActive,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    logger.error({ error: error.message }, 'Error getting queue stats');
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
 
